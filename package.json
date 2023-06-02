@@ -23,6 +23,8 @@
   },
   "homepage": "https://github.com/DislikesSchool/EduPage2-server#readme",
   "dependencies": {
+    "axios": "^1.4.0",
+    "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "cron": "^2.3.1",
     "dotenv": "^16.0.3",
@@ -32,7 +34,8 @@
     "mysql2": "^3.3.3",
     "passport": "^0.6.0",
     "passport-http-bearer": "^1.0.1",
-    "puppeteer": "^20.4.0"
+    "puppeteer": "^20.4.0",
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.2",
