@@ -1,45 +1,38 @@
-import express from 'express';
-import passport from 'passport';
-const Strategy = require('passport-http-bearer').Strategy;
-import mysql from 'mysql2';
-import { exit } from 'process';
-require('dotenv').config();
+import 'dotenv/config';
 
-if (process.env.DATABASE_URL == undefined) {
-  console.log('Please define the URL of the MySQL database in the .env file')
-  exit(1)
-}
-const connection = mysql.createConnection(process.env.DATABASE_URL)
-const app = express();
-require('express-ws')(app);
+import { fastifyFormbody } from '@fastify/formbody';
+import { DefaultEventBridge } from '@purista/core';
+import { httpServerV1Service } from '@purista/httpserver';
 
-passport.use(new Strategy(
-  async function (token: String, cb: Function) {
-    connection.query('SELECT * FROM users WHERE token = ?', [token], function (err: mysql.QueryError | null, results: Array<mysql.RowDataPacket>, fields: Array<mysql.FieldPacket>) {
-      if (err) {
-        console.log(err);
-        return cb(err);
-      }
-      if (results.length > 0) {
-        return cb(null, results[0]);
-      } else {
-        return cb(null, false);
-      }
-    });
-  }
-));
+import httpServerConfig from '../config/httpServerConfig';
+import { edupageV1Service } from './service/edupage/v1/edupageV1Service';
+import { icanteenV1Service } from './service/icanteen/v1/icanteenV1Service';
+import { userV1Service } from './service/user/v1/userV1Service';
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(require('morgan')('combined'));
-app.use(require('cors')());
+export const main = async () => {
+  // initiate the event bridge as first step
+  const eventBridge = new DefaultEventBridge();
+  await eventBridge.start();
 
-app.use(require('./api/v1'))
+  // initiate the webserver service as second step
+  const httpServerService = httpServerV1Service.getInstance(eventBridge, {
+    serviceConfig: httpServerConfig,
+  });
+  httpServerService.server?.register(fastifyFormbody);
 
-app.get('/', (_, res) => {
-  res.send('Public API server for EduPage2')
-});
+  const userInstance = userV1Service.getInstance(eventBridge);
+  const icanteenInstance = icanteenV1Service.getInstance(eventBridge);
+  const edupageInstance = edupageV1Service.getInstance(eventBridge);
+  // initiate/start the user instance
+  // it registers the commands and the subscriptions to the event bridge
+  await userInstance.start();
+  await icanteenInstance.start();
+  await edupageInstance.start();
 
-app.listen(8080, () => {
-  console.log('Server started on port 8080')
-})
+  // start the webserver
+  await httpServerService.start();
+
+  // add initiation and start of services here
+};
+
+main();
