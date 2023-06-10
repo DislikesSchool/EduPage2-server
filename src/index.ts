@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { fastifyFormbody } from '@fastify/formbody';
 import { DefaultEventBridge } from '@purista/core';
 import { httpServerV1Service } from '@purista/httpserver';

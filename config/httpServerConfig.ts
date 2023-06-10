@@ -15,7 +15,7 @@ const httpServerConfig: HttpServerServiceV1Config = {
   logLevel: 'debug',
   domain: 'localhost',
   host: '',
-  cookieSecret: 'oCrUlLnZqhj99evenJ3x',
+  cookieSecret: process.env.COOKIE_SECRET,
   apiMountPath: '/api',
   openApi: {
     enabled: true,
