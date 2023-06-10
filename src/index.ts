@@ -1,7 +1,7 @@
 import 'dotenv/config';
 
 import { fastifyFormbody } from '@fastify/formbody';
-import { DefaultEventBridge } from '@purista/core';
+import { AmqpBridge, AmqpBridgeConfig } from '@purista/amqpbridge';
 import { httpServerV1Service } from '@purista/httpserver';
 
 import httpServerConfig from '../config/httpServerConfig';
@@ -11,9 +11,15 @@ import { userV1Service } from './service/user/v1/userV1Service';
 
 export const main = async () => {
   // initiate the event bridge as first step
-  const eventBridge = new DefaultEventBridge();
-  await eventBridge.start();
+  if (process.env.AMQP_URL === undefined) {
+    return;
+  }
+  const config: AmqpBridgeConfig = {
+    url: process.env.AMQP_URL,
+  };
 
+  const eventBridge = new AmqpBridge(config);
+  await eventBridge.start();
   // initiate the webserver service as second step
   const httpServerService = httpServerV1Service.getInstance(eventBridge, {
     serviceConfig: httpServerConfig,

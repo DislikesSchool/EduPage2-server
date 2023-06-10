@@ -17,9 +17,10 @@
   },
   "dependencies": {
     "@fastify/formbody": "^7.4.0",
-    "@purista/cli": "^1.7.1",
-    "@purista/core": "^1.7.1",
-    "@purista/httpserver": "^1.7.1",
+    "@purista/amqpbridge": "^1.7.2",
+    "@purista/cli": "^1.7.2",
+    "@purista/core": "^1.7.2",
+    "@purista/httpserver": "^1.7.2",
     "@swc/jest": "^0.2.26",
     "@types/jest": "^29.5.2",
     "@types/node": "^18.15.11",
