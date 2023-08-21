@@ -7,6 +7,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"path"
+	"strings"
 
 	"golang.org/x/net/publicsuffix"
 )
@@ -41,6 +42,35 @@ func Login(server, username, password string) (Handle, error) {
 			if rs.Header.Get("Location") != "/user/" {
 				return Handle{}, ErrAuthorization
 			} else if rs.Header.Get("Location") == "/user/" {
+				h.hc.Jar.SetCookies(rs.Request.URL, rs.Cookies())
+				return h, nil
+			}
+		} else {
+			return Handle{}, fmt.Errorf("failed to login: %s", err)
+		}
+	}
+	return Handle{}, errors.New("unexpected response from server, make sure server is specified correctly")
+}
+
+func LoginAuto(username string, password string) (Handle, error) {
+	var h Handle
+	h.hc = http.DefaultClient
+	h.hc.CheckRedirect = noRedirect
+	h.hc.Jar, _ = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
+
+	u := "https://portal.edupage.org/index.php?jwid=jw3&module=Login&lang=sk"
+	d := url.Values{
+		"meno":  []string{username},
+		"heslo": []string{password},
+		"akcia": []string{"login"},
+	}
+
+	rs, err := http.PostForm(u, d)
+	if err != nil && rs != nil {
+		if rs.StatusCode == 302 {
+			if !strings.Contains(rs.Header.Get("Location"), "edupage.org/user/") {
+				return Handle{}, ErrAuthorization
+			} else if strings.Contains(rs.Header.Get("Location"), "edupage.org/user/") {
 				h.hc.Jar.SetCookies(rs.Request.URL, rs.Cookies())
 				return h, nil
 			}
