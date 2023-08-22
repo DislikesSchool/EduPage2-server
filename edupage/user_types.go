@@ -1,6 +1,6 @@
 package edupage
 
-type RawDataObject struct {
+type UserRawDataObject struct {
 	Edubar     map[string]interface{} `json:"_edubar"`
 	Items      []UserDataItem         `json:"items"`
 	DBI        UserDataDBI            `json:"dbi"`

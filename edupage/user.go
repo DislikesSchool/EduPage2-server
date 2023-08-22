@@ -41,8 +41,8 @@ func (h Handle) RefreshUser() {
 	_ = parse(html)
 }
 
-func parse(html string) RawDataObject {
-	data := RawDataObject{
+func parse(html string) UserRawDataObject {
+	data := UserRawDataObject{
 		Edubar: make(map[string]interface{}),
 	}
 
