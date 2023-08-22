@@ -17,6 +17,7 @@ func main() {
 			"message": "pong",
 		})
 	})
+	
 	router.GET("/login", cache.CachePage(store, time.Minute, func(c *gin.Context) {
 		username, password, server := c.Query("username"), c.Query("password"), c.Query("server")
 		var handle edupage.Handle
