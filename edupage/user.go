@@ -10,7 +10,7 @@ import (
 	"regexp"
 )
 
-func (h Handle) RefreshUser() {
+func (h Handle) RefreshUser() UserRawDataObject {
 	urlStr := fmt.Sprintf("https://%s/user/?", h.server)
 	url, _ := url.Parse(urlStr)
 	fmt.Println(url)
@@ -38,7 +38,7 @@ func (h Handle) RefreshUser() {
 	html := string(b)
 
 	// Parse raw JSON data from html
-	_ = UserDataParse(html)
+	return UserDataParse(html)
 }
 
 func UserDataParse(html string) UserRawDataObject {
