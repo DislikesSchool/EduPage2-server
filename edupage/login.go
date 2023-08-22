@@ -43,6 +43,7 @@ func Login(server, username, password string) (Handle, error) {
 				return Handle{}, ErrAuthorization
 			} else if rs.Header.Get("Location") == "/user/" {
 				h.hc.Jar.SetCookies(rs.Request.URL, rs.Cookies())
+				h.server = Server
 				return h, nil
 			}
 		} else {
@@ -72,6 +73,7 @@ func LoginAuto(username string, password string) (Handle, error) {
 				return Handle{}, ErrAuthorization
 			} else if strings.Contains(rs.Header.Get("Location"), "edupage.org/user/") {
 				h.hc.Jar.SetCookies(rs.Request.URL, rs.Cookies())
+				h.server = strings.Split(rs.Header.Get("Location"), "/")[2]
 				return h, nil
 			}
 		} else {

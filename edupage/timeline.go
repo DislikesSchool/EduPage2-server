@@ -91,7 +91,7 @@ type Homework struct {
 }
 
 func (h *Handle) GetTimeline() (Timeline, error) {
-	url := fmt.Sprintf("https://%s/%s", Server, timelinePath)
+	url := fmt.Sprintf("https://%s/%s", h.server, timelinePath)
 	rs, err := h.hc.Get(url)
 	if err != nil {
 		return Timeline{}, fmt.Errorf("failed to fetch timeline: %s", err)
@@ -215,7 +215,7 @@ func (h *Handle) FetchHomeworkAttachments(i *Homework) (map[string]string, error
 	}
 
 	resp, err := h.hc.PostForm(
-		"https://"+path.Join(Server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
+		"https://"+path.Join(h.server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
 		payload,
 	)
 	if err != nil {

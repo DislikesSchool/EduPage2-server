@@ -3,5 +3,6 @@ package edupage
 import "net/http"
 
 type Handle struct {
-	hc *http.Client
+	hc     *http.Client
+	server string
 }
