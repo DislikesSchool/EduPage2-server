@@ -13,7 +13,6 @@ import (
 func (h Handle) RefreshUser() UserRawDataObject {
 	urlStr := fmt.Sprintf("https://%s/user/?", h.server)
 	url, _ := url.Parse(urlStr)
-	fmt.Println(url)
 	rs, err := h.hc.Do(&http.Request{
 		Method: "GET",
 		URL:    url,
