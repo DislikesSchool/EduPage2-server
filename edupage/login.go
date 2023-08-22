@@ -72,9 +72,9 @@ func LoginAuto(username string, password string) (Handle, error) {
 			if !strings.Contains(rs.Header.Get("Location"), "edupage.org/user/") {
 				return Handle{}, ErrAuthorization
 			} else if strings.Contains(rs.Header.Get("Location"), "edupage.org/user/") {
-				h.hc.Jar.SetCookies(rs.Request.URL, rs.Cookies())
-				h.server = strings.Split(rs.Header.Get("Location"), "/")[2]
-				return h, nil
+				domain := strings.Split(rs.Header.Get("Location"), "/")[2]
+				h2, err := Login(strings.Split(domain, ".")[0], username, password)
+				return h2, err
 			}
 		} else {
 			return Handle{}, fmt.Errorf("failed to login: %s", err)
