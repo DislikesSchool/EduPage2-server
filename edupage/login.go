@@ -22,6 +22,11 @@ var (
 	loginPath     = "login/edubarLogin.php"
 )
 
+// Login creates a Handle which you can interact the Edupage API with.
+// Parameter server - domain name of the edupage server.
+// Parameter username - edupage user name.
+// Parameter password - edupage user password.
+// Returns Handle or error.
 func Login(server, username, password string) (Handle, error) {
 	Server = server + "." + edupageDomain
 	var h Handle

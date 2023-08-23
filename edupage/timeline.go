@@ -19,77 +19,81 @@ var (
 	ErrUnobtainableAttachments = errors.New("couldn't obtain attachments")
 )
 
+// Timeline contains all timeline information
 type Timeline struct {
-	Raw           map[string]interface{}
-	Homeworks     []Homework     `json:"homeworks"`
-	TimelineItems []TimelineItem `json:"timelineItems"`
+	Raw           map[string]interface{} // unparsed json mapping
+	Homeworks     []Homework             `json:"homeworks"`
+	TimelineItems []TimelineItem         `json:"timelineItems"`
 }
 
 type TimelineItem struct {
 	Timeline        *Timeline
-	TimelineID      string       `json:"timelineid"`
-	Timestamp       Time         `json:"timestamp"`
-	ReactionTo      string       `json:"reakcia_na"`
-	Type            TimelineType `json:"typ"`
-	User            string       `json:"user"`
-	TargetUser      string       `json:"target_user"`
-	UserName        string       `json:"user_meno"`
-	OtherID         string       `json:"ineid"`
-	Text            string       `json:"text"`
-	TimeAdded       Time         `json:"cas_pridania"`
-	TimeEvent       Time         `json:"cas_udalosti"`
-	Data            TimelineData `json:"data"`
-	Owner           string       `json:"vlastnik"`
-	OwnerName       string       `json:"vlastnik_meno"`
-	ReactionCount   int          `json:"poct_reakcii"`
-	LastReaction    string       `json:"posledna_reakcia"`
-	PomocnyZaznam   string       `json:"pomocny_zaznam"`
-	Removed         Number       `json:"removed"`
-	TimeAddedBTC    Time         `json:"cas_pridania_btc"`
-	LastReactionBTC Time         `json:"cas_udalosti_btc"`
+	TimelineID      string           `json:"timelineid"`
+	Timestamp       Time             `json:"timestamp"`
+	ReactionTo      string           `json:"reakcia_na"`
+	Type            TimelineItemType `json:"typ"`
+	User            string           `json:"user"`
+	TargetUser      string           `json:"target_user"`
+	UserName        string           `json:"user_meno"`
+	OtherID         string           `json:"ineid"`
+	Text            string           `json:"text"`
+	TimeAdded       Time             `json:"cas_pridania"`
+	TimeEvent       Time             `json:"cas_udalosti"`
+	Data            TimelineData     `json:"data"`
+	Owner           string           `json:"vlastnik"`
+	OwnerName       string           `json:"vlastnik_meno"`
+	ReactionCount   int              `json:"poct_reakcii"`
+	LastReaction    string           `json:"posledna_reakcia"`
+	PomocnyZaznam   string           `json:"pomocny_zaznam"`
+	Removed         JSONNumber       `json:"removed"`
+	TimeAddedBTC    Time             `json:"cas_pridania_btc"`
+	LastReactionBTC Time             `json:"cas_udalosti_btc"`
 }
 
 type Homework struct {
-	HomeworkID        string       `json:"homeworkid"`
-	ESuperID          string       `json:"e_superid"`
-	UserID            string       `json:"userid"`
-	LessonID          Number       `json:"predmetid"`
-	PlanID            string       `json:"planid"`
-	Name              string       `json:"name"`
-	Details           string       `json:"details"`
-	DateTo            string       `json:"dateto"`
-	DateFrom          string       `json:"datefrom"`
-	DatetimeTo        string       `json:"datetimeto"`
-	DatetimeFrom      string       `json:"datetimefrom"`
-	DateCreated       string       `json:"datecreated"`
-	Period            interface{}  `json:"period"`
-	Timestamp         string       `json:"timestamp"`
-	TestID            string       `json:"testid"`
-	Type              TimelineType `json:"typ"`
-	LikeCount         Number       `json:"pocet_like"`
-	ReactionCount     Number       `json:"pocet_reakcii"`
-	DoneCount         Number       `json:"pocet_done"`
-	State             string       `json:"stav"`
-	LastResult        string       `json:"posledny_vysledok"`
-	Groups            []string     `json:"skupiny"`
-	HWKID             string       `json:"hwkid"`
-	ETestCards        int          `json:"etestCards"`
-	ETestAnswerCards  int          `json:"etestAnswerCards"`
-	StudyTopics       bool         `json:"studyTopics"`
-	GradeEventID      interface{}  `json:"znamky_udalostid"`
-	StudentsHidden    string       `json:"students_hidden"`
-	Data              TimelineData `json:"data"`
-	EvaluationStatus  string       `json:"stavhodnotenia"`
-	Result            interface{}  `json:"vysledok"`
-	ResultsInfo       string       `json:"resultsInfo"`
-	AssignmentID      string       `json:"pridelenieid"`
-	Ended             interface{}  `json:"skoncil"`
-	MissingNextLesson bool         `json:"missingNextLesson"`
-	Attachments       interface{}  `json:"attachements"`
-	AuthorName        string       `json:"autor_meno"`
-	LessonName        string       `json:"predmet_meno"`
+	HomeworkID        string           `json:"homeworkid"`
+	ESuperID          string           `json:"e_superid"`
+	UserID            string           `json:"userid"`
+	LessonID          JSONNumber       `json:"predmetid"`
+	PlanID            string           `json:"planid"`
+	Name              string           `json:"name"`
+	Details           string           `json:"details"`
+	DateTo            string           `json:"dateto"`
+	DateFrom          string           `json:"datefrom"`
+	DatetimeTo        string           `json:"datetimeto"`
+	DatetimeFrom      string           `json:"datetimefrom"`
+	DateCreated       string           `json:"datecreated"`
+	Period            interface{}      `json:"period"`
+	Timestamp         string           `json:"timestamp"`
+	TestID            string           `json:"testid"`
+	Type              TimelineItemType `json:"typ"`
+	LikeCount         JSONNumber       `json:"pocet_like"`
+	ReactionCount     JSONNumber       `json:"pocet_reakcii"`
+	DoneCount         JSONNumber       `json:"pocet_done"`
+	State             string           `json:"stav"`
+	LastResult        string           `json:"posledny_vysledok"`
+	Groups            []string         `json:"skupiny"`
+	HWKID             string           `json:"hwkid"`
+	ETestCards        int              `json:"etestCards"`
+	ETestAnswerCards  int              `json:"etestAnswerCards"`
+	StudyTopics       bool             `json:"studyTopics"`
+	GradeEventID      interface{}      `json:"znamky_udalostid"`
+	StudentsHidden    string           `json:"students_hidden"`
+	Data              TimelineData     `json:"data"`
+	EvaluationStatus  string           `json:"stavhodnotenia"`
+	Result            interface{}      `json:"vysledok"`
+	ResultsInfo       string           `json:"resultsInfo"`
+	AssignmentID      string           `json:"pridelenieid"`
+	Ended             interface{}      `json:"skoncil"`
+	MissingNextLesson bool             `json:"missingNextLesson"`
+	Attachments       interface{}      `json:"attachements"`
+	AuthorName        string           `json:"autor_meno"`
+	LessonName        string           `json:"predmet_meno"`
 }
 
+// Function region
+
+// GetTimeline obtains the recent timeline data from the specified handle.
 func (h *Handle) GetTimeline() (Timeline, error) {
 	url := fmt.Sprintf("https://%s/%s", h.server, timelinePath)
 	rs, err := h.hc.Get(url)
