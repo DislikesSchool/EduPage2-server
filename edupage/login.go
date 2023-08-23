@@ -55,7 +55,7 @@ func Login(server, username, password string) (Handle, error) {
 			return Handle{}, fmt.Errorf("failed to login: %s", err)
 		}
 	}
-	return Handle{}, errors.New("unexpected response from server, make sure server is specified correctly")
+	return Handle{}, errors.New("unexpected response from server, make sure credentials are specified correctly")
 }
 
 func LoginAuto(username string, password string) (Handle, error) {

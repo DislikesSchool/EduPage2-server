@@ -116,22 +116,22 @@ func (h *Handle) GetTimeline() (Timeline, error) {
 	rg, _ := regexp.Compile(`\.homeworklist\((.*)\);`)
 	matches := rg.FindAllStringSubmatch(text, -1)
 	if len(matches) == 0 {
-		return Timeline{}, errors.New("homework list not found in the document body")
+		return Timeline{}, errors.New("json not found in the document body")
 	}
 
 	js := matches[0][1]
-	var r map[string]interface{}
-	err = json.Unmarshal([]byte(js), &r)
+	var raw map[string]interface{}
+	err = json.Unmarshal([]byte(js), &raw)
 	if err != nil {
 		return Timeline{}, fmt.Errorf("failed to parse timeline json: %s", err.Error())
 	}
 
 	var data Timeline
-	data.Raw = r
 	err = json.Unmarshal([]byte(js), &data)
 	if err != nil {
 		return Timeline{}, fmt.Errorf("failed to parse timeline json: %s", err.Error())
 	}
+	data.Raw = raw
 	return data, nil
 }
 
