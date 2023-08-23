@@ -45,7 +45,7 @@ type TimelineItem struct {
 	ReactionCount   int              `json:"poct_reakcii"`
 	LastReaction    string           `json:"posledna_reakcia"`
 	PomocnyZaznam   string           `json:"pomocny_zaznam"`
-	Removed         JSONNumber       `json:"removed"`
+	Removed         json.Number      `json:"removed"`
 	TimeAddedBTC    Time             `json:"cas_pridania_btc"`
 	LastReactionBTC Time             `json:"cas_udalosti_btc"`
 }
@@ -54,7 +54,7 @@ type Homework struct {
 	HomeworkID        string           `json:"homeworkid"`
 	ESuperID          string           `json:"e_superid"`
 	UserID            string           `json:"userid"`
-	LessonID          JSONNumber       `json:"predmetid"`
+	LessonID          json.Number      `json:"predmetid"`
 	PlanID            string           `json:"planid"`
 	Name              string           `json:"name"`
 	Details           string           `json:"details"`
@@ -67,9 +67,9 @@ type Homework struct {
 	Timestamp         string           `json:"timestamp"`
 	TestID            string           `json:"testid"`
 	Type              TimelineItemType `json:"typ"`
-	LikeCount         JSONNumber       `json:"pocet_like"`
-	ReactionCount     JSONNumber       `json:"pocet_reakcii"`
-	DoneCount         JSONNumber       `json:"pocet_done"`
+	LikeCount         json.Number      `json:"pocet_like"`
+	ReactionCount     json.Number      `json:"pocet_reakcii"`
+	DoneCount         json.Number      `json:"pocet_done"`
 	State             string           `json:"stav"`
 	LastResult        string           `json:"posledny_vysledok"`
 	Groups            []string         `json:"skupiny"`
@@ -153,6 +153,7 @@ func (t *Timeline) SortedTimelineItems(predicate func(TimelineItem) bool) []Time
 	})
 	return a
 }
+
 func (t *Timeline) FindHomework(superid string) (Homework, error) {
 	for _, homework := range t.Homeworks {
 		if homework.ESuperID == superid {

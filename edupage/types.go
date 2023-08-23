@@ -66,23 +66,6 @@ func (n *TimelineData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(n.Value)
 }
 
-// JSONNumber is a robust representation of an integer in json to help with parsing
-type JSONNumber struct {
-	int64
-}
-
-func (n *JSONNumber) UnmarshalJSON(b []byte) error {
-	var s = string(b)
-	s = strings.ReplaceAll(s, "\"", "")
-	var err error
-	n.int64, err = strconv.ParseInt(s, 10, 64)
-	return err
-}
-
-func (n *JSONNumber) MarshalJSON() ([]byte, error) {
-	return []byte(strconv.FormatInt(n.int64, 10)), nil
-}
-
 // Time is a representation of time instances to help with parsing.
 type Time struct {
 	time.Time
