@@ -24,7 +24,7 @@ func TestAutoLogin(t *testing.T) {
 	}
 
 	if len(password) == 0 {
-		t.Log("Password parameter missing, (-pasword=?)")
+		t.Log("Password parameter missing, (-password=?)")
 		return
 	}
 
@@ -43,7 +43,7 @@ func TestEdupage(t *testing.T) {
 	}
 
 	if len(password) == 0 {
-		t.Log("Password parameter missing, (-pasword=?)")
+		t.Log("Password parameter missing, (-password=?)")
 		return
 	}
 
