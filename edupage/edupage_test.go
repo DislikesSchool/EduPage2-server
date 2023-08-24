@@ -52,20 +52,21 @@ func TestEdupage(t *testing.T) {
 		return
 	}
 
-	h, err := Login(server, username, password)
+	e, err := Login(server, username, password)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	timeline, err := h.LoadRecentTimeline()
+	err = e.Fetch()
+
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if timeline.Raw["module"] != "messages" {
-		t.Error("Invalid timeline raw data")
+	if len(e.EdupageData.Timeline.Items) == 0 {
+		t.Error("Recieved timeline items length is zero")
 		return
 	}
 }

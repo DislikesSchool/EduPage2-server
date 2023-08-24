@@ -11,32 +11,43 @@ import (
 	"path"
 	"reflect"
 	"time"
+
+	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
-// Edupage is used to access the Edupage API.
-type Edupage struct {
-	hc       *http.Client
-	server   string
-	Timeline Timeline
+// EdupageClient is used to access the edupage api.
+type EdupageClient struct {
+	hc          *http.Client //TODO: remove, save only edid, hsid, phpsessid tokens
+	server      string
+	EdupageData EdupageData
+}
+
+type EdupageData struct {
+	Timeline model.Timeline
+}
+
+func (client *EdupageClient) Fetch() error {
+	client.LoadRecentTimeline()
+	return nil
 }
 
 // LoadRecentTimeline loads the recent timeline data.
 // That's from today, to 30 days in the past.
 // Also updates the Timeline property in Edupage struct.
-func (edupage *Edupage) LoadRecentTimeline() (Timeline, error) {
+func (client *EdupageClient) LoadRecentTimeline() error {
 	duration, err := time.ParseDuration("-720h") // 30 days
 	if err != nil {
-		return Timeline{}, fmt.Errorf("failed to parse duration: %s", err)
+		return fmt.Errorf("failed to parse duration: %s", err)
 	}
 
 	start := time.Now().Add(duration)
-	return edupage.LoadTimeline(start, time.Now())
+	return client.LoadTimeline(start, time.Now())
 }
 
 // LoadTimeline loads the timeline data from the specified date range.
 // Also updates the Timeline property in Edupage struct.
-func (h *Edupage) LoadTimeline(datefrom, dateto time.Time) (Timeline, error) {
-	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", h.server)
+func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
+	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", client.server)
 
 	form, err := CreatePayload(map[string]string{
 		"datefrom": datefrom.Format("2006-01-02"),
@@ -44,58 +55,47 @@ func (h *Edupage) LoadTimeline(datefrom, dateto time.Time) (Timeline, error) {
 	})
 
 	if err != nil {
-		return Timeline{}, fmt.Errorf("failed to create payload: %s", err)
+		return fmt.Errorf("failed to create payload: %s", err)
 	}
 
-	response, err := h.hc.PostForm(url, form)
+	response, err := client.hc.PostForm(url, form)
 	if err != nil {
-		return Timeline{}, fmt.Errorf("failed to fetch timeline: %s", err)
+		return fmt.Errorf("failed to fetch timeline: %s", err)
 	}
 
 	if response.StatusCode == 302 {
 		// edupage is trying to redirect us, that means an authorization error
-		return Timeline{}, ErrAuthorization
+		return ErrAuthorization
 	}
 
 	if response.StatusCode != 200 {
-		return Timeline{}, fmt.Errorf("server returned code:%d", response.StatusCode)
+		return fmt.Errorf("server returned code:%d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return Timeline{}, fmt.Errorf("failed to read response body: %s", err)
+		return fmt.Errorf("failed to read response body: %s", err)
 	}
 
 	decoded_body := make([]byte, base64.StdEncoding.DecodedLen(len(body)-4))
 
 	_, err = base64.StdEncoding.Decode(decoded_body, body[4:])
-
 	if err != nil {
-		return Timeline{}, fmt.Errorf("failed to decode response body: %s", err)
+		return fmt.Errorf("failed to decode response body: %s", err)
 	}
 
-	var raw map[string]interface{}
-	err = json.Unmarshal(decoded_body[0:len(decoded_body)-1], &raw) // omitting null character at end
+	err = json.Unmarshal(decoded_body[0:len(decoded_body)-1], &client.EdupageData.Timeline) // omitting null character at end
 	if err != nil {
-		return Timeline{}, fmt.Errorf("failed to parse timeline json into raw object: %s", err.Error())
+		return fmt.Errorf("failed to parse timeline json into raw object: %s", err.Error())
 	}
 
-	var data Timeline
-	err = json.Unmarshal(decoded_body[0:len(decoded_body)-1], &data)
-	if err != nil {
-		return Timeline{}, fmt.Errorf("failed to parse timeline json: %s", err.Error())
-	}
-
-	data.Raw = raw
-
-	h.Timeline = data
-	return data, nil
+	return nil
 }
 
 // FetchHomeworkAttachmens obtains the homework attchments for the specified homework.
 // Returns ErrUnobtainableAttachments in case the attachments are not present.
 // Retruns map, key is the resource name and value is the resource link
-func (edupage *Edupage) FetchHomeworkAttachments(i *Homework) (map[string]string, error) {
+func (client *EdupageClient) FetchHomeworkAttachments(i *model.Homework) (map[string]string, error) {
 	if i.ESuperID == "" || i.TestID == "" {
 		return nil, errors.New("required fields superid and testid not set")
 	}
@@ -110,8 +110,8 @@ func (edupage *Edupage) FetchHomeworkAttachments(i *Homework) (map[string]string
 		return nil, fmt.Errorf("failed to create payload: %w", err)
 	}
 
-	resp, err := edupage.hc.PostForm(
-		"https://"+path.Join(edupage.server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
+	resp, err := client.hc.PostForm(
+		"https://"+path.Join(client.server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
 		payload,
 	)
 	if err != nil {
@@ -145,14 +145,14 @@ func (edupage *Edupage) FetchHomeworkAttachments(i *Homework) (map[string]string
 	if object["materialData"] == nil ||
 		(reflect.TypeOf(object["materialData"]).Kind() != reflect.Map ||
 			reflect.TypeOf(object["materialData"]).Elem().Kind() != reflect.Interface) {
-		return nil, ErrUnobtainableAttachments
+		return nil, model.ErrUnobtainableAttachments
 	}
 	materialData := object["materialData"].(map[string]interface{})
 
 	if materialData["cardsData"] == nil ||
 		(reflect.TypeOf(materialData["cardsData"]).Kind() != reflect.Map ||
 			reflect.TypeOf(materialData["cardsData"]).Elem().Kind() != reflect.Interface) {
-		return nil, ErrUnobtainableAttachments
+		return nil, model.ErrUnobtainableAttachments
 	}
 	cardsData := materialData["cardsData"].(map[string]interface{})
 
@@ -160,11 +160,11 @@ func (edupage *Edupage) FetchHomeworkAttachments(i *Homework) (map[string]string
 		if entry == nil ||
 			(reflect.TypeOf(entry).Kind() != reflect.Map ||
 				reflect.TypeOf(entry).Elem().Kind() != reflect.Interface) {
-			return nil, ErrUnobtainableAttachments
+			return nil, model.ErrUnobtainableAttachments
 		}
 
 		if e, ok := entry.(map[string]interface{})["content"]; !ok && reflect.TypeOf(e).Kind() != reflect.String {
-			return nil, ErrUnobtainableAttachments
+			return nil, model.ErrUnobtainableAttachments
 		}
 
 		var content map[string]interface{}
@@ -177,7 +177,7 @@ func (edupage *Edupage) FetchHomeworkAttachments(i *Homework) (map[string]string
 		if content["widgets"] == nil ||
 			(reflect.TypeOf(content["widgets"]).Kind() != reflect.Slice ||
 				reflect.TypeOf(content["widgets"]).Elem().Kind() != reflect.Interface) {
-			return nil, ErrUnobtainableAttachments
+			return nil, model.ErrUnobtainableAttachments
 		}
 
 		widgets := content["widgets"].([]interface{})
@@ -185,12 +185,12 @@ func (edupage *Edupage) FetchHomeworkAttachments(i *Homework) (map[string]string
 			if widget == nil ||
 				(reflect.TypeOf(widget).Kind() != reflect.Map ||
 					reflect.TypeOf(widget).Elem().Kind() != reflect.Interface) {
-				return nil, ErrUnobtainableAttachments
+				return nil, model.ErrUnobtainableAttachments
 			}
 			if widget.(map[string]interface{})["props"] == nil ||
 				(reflect.TypeOf(widget.(map[string]interface{})["props"]).Kind() != reflect.Map ||
 					reflect.TypeOf(widget.(map[string]interface{})["props"]).Elem().Kind() != reflect.Interface) {
-				return nil, ErrUnobtainableAttachments
+				return nil, model.ErrUnobtainableAttachments
 			}
 			props := widget.(map[string]interface{})["props"].(map[string]interface{})
 			if files, ok := props["files"]; ok {
@@ -198,7 +198,7 @@ func (edupage *Edupage) FetchHomeworkAttachments(i *Homework) (map[string]string
 					if file == nil ||
 						(reflect.TypeOf(file).Kind() != reflect.Map ||
 							reflect.TypeOf(file).Elem().Kind() != reflect.Interface) {
-						return nil, ErrUnobtainableAttachments
+						return nil, model.ErrUnobtainableAttachments
 					}
 					attachments[file.(map[string]interface{})["name"].(string)] = file.(map[string]interface{})["src"].(string)
 				}

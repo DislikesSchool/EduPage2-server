@@ -1,38 +1,15 @@
-package edupage
+package model
 
-type UserRawDataObject struct {
-	Edubar     map[string]interface{} `json:"_edubar"`
-	Items      []UserDataItem         `json:"items"`
-	DBI        UserDataDBI            `json:"dbi"`
-	UserRow    UserDataUserRow        `json:"userrow"`
-	EventTypes []UserDataEvent        `json:"eventtypes"`
-	UserGroups []string               `json:"usergroups"`
+type User struct {
+	Edubar map[string]interface{} `json:"_edubar"`
+	// Items      []UserDataItem         `json:"items"` not required
+	DBI        UserDataDBI `json:"dbi"`
+	UserRow    UserRow     `json:"userrow"`
+	EventTypes []EventType `json:"eventtypes"`
+	UserGroups []string    `json:"usergroups"`
 }
 
-type UserDataItem struct {
-	TimelineID      string `json:"timelineid"`
-	Timestamp       string `json:"timestamp"`
-	ReactionTo      string `json:"reakcia_na"`
-	Typ             string `json:"typ"`
-	User            string `json:"user"`
-	TargetUser      string `json:"target_user"`
-	UserName        string `json:"user_meno"`
-	IneId           string `json:"ineid"`
-	Text            string `json:"text"`
-	AdditionTime    string `json:"cas_pridania"`
-	EventTime       string `json:"cas_udalosti"`
-	Data            string `json:"data"`
-	Owner           string `json:"vlastnik"`
-	OwnerName       string `json:"vlastnik_meno"`
-	ReactionCount   string `json:"pocet_reakcii"`
-	LastReaction    string `json:"posledna_reakcia"`
-	HelpfulRecord   string `json:"pomocny_zaznam"`
-	Removed         string `json:"removed"`
-	AdditionTimeBtc string `json:"cas_pridania_btc"`
-	LastReactionBtc string `json:"posledna_reakcia_btc"`
-}
-
-type UserDataUserRow struct {
+type UserRow struct {
 	UserID    string `json:"UserID"`
 	StudentID string `json:"StudentID"`
 	Firstname string `json:"p_meno"`
@@ -41,7 +18,7 @@ type UserDataUserRow struct {
 	ClassID   string `json:"TriedaID"`
 }
 
-type UserDataEvent struct {
+type EventType struct {
 	ID            string   `json:"id"`
 	C             string   `json:"c"`
 	Name          string   `json:"name"`
@@ -62,24 +39,24 @@ type UserDataEvent struct {
 }
 
 type UserDataDBI struct {
-	Teachers           map[string]UserDataTeacher           `json:"teachers"`
-	Classes            map[string]UserDataClass             `json:"classes"`
-	Subjects           map[string]UserDataSubject           `json:"subjects"`
-	Classrooms         map[string]UserDataClassroom         `json:"classrooms"`
-	Students           map[string]UserDataStudent           `json:"students"`
-	Parents            map[string]UserDataParent            `json:"parents"`
-	Periods            []UserDataPeriod                     `json:"periods"`
-	DayParts           map[string]UserDataDayPart           `json:"dayparts"`
-	AbsentTypes        map[string]UserDataAbsentType        `json:"absenttypes"`
-	SubstitutionTypes  map[string]UserDataSubstitutionType  `json:"substitutiontypes"`
-	StudentAbsentTypes map[string]UserDataStudentAbsentType `json:"studentabsenttypes"`
-	EventTypes         map[string]UserDataEventType         `json:"eventtypes"`
-	ProcessTypes       map[string]UserDataProcessType       `json:"processtypes"`
-	ProcessStates      map[string]UserDataProcessState      `json:"processstates"`
-	IsStudentAdult     bool                                 `json:"isstudentadult"`
+	Teachers           map[string]Teacher           `json:"teachers"`
+	Classes            map[string]Class             `json:"classes"`
+	Subjects           map[string]Subject           `json:"subjects"`
+	Classrooms         map[string]Classrom          `json:"classrooms"`
+	Students           map[string]Students          `json:"students"`
+	Parents            map[string]Parents           `json:"parents"`
+	Periods            []Periods                    `json:"periods"`
+	DayParts           map[string]DayParts          `json:"dayparts"`
+	AbsentTypes        map[string]AbsentType        `json:"absenttypes"`
+	SubstitutionTypes  map[string]SubstitionType    `json:"substitutiontypes"`
+	StudentAbsentTypes map[string]StudentAbsentType `json:"studentabsenttypes"`
+	EventTypes         map[string]UserEventType     `json:"eventtypes"`
+	ProcessTypes       map[string]ProcessType       `json:"processtypes"`
+	ProcessStates      map[string]ProcessState      `json:"processstates"`
+	IsStudentAdult     bool                         `json:"isstudentadult"`
 }
 
-type UserDataTeacher struct {
+type Teacher struct {
 	ID          string `json:"id"`
 	Firstname   string `json:"firstname"`
 	Lastname    string `json:"lastname"`
@@ -91,7 +68,7 @@ type UserDataTeacher struct {
 	IsOut       bool   `json:"isout"`
 }
 
-type UserDataClass struct {
+type Class struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	Short       string `json:"short"`
@@ -101,20 +78,20 @@ type UserDataClass struct {
 	ClassroomID string `json:"classroomid"`
 }
 
-type UserDataSubject struct {
+type Subject struct {
 	ID       string `json:"id"`
 	Name     string `json:"name"`
 	Short    string `json:"short"`
 	CBHidden bool   `json:"cbhidden"`
 }
 
-type UserDataClassroom struct {
+type Classrom struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Short string `json:"short"`
 }
 
-type UserDataStudent struct {
+type Students struct {
 	ID            string `json:"id"`
 	ClassroomID   string `json:"classroomid"`
 	Firstname     string `json:"firstname"`
@@ -131,14 +108,14 @@ type UserDataStudent struct {
 	DataCopy      string `json:"kopiadata"`
 }
 
-type UserDataParent struct {
+type Parents struct {
 	ID        string `json:"id"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
 	Gender    string `json:"gender"`
 }
 
-type UserDataPeriod struct {
+type Periods struct {
 	ID        string `json:"id"`
 	StartTime string `json:"starttime"`
 	EndTime   string `json:"endtime"`
@@ -146,7 +123,7 @@ type UserDataPeriod struct {
 	Short     string `json:"short"`
 }
 
-type UserDataDayPart struct {
+type DayParts struct {
 	ID        string `json:"id"`
 	StartTime string `json:"starttime"`
 	EndTime   string `json:"endtime"`
@@ -154,19 +131,19 @@ type UserDataDayPart struct {
 	Short     string `json:"short"`
 }
 
-type UserDataAbsentType struct {
+type AbsentType struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Short string `json:"short"`
 }
 
-type UserDataSubstitutionType struct {
+type SubstitionType struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Short string `json:"short"`
 }
 
-type UserDataStudentAbsentType struct {
+type StudentAbsentType struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`
 	Short      string `json:"short"`
@@ -174,13 +151,13 @@ type UserDataStudentAbsentType struct {
 	ExcuseType string `json:"excusetype"`
 }
 
-type UserDataEventType struct {
+type UserEventType struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Color string `json:"color"`
 }
 
-type UserDataProcessType struct {
+type ProcessType struct {
 	ID           string   `json:"id"`
 	User         string   `json:"user"`
 	Name         string   `json:"name"`
@@ -190,7 +167,7 @@ type UserDataProcessType struct {
 	DataColumns  []string `json:"datacolumns"`
 }
 
-type UserDataProcessState struct {
+type ProcessState struct {
 	ID      string            `json:"id"`
 	Name    string            `json:"name"`
 	Icon    string            `json:"icon"`

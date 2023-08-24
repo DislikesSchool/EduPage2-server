@@ -24,9 +24,9 @@ var (
 
 // Login creates a Handle which you can interact the Edupage API with.
 // Returns Handle or error.
-func Login(server, username, password string) (Edupage, error) {
+func Login(server, username, password string) (EdupageClient, error) {
 	Server = server + "." + edupageDomain
-	var h Edupage
+	var h EdupageClient
 	h.hc = http.DefaultClient
 	h.hc.CheckRedirect = noRedirect
 	h.hc.Jar, _ = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
@@ -42,21 +42,21 @@ func Login(server, username, password string) (Edupage, error) {
 	if err != nil && rs != nil {
 		if rs.StatusCode == 302 {
 			if rs.Header.Get("Location") != "/user/" {
-				return Edupage{}, ErrAuthorization
+				return EdupageClient{}, ErrAuthorization
 			} else if rs.Header.Get("Location") == "/user/" {
 				h.hc.Jar.SetCookies(rs.Request.URL, rs.Cookies())
 				h.server = Server
 				return h, nil
 			}
 		} else {
-			return Edupage{}, fmt.Errorf("failed to login: %s", err)
+			return EdupageClient{}, fmt.Errorf("failed to login: %s", err)
 		}
 	}
-	return Edupage{}, errors.New("unexpected response from server, make sure credentials are specified correctly")
+	return EdupageClient{}, errors.New("unexpected response from server, make sure credentials are specified correctly")
 }
 
-func LoginAuto(username string, password string) (Edupage, error) {
-	var h Edupage
+func LoginAuto(username string, password string) (EdupageClient, error) {
+	var h EdupageClient
 	h.hc = http.DefaultClient
 	h.hc.CheckRedirect = noRedirect
 	h.hc.Jar, _ = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
@@ -72,17 +72,17 @@ func LoginAuto(username string, password string) (Edupage, error) {
 	if err != nil && rs != nil {
 		if rs.StatusCode == 302 {
 			if !strings.Contains(rs.Header.Get("Location"), "edupage.org/user/") {
-				return Edupage{}, ErrAuthorization
+				return EdupageClient{}, ErrAuthorization
 			} else if strings.Contains(rs.Header.Get("Location"), "edupage.org/user/") {
 				domain := strings.Split(rs.Header.Get("Location"), "/")[2]
 				h2, err := Login(strings.Split(domain, ".")[0], username, password)
 				return h2, err
 			}
 		} else {
-			return Edupage{}, fmt.Errorf("failed to login: %s", err)
+			return EdupageClient{}, fmt.Errorf("failed to login: %s", err)
 		}
 	}
-	return Edupage{}, errors.New("unexpected response from server, make sure server is specified correctly")
+	return EdupageClient{}, errors.New("unexpected response from server, make sure server is specified correctly")
 }
 
 func noRedirect(_ *http.Request, _ []*http.Request) error {
