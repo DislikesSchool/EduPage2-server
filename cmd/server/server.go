@@ -38,11 +38,11 @@ type LoginData struct {
 // @Accept x-www-form-urlencoded
 // @Param login body LoginRequestUsernamePassword false "Login using username and password"
 // @Param loginServer body LoginRequestUsernamePasswordServer false "Login using username, password and server"
-// @Param loginToken body LoginRequestToken false "Login using token"
 // @Produce json
 // @Success 200 {object} LoginSuccessResponse
 // @Failure 400 {object} LoginBadRequestResponse
 // @Failure 401 {object} LoginUnauthorizedResponse
+// @Failure 500 {object} LoginInternalErrorResponse
 // @Router /login [post]
 func LoginHandler(c *gin.Context) {
 	var loginData LoginData
@@ -65,18 +65,25 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
 		return
 	}
 
 	err = h.LoadUser()
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
+		"error":   "",
+		"success": true,
 		"name":    h.EdupageData.User.UserRow.Firstname + " " + h.EdupageData.User.UserRow.Lastname,
 	})
 }

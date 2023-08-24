@@ -47,14 +47,6 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/main.LoginRequestUsernamePasswordServer"
                         }
-                    },
-                    {
-                        "description": "Login using token",
-                        "name": "loginToken",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/main.LoginRequestToken"
-                        }
                     }
                 ],
                 "responses": {
@@ -75,6 +67,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/main.LoginUnauthorizedResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.LoginInternalErrorResponse"
+                        }
                     }
                 }
             }
@@ -87,17 +85,23 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "Username and Password are required"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
                 }
             }
         },
-        "main.LoginRequestToken": {
+        "main.LoginInternalErrorResponse": {
             "type": "object",
-            "required": [
-                "token"
-            ],
             "properties": {
-                "token": {
-                    "type": "string"
+                "error": {
+                    "type": "string",
+                    "example": "failed to login: Post https://example.edupage.org/login/edubarLogin.php: dial tcp: lookup example.edupage.org: no such host"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
                 }
             }
         },
@@ -139,16 +143,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
-                    "type": "string"
+                    "type": "string",
+                    "example": ""
+                },
+                "firstname": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "lastname": {
+                    "type": "string",
+                    "example": "Doe"
                 },
                 "success": {
-                    "type": "boolean"
-                },
-                "temp_token": {
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 },
                 "token": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM"
                 }
             }
         },
@@ -157,7 +169,11 @@ const docTemplate = `{
             "properties": {
                 "error": {
                     "type": "string",
-                    "example": "Invalid username or password"
+                    "example": "Unexpected response from server, make sure credentials are specified correctly"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
                 }
             }
         }

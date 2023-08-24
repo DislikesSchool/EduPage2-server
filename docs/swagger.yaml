@@ -5,13 +5,19 @@ definitions:
       error:
         example: Username and Password are required
         type: string
+      success:
+        example: false
+        type: boolean
     type: object
-  main.LoginRequestToken:
+  main.LoginInternalErrorResponse:
     properties:
-      token:
+      error:
+        example: 'failed to login: Post https://example.edupage.org/login/edubarLogin.php:
+          dial tcp: lookup example.edupage.org: no such host'
         type: string
-    required:
-    - token
+      success:
+        example: false
+        type: boolean
     type: object
   main.LoginRequestUsernamePassword:
     properties:
@@ -39,19 +45,30 @@ definitions:
   main.LoginSuccessResponse:
     properties:
       error:
+        example: ""
+        type: string
+      firstname:
+        example: John
+        type: string
+      lastname:
+        example: Doe
         type: string
       success:
-        type: boolean
-      temp_token:
+        example: true
         type: boolean
       token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM
         type: string
     type: object
   main.LoginUnauthorizedResponse:
     properties:
       error:
-        example: Invalid username or password
+        example: Unexpected response from server, make sure credentials are specified
+          correctly
         type: string
+      success:
+        example: false
+        type: boolean
     type: object
 info:
   contact: {}
@@ -77,11 +94,6 @@ paths:
         name: loginServer
         schema:
           $ref: '#/definitions/main.LoginRequestUsernamePasswordServer'
-      - description: Login using token
-        in: body
-        name: loginToken
-        schema:
-          $ref: '#/definitions/main.LoginRequestToken'
       produces:
       - application/json
       responses:
@@ -97,6 +109,10 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/main.LoginUnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.LoginInternalErrorResponse'
       summary: Login to your Edupage account
       tags:
       - auth
