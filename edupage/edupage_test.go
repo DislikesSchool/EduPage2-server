@@ -28,7 +28,7 @@ func TestAutoLogin(t *testing.T) {
 		return
 	}
 
-	_, err := LoginAuto(password, username)
+	_, err := LoginAuto(username, password)
 	if err != nil {
 		t.Error(err)
 		return
