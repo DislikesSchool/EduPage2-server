@@ -69,4 +69,9 @@ func TestEdupage(t *testing.T) {
 		t.Error("Recieved timeline items length is zero")
 		return
 	}
+
+	if len(e.EdupageData.User.UserGroups) == 0 {
+		t.Error("Recieved usergroup length is zero")
+		return
+	}
 }

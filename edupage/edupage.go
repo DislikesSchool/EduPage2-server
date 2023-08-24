@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"path"
 	"reflect"
+	"regexp"
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
@@ -28,7 +29,16 @@ type EdupageData struct {
 }
 
 func (client *EdupageClient) Fetch() error {
-	client.LoadRecentTimeline()
+	err := client.LoadUser()
+	if err != nil {
+		return err
+	}
+
+	err = client.LoadRecentTimeline()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -88,6 +98,45 @@ func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 	err = json.Unmarshal(decoded_body[0:len(decoded_body)-1], &client.EdupageData.Timeline) // omitting null character at end
 	if err != nil {
 		return fmt.Errorf("failed to parse timeline json into raw object: %s", err.Error())
+	}
+
+	return nil
+}
+
+func (client *EdupageClient) LoadUser() error {
+	url := fmt.Sprintf("https://%s/user/", client.server)
+	response, err := client.hc.Get(url)
+	if err != nil {
+		return fmt.Errorf("failed to fetch timeline: %s", err)
+	}
+
+	if response.StatusCode == 302 {
+		// edupage is trying to redirect us, that means an authorization error
+		return ErrAuthorization
+	}
+
+	if response.StatusCode != 200 {
+		return fmt.Errorf("server returned code: %d", response.StatusCode)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %s", err)
+	}
+
+	text := string(body)
+
+	rg, _ := regexp.Compile(`\.userhome\((.*)\);`)
+	matches := rg.FindAllStringSubmatch(text, -1)
+	if len(matches) == 0 {
+		return errors.New("userhome not found in the document body")
+	}
+
+	js := matches[0][1]
+
+	err = json.Unmarshal([]byte(js), &client.EdupageData.User)
+	if err != nil {
+		return fmt.Errorf("failed to read json: %s", err)
 	}
 
 	return nil

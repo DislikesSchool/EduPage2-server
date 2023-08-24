@@ -45,7 +45,7 @@ type UserDataDBI struct {
 	Classrooms         map[string]Classrom          `json:"classrooms"`
 	Students           map[string]Students          `json:"students"`
 	Parents            map[string]Parents           `json:"parents"`
-	Periods            []Periods                    `json:"periods"`
+	Periods            map[string]Period            `json:"periods"`
 	DayParts           map[string]DayParts          `json:"dayparts"`
 	AbsentTypes        map[string]AbsentType        `json:"absenttypes"`
 	SubstitutionTypes  map[string]SubstitionType    `json:"substitutiontypes"`
@@ -115,7 +115,7 @@ type Parents struct {
 	Gender    string `json:"gender"`
 }
 
-type Periods struct {
+type Period struct {
 	ID        string `json:"id"`
 	StartTime string `json:"starttime"`
 	EndTime   string `json:"endtime"`
