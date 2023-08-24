@@ -22,24 +22,24 @@ func CreateMessage(receiver, text, attachments string) MessagePayload {
 	}
 }
 
-func CreatePayload(payload map[string]string) (url.Values, error) {
-	data := url.Values{}
-	for key, val := range payload {
-		data.Add(key, val)
+func CreatePayload(data map[string]string) (url.Values, error) {
+	payload_values := url.Values{}
+	for key, val := range data {
+		payload_values.Add(key, val)
 	}
 
-	es := data.Encode()
-	e := make([]byte, base64.URLEncoding.EncodedLen(len(es)))
-	base64.URLEncoding.Encode(e, []byte(es))
+	payload := payload_values.Encode()
+	encoded := make([]byte, base64.URLEncoding.EncodedLen(len(payload)))
+	base64.URLEncoding.Encode(encoded, []byte(payload))
 
-	r := url.Values{}
-	r.Add("eqap", string(e))
+	values := url.Values{}
+	values.Add("eqap", string(encoded))
 
 	hasher := sha1.New()
 	hasher.Reset()
-	hasher.Write(e)
-	r.Add("eqacs", base64.URLEncoding.EncodeToString(hasher.Sum(nil)))
+	hasher.Write(encoded)
+	values.Add("eqacs", base64.URLEncoding.EncodeToString(hasher.Sum(nil)))
 
-	r.Add("eqaz", "1")
-	return r, nil
+	values.Add("eqaz", "1")
+	return values, nil
 }

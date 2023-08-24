@@ -9,12 +9,11 @@ import (
 	"io"
 	"path"
 	"reflect"
-	"regexp"
 	"sort"
+	"time"
 )
 
 var (
-	timelinePath               = "timeline/"
 	TimeFormat                 = "2006-01-02 15:04:05"
 	ErrUnobtainableAttachments = errors.New("couldn't obtain attachments")
 )
@@ -80,10 +79,7 @@ type Homework struct {
 	GradeEventID      interface{}      `json:"znamky_udalostid"`
 	StudentsHidden    string           `json:"students_hidden"`
 	Data              TimelineData     `json:"data"`
-	EvaluationStatus  string           `json:"stavhodnotenia"`
-	Result            interface{}      `json:"vysledok"`
-	ResultsInfo       string           `json:"resultsInfo"`
-	AssignmentID      string           `json:"pridelenieid"`
+	EvaluationStatus  string           `json:"stavhodnotetimelinePathd"`
 	Ended             interface{}      `json:"skoncil"`
 	MissingNextLesson bool             `json:"missingNextLesson"`
 	Attachments       interface{}      `json:"attachements"`
@@ -92,45 +88,70 @@ type Homework struct {
 }
 
 // Function region
+// GetRecentTimeline obtains the recent timeline data.
+// That's from today, to 30 days in the past.
+func (h *Handle) GetRecentTimeline() (Timeline, error) {
+	duration, err := time.ParseDuration("-720h") // 30 days
+	if err != nil {
+		return Timeline{}, fmt.Errorf("failed to parse duration: %s", err)
+	}
 
-// GetTimeline obtains the recent timeline data from the specified handle.
-func (h *Handle) GetTimeline() (Timeline, error) {
-	url := fmt.Sprintf("https://%s/%s", h.server, timelinePath)
-	rs, err := h.hc.Get(url)
+	start := time.Now().Add(duration)
+	return h.GetTimeline(start, time.Now())
+}
+
+// GetTimeline obtains the timeline data from the specified date range.
+func (h *Handle) GetTimeline(datefrom, dateto time.Time) (Timeline, error) {
+	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", h.server)
+
+	form, err := CreatePayload(map[string]string{
+		"datefrom": datefrom.Format("2006-01-02"),
+		"dateto":   dateto.Format("2006-01-02"),
+	})
+
+	if err != nil {
+		return Timeline{}, fmt.Errorf("failed to create payload: %s", err)
+	}
+
+	response, err := h.hc.PostForm(url, form)
 	if err != nil {
 		return Timeline{}, fmt.Errorf("failed to fetch timeline: %s", err)
 	}
 
-	if rs.StatusCode == 302 {
+	if response.StatusCode == 302 {
 		// edupage is trying to redirect us, that means an authorization error
 		return Timeline{}, ErrAuthorization
 	}
 
-	if rs.StatusCode != 200 {
-		return Timeline{}, fmt.Errorf("server returned code:%d", rs.StatusCode)
+	if response.StatusCode != 200 {
+		return Timeline{}, fmt.Errorf("server returned code:%d", response.StatusCode)
 	}
 
-	body, _ := io.ReadAll(rs.Body)
-	text := string(body)
-
-	rg, _ := regexp.Compile(`\.homeworklist\((.*)\);`)
-	matches := rg.FindAllStringSubmatch(text, -1)
-	if len(matches) == 0 {
-		return Timeline{}, errors.New("json not found in the document body")
-	}
-
-	js := matches[0][1]
-	var raw map[string]interface{}
-	err = json.Unmarshal([]byte(js), &raw)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return Timeline{}, fmt.Errorf("failed to parse timeline json: %s", err.Error())
+		return Timeline{}, fmt.Errorf("failed to read response body: %s", err)
+	}
+
+	decoded_body := make([]byte, base64.StdEncoding.DecodedLen(len(body)-4))
+
+	_, err = base64.StdEncoding.Decode(decoded_body, body[4:])
+
+	if err != nil {
+		return Timeline{}, fmt.Errorf("failed to decode response body: %s", err)
+	}
+
+	var raw map[string]interface{}
+	err = json.Unmarshal(decoded_body[0:len(decoded_body)-1], &raw) // omitting null character at end
+	if err != nil {
+		return Timeline{}, fmt.Errorf("failed to parse timeline json into raw object: %s", err.Error())
 	}
 
 	var data Timeline
-	err = json.Unmarshal([]byte(js), &data)
+	err = json.Unmarshal(decoded_body[0:len(decoded_body)-1], &data)
 	if err != nil {
 		return Timeline{}, fmt.Errorf("failed to parse timeline json: %s", err.Error())
 	}
+
 	data.Raw = raw
 	return data, nil
 }
