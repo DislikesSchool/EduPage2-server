@@ -56,7 +56,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	var h edupage.Handle
+	var h edupage.EdupageClient
 	var err error
 	if loginData.Server == "" {
 		h, err = edupage.LoginAuto(loginData.Username, loginData.Password)
@@ -69,11 +69,15 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	data := h.RefreshUser()
+	err = h.LoadUser()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
-		"name":    data.UserRow.Firstname + " " + data.UserRow.Lastname,
+		"name":    h.EdupageData.User.UserRow.Firstname + " " + h.EdupageData.User.UserRow.Lastname,
 	})
 }
 
