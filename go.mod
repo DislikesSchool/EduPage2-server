@@ -1,4 +1,4 @@
-module DislikesSchool/EduPage2-server
+module github.com/DislikesSchool/EduPage2-server
 
 go 1.20
 
