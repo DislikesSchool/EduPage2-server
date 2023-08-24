@@ -12,7 +12,7 @@ import (
 var (
 	ItemTypeMessage  = TimelineItemType{0}
 	ItemTypeHomework = TimelineItemType{1}
-	TYPE_INVALID     = TimelineItemType{2}
+	ItemTypeInvalid  = TimelineItemType{2}
 )
 
 var (
@@ -22,8 +22,8 @@ var (
 
 // Timeline contains all timeline information
 type Timeline struct {
-	Homeworks []Homework     `json:"homeworks"`
-	Items     []TimelineItem `json:"timelineItems"`
+	Homeworks []Homework     `json:"homeworks"`     // Homeworks
+	Items     []TimelineItem `json:"timelineItems"` // Detailed timeline
 }
 
 type TimelineItemType struct {

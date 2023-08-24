@@ -24,6 +24,7 @@ type EdupageClient struct {
 
 type EdupageData struct {
 	Timeline model.Timeline
+	User     model.User
 }
 
 func (client *EdupageClient) Fetch() error {

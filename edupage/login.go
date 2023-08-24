@@ -22,14 +22,14 @@ var (
 	loginPath     = "login/edubarLogin.php"
 )
 
-// Login creates a Handle which you can interact the Edupage API with.
-// Returns Handle or error.
+// Login creates EdupageClient you can use to interact the edupage api with.
+// Returns EdupageClient or error.
 func Login(server, username, password string) (EdupageClient, error) {
 	Server = server + "." + edupageDomain
-	var h EdupageClient
-	h.hc = http.DefaultClient
-	h.hc.CheckRedirect = noRedirect
-	h.hc.Jar, _ = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
+	var client EdupageClient
+	client.hc = http.DefaultClient
+	client.hc.CheckRedirect = noRedirect
+	client.hc.Jar, _ = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 
 	u := fmt.Sprintf("https://%s", path.Join(Server, loginPath))
 	d := url.Values{
@@ -44,9 +44,9 @@ func Login(server, username, password string) (EdupageClient, error) {
 			if rs.Header.Get("Location") != "/user/" {
 				return EdupageClient{}, ErrAuthorization
 			} else if rs.Header.Get("Location") == "/user/" {
-				h.hc.Jar.SetCookies(rs.Request.URL, rs.Cookies())
-				h.server = Server
-				return h, nil
+				client.hc.Jar.SetCookies(rs.Request.URL, rs.Cookies())
+				client.server = Server
+				return client, nil
 			}
 		} else {
 			return EdupageClient{}, fmt.Errorf("failed to login: %s", err)
