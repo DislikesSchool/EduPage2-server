@@ -1,0 +1,103 @@
+basePath: /
+definitions:
+  main.LoginBadRequestResponse:
+    properties:
+      error:
+        example: Username and Password are required
+        type: string
+    type: object
+  main.LoginRequestToken:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  main.LoginRequestUsernamePassword:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  main.LoginRequestUsernamePasswordServer:
+    properties:
+      password:
+        type: string
+      server:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - server
+    - username
+    type: object
+  main.LoginSuccessResponse:
+    properties:
+      error:
+        type: string
+      success:
+        type: boolean
+      temp_token:
+        type: boolean
+      token:
+        type: string
+    type: object
+  main.LoginUnauthorizedResponse:
+    properties:
+      error:
+        example: Invalid username or password
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is the backend for the EduPage2 app.
+  title: EduPage2 API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      description: Logs in to your Edupage account using the provided credentials.
+      parameters:
+      - description: Login using username and password
+        in: body
+        name: login
+        schema:
+          $ref: '#/definitions/main.LoginRequestUsernamePassword'
+      - description: Login using username, password and server
+        in: body
+        name: loginServer
+        schema:
+          $ref: '#/definitions/main.LoginRequestUsernamePasswordServer'
+      - description: Login using token
+        in: body
+        name: loginToken
+        schema:
+          $ref: '#/definitions/main.LoginRequestToken'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.LoginSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.LoginBadRequestResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.LoginUnauthorizedResponse'
+      summary: Login to your Edupage account
+      tags:
+      - auth
+swagger: "2.0"
