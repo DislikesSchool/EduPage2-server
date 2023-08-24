@@ -10,7 +10,7 @@ import (
 	"regexp"
 )
 
-func (h Handle) RefreshUser() UserRawDataObject {
+func (h Edupage) RefreshUser() UserRawDataObject {
 	urlStr := fmt.Sprintf("https://%s/user/?", h.server)
 	url, _ := url.Parse(urlStr)
 	fmt.Println(url)

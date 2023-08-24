@@ -58,7 +58,7 @@ func TestEdupage(t *testing.T) {
 		return
 	}
 
-	timeline, err := h.GetRecentTimeline()
+	timeline, err := h.LoadRecentTimeline()
 	if err != nil {
 		t.Error(err)
 		return
