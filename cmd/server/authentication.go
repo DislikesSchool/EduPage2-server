@@ -3,9 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
+	"github.com/DislikesSchool/EduPage2-server/edupage"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
@@ -51,4 +54,71 @@ func verifyJWT(tokenString string) (jwt.MapClaims, error) {
 	} else {
 		return nil, errors.New("invalid token")
 	}
+}
+
+type LoginData struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Server   string `json:"server" binding:"omitempty" required:"false"`
+	Token    string `json:"token" binding:"omitempty" required:"false"`
+}
+
+// LoginHandler godoc
+// @Summary Login to your Edupage account
+// @Schemes
+// @Description Logs in to your Edupage account using the provided credentials.
+// @Tags auth
+// @Accept json
+// @Accept multipart/form-data
+// @Accept x-www-form-urlencoded
+// @Param login body LoginRequestUsernamePassword false "Login using username and password"
+// @Param loginServer body LoginRequestUsernamePasswordServer false "Login using username, password and server"
+// @Produce json
+// @Success 200 {object} LoginSuccessResponse
+// @Failure 400 {object} LoginBadRequestResponse
+// @Failure 401 {object} LoginUnauthorizedResponse
+// @Failure 500 {object} LoginInternalErrorResponse
+// @Router /login [post]
+func LoginHandler(c *gin.Context) {
+	var loginData LoginData
+	if err := c.Bind(&loginData); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if loginData.Username == "" || loginData.Password == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Username and Password are required"})
+		return
+	}
+
+	var h edupage.EdupageClient
+	var err error
+	if loginData.Server == "" {
+		h, err = edupage.LoginAuto(loginData.Username, loginData.Password)
+	} else {
+		h, err = edupage.Login(loginData.Server, loginData.Username, loginData.Password)
+	}
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
+		return
+	}
+
+	err = h.LoadUser()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"error":   "",
+		"success": true,
+		"name":    h.EdupageData.User.UserRow.Firstname + " " + h.EdupageData.User.UserRow.Lastname,
+	})
 }
