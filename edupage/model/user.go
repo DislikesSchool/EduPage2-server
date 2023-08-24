@@ -1,12 +1,14 @@
 package model
 
 type User struct {
-	Edubar     map[string]interface{} `json:"_edubar"`
-	Timeline   []TimelineItem         `json:"items"` // Only recent timeline, see EdupageClient.Timeline for more
-	DBI        UserDataDBI            `json:"dbi"`
-	UserRow    UserRow                `json:"userrow"`
-	EventTypes []EventType            `json:"eventtypes"`
-	UserGroups []string               `json:"usergroups"`
+	Edubar           map[string]interface{} `json:"_edubar"`
+	Timeline         []TimelineItem         `json:"items"` // Only recent timeline, see EdupageClient.Timeline for more
+	DBI              UserDataDBI            `json:"dbi"`
+	UserRow          UserRow                `json:"userrow"`
+	EventTypes       []EventType            `json:"eventtypes"`
+	UserGroups       []string               `json:"usergroups"`
+	NamedayToday     string                 `json:"meninyDnes"`
+	NamedayTommorrow string                 `json:"meninyZajtra"`
 }
 
 type UserRow struct {
