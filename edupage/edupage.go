@@ -95,9 +95,9 @@ func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 		return fmt.Errorf("failed to decode response body: %s", err)
 	}
 
-	err = json.Unmarshal(decoded_body[0:len(decoded_body)-1], &client.EdupageData.Timeline) // omitting null character at end
+	err = json.Unmarshal(decoded_body, &client.EdupageData.Timeline) // may throw unexpected null character sometimes FIX?
 	if err != nil {
-		return fmt.Errorf("failed to parse timeline json into raw object: %s", err.Error())
+		return fmt.Errorf("failed to parse timeline json into raw object: %s", err)
 	}
 
 	return nil
