@@ -190,7 +190,7 @@ func (dbi *DBI) UnmarshalJSON(data []byte) error {
 	err := json.Unmarshal(data, &fdbi)
 	if err != nil {
 		type AltDBI struct {
-			DBI
+			FakeDBI
 			Periods []Period `json:"periods"`
 		}
 
