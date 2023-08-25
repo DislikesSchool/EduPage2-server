@@ -74,4 +74,10 @@ func TestEdupage(t *testing.T) {
 		t.Error("Recieved usergroup length is zero")
 		return
 	}
+
+	if len(e.EdupageData.User.DBI.Teachers) == 0 {
+		t.Error("Recieved teacher map length is zero")
+		return
+	}
+
 }

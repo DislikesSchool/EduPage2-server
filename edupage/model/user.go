@@ -1,9 +1,14 @@
 package model
 
+import (
+	"encoding/json"
+	"strconv"
+)
+
 type User struct {
 	Edubar           map[string]interface{} `json:"_edubar"`
 	Timeline         []TimelineItem         `json:"items"` // Only recent timeline, see EdupageClient.Timeline for more
-	DBI              UserDataDBI            `json:"dbi"`
+	DBI              DBI                    `json:"dbi"`
 	UserRow          UserRow                `json:"userrow"`
 	EventTypes       []EventType            `json:"eventtypes"`
 	UserGroups       []string               `json:"usergroups"`
@@ -40,14 +45,14 @@ type EventType struct {
 	SubID         string   `json:"subId"`
 }
 
-type UserDataDBI struct {
+type DBI struct {
 	Teachers           map[string]Teacher           `json:"teachers"`
 	Classes            map[string]Class             `json:"classes"`
 	Subjects           map[string]Subject           `json:"subjects"`
 	Classrooms         map[string]Classrom          `json:"classrooms"`
 	Students           map[string]Students          `json:"students"`
 	Parents            map[string]Parents           `json:"parents"`
-	Periods            []Period                     `json:"periods"`
+	Periods            map[json.Number]Period       `json:"periods"`
 	DayParts           map[string]DayParts          `json:"dayparts"`
 	AbsentTypes        map[string]AbsentType        `json:"absenttypes"`
 	SubstitutionTypes  map[string]SubstitionType    `json:"substitutiontypes"`
@@ -176,4 +181,63 @@ type ProcessState struct {
 	Color   string            `json:"color"`
 	Next    map[string]string `json:"next"`
 	Changes map[string]string `json:"changes"`
+}
+
+func (dbi *DBI) UnmarshalJSON(data []byte) error {
+	type FakeDBI DBI
+	var fdbi FakeDBI
+
+	err := json.Unmarshal(data, &fdbi)
+	if err != nil {
+		type AltDBI struct {
+			DBI
+			Periods []Period `json:"periods"`
+		}
+
+		var adbi AltDBI
+		err := json.Unmarshal(data, &adbi)
+		if err != nil {
+			return err
+		}
+
+		dbi.AbsentTypes = adbi.AbsentTypes
+		dbi.Classes = adbi.Classes
+		dbi.Classrooms = adbi.Classrooms
+		dbi.DayParts = adbi.DayParts
+		dbi.EventTypes = adbi.EventTypes
+		dbi.IsStudentAdult = adbi.IsStudentAdult
+
+		for index, v := range adbi.Periods {
+			dbi.Periods[json.Number(strconv.Itoa(index))] = v
+		}
+
+		dbi.Parents = adbi.Parents
+		dbi.ProcessStates = adbi.ProcessStates
+		dbi.ProcessTypes = adbi.ProcessTypes
+		dbi.StudentAbsentTypes = adbi.StudentAbsentTypes
+		dbi.Students = adbi.Students
+		dbi.Subjects = adbi.Subjects
+		dbi.SubstitutionTypes = adbi.SubstitutionTypes
+		dbi.Teachers = adbi.Teachers
+		dbi.IsStudentAdult = adbi.IsStudentAdult
+
+	}
+
+	dbi.AbsentTypes = fdbi.AbsentTypes
+	dbi.Classes = fdbi.Classes
+	dbi.Classrooms = fdbi.Classrooms
+	dbi.DayParts = fdbi.DayParts
+	dbi.EventTypes = fdbi.EventTypes
+	dbi.IsStudentAdult = fdbi.IsStudentAdult
+	dbi.Periods = fdbi.Periods
+	dbi.Parents = fdbi.Parents
+	dbi.ProcessStates = fdbi.ProcessStates
+	dbi.ProcessTypes = fdbi.ProcessTypes
+	dbi.StudentAbsentTypes = fdbi.StudentAbsentTypes
+	dbi.Students = fdbi.Students
+	dbi.Subjects = fdbi.Subjects
+	dbi.SubstitutionTypes = fdbi.SubstitutionTypes
+	dbi.Teachers = fdbi.Teachers
+	dbi.IsStudentAdult = fdbi.IsStudentAdult
+	return nil
 }
