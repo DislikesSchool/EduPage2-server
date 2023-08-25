@@ -207,6 +207,7 @@ func (dbi *DBI) UnmarshalJSON(data []byte) error {
 		dbi.EventTypes = adbi.EventTypes
 		dbi.IsStudentAdult = adbi.IsStudentAdult
 
+		dbi.Periods = make(map[json.Number]Period, len(adbi.Periods))
 		for index, v := range adbi.Periods {
 			dbi.Periods[json.Number(strconv.Itoa(index))] = v
 		}
