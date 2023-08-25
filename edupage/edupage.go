@@ -146,7 +146,7 @@ func (client *EdupageClient) LoadUser() error {
 // Returns ErrUnobtainableAttachments in case the attachments are not present.
 // Retruns map, key is the resource name and value is the resource link
 func (client *EdupageClient) FetchHomeworkAttachments(i *model.Homework) (map[string]string, error) {
-	if i.ESuperID == "" || i.TestID == "" {
+	if len(i.ESuperID) == 0 || len(i.TestID) == 0 {
 		return nil, errors.New("required fields superid and testid not set")
 	}
 
