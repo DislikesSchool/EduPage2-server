@@ -58,7 +58,6 @@ func Login(server, username, password string) (EdupageClient, error) {
 func LoginAuto(username string, password string) (EdupageClient, error) {
 	var h EdupageClient
 	h.hc = http.DefaultClient
-	h.hc.CheckRedirect = noRedirect
 	h.hc.Jar, _ = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 
 	u := "https://portal.edupage.org/index.php?jwid=jw3&module=Login&lang=sk"
@@ -72,6 +71,7 @@ func LoginAuto(username string, password string) (EdupageClient, error) {
 	if err != nil && rs != nil {
 		if rs.StatusCode == 302 {
 			if !strings.Contains(rs.Header.Get("Location"), "edupage.org/user/") {
+				fmt.Println(rs.Location())
 				return EdupageClient{}, ErrAuthorization
 			} else if strings.Contains(rs.Header.Get("Location"), "edupage.org/user/") {
 				domain := strings.Split(rs.Header.Get("Location"), "/")[2]
