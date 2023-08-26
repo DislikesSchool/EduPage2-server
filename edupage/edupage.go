@@ -26,6 +26,7 @@ type EdupageClient struct {
 type EdupageData struct {
 	Timeline model.Timeline
 	User     model.User
+	Grades   map[string]model.Grade
 }
 
 func (client *EdupageClient) Fetch() error {
@@ -35,6 +36,11 @@ func (client *EdupageClient) Fetch() error {
 	}
 
 	err = client.LoadRecentTimeline()
+	if err != nil {
+		return err
+	}
+
+	err = client.LoadGrades("2022", "RX")
 	if err != nil {
 		return err
 	}
@@ -96,9 +102,9 @@ func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 	}
 
 	decoded_body = bytes.Trim(decoded_body, "\x00")
-	err = json.Unmarshal(decoded_body, &client.EdupageData.Timeline) // may throw unexpected null character sometimes FIX?
+	err = json.Unmarshal(decoded_body, &client.EdupageData.Timeline)
 	if err != nil {
-		return fmt.Errorf("failed to parse timeline json into raw object: %s", err)
+		return fmt.Errorf("failed to parse timeline json into json object: %s", err)
 	}
 
 	return nil
@@ -141,6 +147,85 @@ func (client *EdupageClient) LoadUser() error {
 	}
 
 	return nil
+}
+
+// LoadGrades loads the grade data from specified year and halfyear
+// Halfyears types are: P1 (first halfyear), P2 (second halfyear), RX (whole year)
+func (client *EdupageClient) LoadGrades(year, halfyear string) error {
+	if halfyear != "P1" && halfyear != "P2" && halfyear != "RX" {
+		return errors.New("invalid halfyear type")
+	}
+
+	url := fmt.Sprintf("https://%s/znamky/?what=studentviewer&akcia=studentData&eqav=1&maxEqav=7", client.server)
+
+	form, err := CreatePayload(map[string]string{
+		"pohlad":           "podladatumu",
+		"znamky_yearid":    year,
+		"znamky_yearid_ns": "1",
+		"nadobdobie":       halfyear,
+		"rokobdobie":       fmt.Sprintf("%s::%s", year, halfyear),
+		"doRq":             "1",
+		"what":             "studentviewer",
+		"updateLastView":   "0",
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to create payload: %s", err)
+	}
+
+	response, err := client.hc.PostForm(url, form)
+	if err != nil {
+		return fmt.Errorf("failed to fetch grades: %s", err)
+	}
+
+	if response.StatusCode == 302 {
+		// edupage is trying to redirect us, that means an authorization error
+		return ErrAuthorization
+	}
+
+	if response.StatusCode != 200 {
+		return fmt.Errorf("server returned code:%d", response.StatusCode)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %s", err)
+	}
+
+	decoded_body := make([]byte, base64.StdEncoding.DecodedLen(len(body)-4))
+
+	_, err = base64.StdEncoding.Decode(decoded_body, body[4:])
+	if err != nil {
+		return fmt.Errorf("failed to decode response body: %s", err)
+	}
+
+	type GradesData struct {
+		Grades []model.Grade `json:"vsetkyZnamky"`
+	}
+
+	type Grades struct {
+		Status string     `json:"status"`
+		Data   GradesData `json:"data"`
+	}
+
+	var grades Grades
+
+	decoded_body = bytes.Trim(decoded_body, "\x00")
+	err = json.Unmarshal(decoded_body, &grades)
+	if err != nil {
+		return fmt.Errorf("failed to parse grades json into json object: %s", err)
+	}
+
+	if client.EdupageData.Grades == nil {
+		client.EdupageData.Grades = make(map[string]model.Grade, len(grades.Data.Grades))
+	}
+
+	for _, v := range grades.Data.Grades {
+		client.EdupageData.Grades[v.ID] = v
+	}
+
+	return nil
+
 }
 
 // FetchHomeworkAttachmens obtains the homework attchments for the specified homework.
