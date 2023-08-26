@@ -70,12 +70,202 @@ definitions:
         example: false
         type: boolean
     type: object
+  main.RecentTimelineInternalErrorResponse:
+    properties:
+      error:
+        example: failed to create payload
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  main.RecentTimelineSuccessResponse:
+    properties:
+      error:
+        example: ""
+        type: string
+      success:
+        example: true
+        type: boolean
+      timeline:
+        items:
+          $ref: '#/definitions/model.Timeline'
+        type: array
+    type: object
+  main.RecentTimelineUnauthorizedResponse:
+    properties:
+      error:
+        example: Unauthorized
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  model.Homework:
+    properties:
+      attachements: {}
+      autor_meno:
+        type: string
+      data:
+        $ref: '#/definitions/model.TimelineItemData'
+      datecreated:
+        type: string
+      datefrom:
+        type: string
+      datetimefrom:
+        type: string
+      datetimeto:
+        type: string
+      dateto:
+        type: string
+      details:
+        type: string
+      e_superid:
+        type: string
+      etestAnswerCards:
+        type: integer
+      etestCards:
+        type: integer
+      homeworkid:
+        type: string
+      hwkid:
+        type: string
+      missingNextLesson:
+        type: boolean
+      name:
+        type: string
+      period: {}
+      planid:
+        type: string
+      pocet_done:
+        type: string
+      pocet_like:
+        type: string
+      pocet_reakcii:
+        type: string
+      posledny_vysledok:
+        type: string
+      predmet_meno:
+        type: string
+      predmetid:
+        type: string
+      skoncil: {}
+      skupiny:
+        items:
+          type: string
+        type: array
+      stav:
+        type: string
+      stavhodnotetimelinePathd:
+        type: string
+      students_hidden:
+        type: string
+      studyTopics:
+        type: boolean
+      testid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        $ref: '#/definitions/model.TimelineItemType'
+      userid:
+        type: string
+      znamky_udalostid: {}
+    type: object
+  model.Timeline:
+    properties:
+      homeworks:
+        description: Homeworks
+        items:
+          $ref: '#/definitions/model.Homework'
+        type: array
+      timelineItems:
+        description: Detailed timeline
+        items:
+          $ref: '#/definitions/model.TimelineItem'
+        type: array
+    type: object
+  model.TimelineItem:
+    properties:
+      cas_pridania:
+        type: string
+      cas_pridania_btc:
+        type: string
+      cas_udalosti:
+        type: string
+      cas_udalosti_btc:
+        type: string
+      data:
+        $ref: '#/definitions/model.TimelineItemData'
+      ineid:
+        type: string
+      poct_reakcii:
+        type: integer
+      pomocny_zaznam:
+        type: string
+      posledna_reakcia:
+        type: string
+      reakcia_na:
+        type: string
+      removed:
+        type: string
+      target_user:
+        type: string
+      text:
+        type: string
+      timelineid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        $ref: '#/definitions/model.TimelineItemType'
+      user:
+        type: string
+      user_meno:
+        type: string
+      vlastnik:
+        type: string
+      vlastnik_meno:
+        type: string
+    type: object
+  model.TimelineItemData:
+    properties:
+      value:
+        additionalProperties: true
+        type: object
+    type: object
+  model.TimelineItemType:
+    properties:
+      uint8:
+        type: integer
+    type: object
 info:
   contact: {}
   description: This is the backend for the EduPage2 app.
   title: EduPage2 API
   version: "1.0"
 paths:
+  /api/timeline/recent:
+    get:
+      description: Returns the user's timeline from today to 30 days in the past.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.RecentTimelineSuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.RecentTimelineUnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.RecentTimelineInternalErrorResponse'
+      summary: Get the user's recent timeline
+      tags:
+      - timeline
   /login:
     post:
       consumes:

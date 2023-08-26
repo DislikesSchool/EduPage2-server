@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/edupage"
@@ -15,15 +16,16 @@ import (
 func getSecretKey() []byte {
 	key := os.Getenv("JWT_SECRET_KEY")
 	if key == "" {
-		panic("JWT_SECRET_KEY environment variable is not set")
+		key = "development-secret-key"
 	}
 	return []byte(key)
 }
 
-func generateJWT(username string) (string, error) {
+func generateJWT(userID string, username string) (string, error) {
 	expirationTime := time.Now().Add(time.Hour)
 
 	claims := jwt.MapClaims{
+		"userID":   userID,
 		"username": username,
 		"exp":      expirationTime.Unix(),
 	}
@@ -37,7 +39,50 @@ func generateJWT(username string) (string, error) {
 	return signedToken, nil
 }
 
-func verifyJWT(tokenString string) (jwt.MapClaims, error) {
+func authMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is missing"})
+			return
+		}
+
+		authHeaderParts := strings.Split(authHeader, " ")
+		if len(authHeaderParts) != 2 || authHeaderParts[0] != "Bearer" {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is invalid"})
+			return
+		}
+
+		tokenString := authHeaderParts[1]
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return getSecretKey(), nil
+		})
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+
+		if _, ok := token.Claims.(jwt.MapClaims); !ok || !token.Valid {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func getUserIDAndUsername(c *gin.Context) (string, string, error) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		return "", "", errors.New("missing Authorization header")
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -46,14 +91,25 @@ func verifyJWT(tokenString string) (jwt.MapClaims, error) {
 		return getSecretKey(), nil
 	})
 	if err != nil {
-		return nil, err
+		return "", "", err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims, nil
-	} else {
-		return nil, errors.New("invalid token")
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", "", errors.New("invalid token claims")
 	}
+
+	userID, ok := claims["userID"].(string)
+	if !ok {
+		return "", "", errors.New("invalid user ID in token claims")
+	}
+
+	username, ok := claims["username"].(string)
+	if !ok {
+		return "", "", errors.New("invalid user ID in token claims")
+	}
+
+	return userID, username, nil
 }
 
 type LoginData struct {
@@ -116,9 +172,19 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
+	userID := h.EdupageData.User.UserRow.UserID
+	username := loginData.Username
+
+	token, err := generateJWT(userID, loginData.Username)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	clients[userID+username] = &h
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
 		"success": true,
 		"name":    h.EdupageData.User.UserRow.Firstname + " " + h.EdupageData.User.UserRow.Lastname,
+		"token":   token,
 	})
 }
