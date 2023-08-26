@@ -124,4 +124,66 @@ func BenchmarkTimeline(t *testing.B) {
 		t.Error(err)
 		return
 	}
+
+	t.StopTimer()
+
+	if len(client.EdupageData.Timeline.Items) == 0 {
+		t.Error("Recieved timeline array is empty")
+	}
+}
+
+func BenchmarkUser(t *testing.B) {
+	err := checkCredentials()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	client, err := Login(server, username, password)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.ResetTimer()
+
+	err = client.LoadUser()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.StopTimer()
+
+	if len(client.EdupageData.User.UserGroups) == 0 {
+		t.Error("Recieved user group array is empty")
+	}
+}
+
+func BenchmarkGrades(t *testing.B) {
+	err := checkCredentials()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	client, err := Login(server, username, password)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.ResetTimer()
+
+	err = client.LoadGrades("2022", "RX")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.StopTimer()
+
+	if len(client.EdupageData.Grades) == 0 {
+		t.Error("Recieved grades array is empty")
+	}
 }
