@@ -29,6 +29,7 @@ type EdupageData struct {
 	Grades   map[string]model.Grade
 }
 
+// Fetch loads all possible data into the object
 func (client *EdupageClient) Fetch() error {
 	err := client.LoadUser()
 	if err != nil {
