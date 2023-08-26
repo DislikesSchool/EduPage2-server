@@ -72,21 +72,22 @@ func TestEdupage(t *testing.T) {
 		return
 	}
 
-	if len(client.EdupageData.Timeline.Items) == 0 {
+	if len(client.Timeline.Items) == 0 {
 		t.Error("Recieved timeline array is empty")
 	}
 
-	if len(client.EdupageData.User.UserGroups) == 0 {
+	if len(client.User.UserGroups) == 0 {
 		t.Error("Recieved usergroup array is empty")
 	}
 
-	if len(client.EdupageData.User.DBI.Teachers) == 0 {
+	if len(client.User.DBI.Teachers) == 0 {
 		t.Error("Recieved teacher map is empty")
 	}
 
-	if len(client.EdupageData.Results.Grades) == 0 {
+	if len(client.Results.Grades) == 0 {
 		t.Error("Recieved grade array is empty")
 	}
+
 }
 
 func BenchmarkLogin(t *testing.B) {
@@ -127,7 +128,7 @@ func BenchmarkTimeline(t *testing.B) {
 
 	t.StopTimer()
 
-	if len(client.EdupageData.Timeline.Items) == 0 {
+	if len(client.Timeline.Items) == 0 {
 		t.Error("Recieved timeline array is empty")
 	}
 }
@@ -155,7 +156,7 @@ func BenchmarkUser(t *testing.B) {
 
 	t.StopTimer()
 
-	if len(client.EdupageData.User.UserGroups) == 0 {
+	if len(client.User.UserGroups) == 0 {
 		t.Error("Recieved user group array is empty")
 	}
 }
@@ -183,7 +184,7 @@ func BenchmarkGrades(t *testing.B) {
 
 	t.StopTimer()
 
-	if len(client.EdupageData.Results.Grades) == 0 {
+	if len(client.Results.Grades) == 0 {
 		t.Error("Recieved grades array is empty")
 	}
 }

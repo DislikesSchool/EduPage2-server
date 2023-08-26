@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"path"
-	"reflect"
 	"regexp"
 	"time"
 
@@ -18,14 +16,11 @@ import (
 
 // EdupageClient is used to access the edupage api.
 type EdupageClient struct {
-	hc          *http.Client //TODO: remove, save only edid, hsid, phpsessid tokens
-	server      string
-	EdupageData EdupageData
-}
+	hc     *http.Client //TODO: remove, save only edid, hsid, phpsessid tokens
+	server string
 
-type EdupageData struct {
-	Timeline *model.Timeline
 	User     *model.User
+	Timeline *model.Timeline
 	Results  *model.Results
 }
 
@@ -107,10 +102,10 @@ func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 		return fmt.Errorf("failed to parse timeline json into json object: %s", err)
 	}
 
-	if client.EdupageData.Timeline == nil {
-		client.EdupageData.Timeline = &timeline
+	if client.Timeline == nil {
+		client.Timeline = &timeline
 	} else {
-		client.EdupageData.Timeline.Merge(&timeline)
+		client.Timeline.Merge(&timeline)
 	}
 
 	return nil
@@ -147,7 +142,7 @@ func (client *EdupageClient) LoadUser() error {
 	}
 
 	js := matches[0][1]
-	err = json.Unmarshal([]byte(js), &client.EdupageData.User)
+	err = json.Unmarshal([]byte(js), &client.User)
 	if err != nil {
 		return fmt.Errorf("failed to parse user json into json object: %s", err)
 	}
@@ -208,133 +203,11 @@ func (client *EdupageClient) LoadResults(year, halfyear string) error {
 		return fmt.Errorf("failed to parse results: %s", err)
 	}
 
-	if client.EdupageData.Results == nil {
-		client.EdupageData.Results = &results
+	if client.Results == nil {
+		client.Results = &results
 	} else {
-		client.EdupageData.Results.Merge(&results)
+		client.Results.Merge(&results)
 	}
 
 	return nil
-
-}
-
-// FetchHomeworkAttachmens obtains the homework attchments for the specified homework.
-// Returns ErrUnobtainableAttachments in case the attachments are not present.
-// Retruns map, key is the resource name and value is the resource link
-func (client *EdupageClient) FetchHomeworkAttachments(i *model.Homework) (map[string]string, error) {
-	if len(i.ESuperID) == 0 || len(i.TestID) == 0 {
-		return nil, errors.New("required fields superid and testid not set")
-	}
-
-	data := map[string]string{
-		"testid":  i.TestID,
-		"superid": i.ESuperID,
-	}
-
-	payload, err := CreatePayload(data)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create payload: %w", err)
-	}
-
-	resp, err := client.hc.PostForm(
-		"https://"+path.Join(client.server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
-		payload,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("homework request failed: %w", err)
-	}
-
-	response, err := io.ReadAll(resp.Body)
-
-	if len(response) < 5 {
-		return nil, fmt.Errorf("homework request failed, bad response: %w", err)
-	}
-
-	response = response[4:]
-
-	decoded := make([]byte, base64.StdEncoding.DecodedLen(len(response)))
-	_, err = base64.StdEncoding.Decode(decoded, response)
-	if err != nil {
-		return nil, fmt.Errorf("homework request failed, bad response: %w", err)
-	}
-
-	decoded = bytes.Trim(decoded, "\x00")
-	var object map[string]interface{}
-	err = json.Unmarshal(decoded, &object)
-	if err != nil {
-		return nil, fmt.Errorf("homework request failed, bad response: %w", err)
-	}
-
-	attachments := make(map[string]string)
-
-	// God help those who may try to debug this.
-	if object["materialData"] == nil ||
-		(reflect.TypeOf(object["materialData"]).Kind() != reflect.Map ||
-			reflect.TypeOf(object["materialData"]).Elem().Kind() != reflect.Interface) {
-		return nil, model.ErrUnobtainableAttachments
-	}
-	materialData := object["materialData"].(map[string]interface{})
-
-	if materialData["cardsData"] == nil ||
-		(reflect.TypeOf(materialData["cardsData"]).Kind() != reflect.Map ||
-			reflect.TypeOf(materialData["cardsData"]).Elem().Kind() != reflect.Interface) {
-		return nil, model.ErrUnobtainableAttachments
-	}
-	cardsData := materialData["cardsData"].(map[string]interface{})
-
-	for _, entry := range cardsData {
-		if entry == nil ||
-			(reflect.TypeOf(entry).Kind() != reflect.Map ||
-				reflect.TypeOf(entry).Elem().Kind() != reflect.Interface) {
-			return nil, model.ErrUnobtainableAttachments
-		}
-
-		if e, ok := entry.(map[string]interface{})["content"]; !ok && reflect.TypeOf(e).Kind() != reflect.String {
-			return nil, model.ErrUnobtainableAttachments
-		}
-
-		var content map[string]interface{}
-		contentJson := entry.(map[string]interface{})["content"].(string)
-		err = json.Unmarshal([]byte(contentJson), &content)
-		if err != nil {
-			return nil, err
-		}
-
-		if content["widgets"] == nil ||
-			(reflect.TypeOf(content["widgets"]).Kind() != reflect.Slice ||
-				reflect.TypeOf(content["widgets"]).Elem().Kind() != reflect.Interface) {
-			return nil, model.ErrUnobtainableAttachments
-		}
-
-		widgets := content["widgets"].([]interface{})
-		for _, widget := range widgets {
-			if widget == nil ||
-				(reflect.TypeOf(widget).Kind() != reflect.Map ||
-					reflect.TypeOf(widget).Elem().Kind() != reflect.Interface) {
-				return nil, model.ErrUnobtainableAttachments
-			}
-			if widget.(map[string]interface{})["props"] == nil ||
-				(reflect.TypeOf(widget.(map[string]interface{})["props"]).Kind() != reflect.Map ||
-					reflect.TypeOf(widget.(map[string]interface{})["props"]).Elem().Kind() != reflect.Interface) {
-				return nil, model.ErrUnobtainableAttachments
-			}
-			props := widget.(map[string]interface{})["props"].(map[string]interface{})
-			if files, ok := props["files"]; ok {
-				for _, file := range files.([]interface{}) {
-					if file == nil ||
-						(reflect.TypeOf(file).Kind() != reflect.Map ||
-							reflect.TypeOf(file).Elem().Kind() != reflect.Interface) {
-						return nil, model.ErrUnobtainableAttachments
-					}
-					attachments[file.(map[string]interface{})["name"].(string)] = file.(map[string]interface{})["src"].(string)
-				}
-			}
-		}
-		if err != nil {
-			continue
-		}
-		continue
-	}
-
-	return attachments, nil
 }
