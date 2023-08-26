@@ -66,18 +66,18 @@ func TestEdupage(t *testing.T) {
 	}
 
 	if len(e.EdupageData.Timeline.Items) == 0 {
-		t.Error("Recieved timeline items length is zero")
+		t.Error("Recieved timeline array is empty")
 	}
 
 	if len(e.EdupageData.User.UserGroups) == 0 {
-		t.Error("Recieved usergroup length is zero")
+		t.Error("Recieved usergroup array is empty")
 	}
 
 	if len(e.EdupageData.User.DBI.Teachers) == 0 {
-		t.Error("Recieved teacher map length is zero")
+		t.Error("Recieved teacher map is empty")
 	}
 
 	if len(e.EdupageData.Grades) == 0 {
-		t.Error("Recieved grade array length is zero")
+		t.Error("Recieved grade array is empty")
 	}
 }
