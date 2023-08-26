@@ -1,9 +1,116 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"flag"
+	"net/http"
+	"net/http/httptest"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestMain(t *testing.T) {
-	// TODO: implement
+var (
+	username string
+	password string
+	server   string
+	name     string
+)
+
+func init() {
+	flag.StringVar(&username, "username", "", "Edupage username")
+	flag.StringVar(&password, "password", "", "Edupage password")
+	flag.StringVar(&server, "server", "", "Edupage server")
+	flag.StringVar(&name, "name", "", "Name of the user (firstname lastname)")
+}
+
+func TestLoginAuto(t *testing.T) {
+	if len(username) == 0 {
+		t.Log("Username parameter missing, (-username=?)")
+		return
+	}
+
+	if len(password) == 0 {
+		t.Log("Password parameter missing, (-password=?)")
+		return
+	}
+
+	gin.SetMode(gin.TestMode)
+
+	// Test case 1: successful login
+	loginData := LoginData{
+		Server:   "",
+		Username: username,
+		Password: password,
+	}
+	loginDataBytes, _ := json.Marshal(loginData)
+	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(loginDataBytes))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router := gin.Default()
+	router.POST("/login", LoginHandler)
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response struct {
+		Error   string `json:"error"`
+		Success bool   `json:"success"`
+		Name    string `json:"name"`
+		Token   string `json:"token"`
+	}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "", response.Error)
+	assert.True(t, response.Success)
+	assert.Equal(t, name, response.Name)
+	assert.NotEmpty(t, response.Token)
+}
+
+func TestLogin(t *testing.T) {
+	if len(username) == 0 {
+		t.Log("Username parameter missing, (-username=?)")
+		return
+	}
+
+	if len(password) == 0 {
+		t.Log("Password parameter missing, (-password=?)")
+		return
+	}
+
+	if len(server) == 0 {
+		t.Log("Server parameter missing, (-server=?)")
+		return
+	}
+
+	gin.SetMode(gin.TestMode)
+
+	// Test case 1: successful login
+	loginData := LoginData{
+		Server:   server,
+		Username: username,
+		Password: password,
+	}
+	loginDataBytes, _ := json.Marshal(loginData)
+	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(loginDataBytes))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router := gin.Default()
+	router.POST("/login", LoginHandler)
+	router.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response struct {
+		Error   string `json:"error"`
+		Success bool   `json:"success"`
+		Name    string `json:"name"`
+		Token   string `json:"token"`
+	}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	assert.Equal(t, "", response.Error)
+	assert.True(t, response.Success)
+	assert.Equal(t, name, response.Name)
+	assert.NotEmpty(t, response.Token)
 }
