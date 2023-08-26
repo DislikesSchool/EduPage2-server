@@ -3,8 +3,13 @@ package model
 import (
 	"encoding/json"
 	"errors"
+	"maps"
 	"reflect"
 	"strconv"
+)
+
+var (
+	ErrUnobtainableAttachments = errors.New("couldn't obtain attachments")
 )
 
 var (
@@ -12,16 +17,6 @@ var (
 	ItemTypeHomework = TimelineItemType{1}
 	ItemTypeInvalid  = TimelineItemType{2}
 )
-
-var (
-	ErrUnobtainableAttachments = errors.New("couldn't obtain attachments")
-)
-
-// Timeline contains all timeline information
-type Timeline struct {
-	Homeworks []Homework     `json:"homeworks"`     // Homeworks
-	Items     []TimelineItem `json:"timelineItems"` // Detailed timeline
-}
 
 type TimelineItemType struct {
 	uint8
@@ -33,7 +28,7 @@ type TimelineItemData struct {
 }
 
 type TimelineItem struct {
-	TimelineID      string           `json:"timelineid"`
+	ID              string           `json:"timelineid"`
 	Timestamp       Time             `json:"timestamp"`
 	ReactionTo      string           `json:"reakcia_na"`
 	Type            TimelineItemType `json:"typ"`
@@ -56,6 +51,7 @@ type TimelineItem struct {
 }
 
 type Homework struct {
+	ID                string           `json:"hwkid"`
 	HomeworkID        string           `json:"homeworkid"`
 	ESuperID          string           `json:"e_superid"`
 	UserID            string           `json:"userid"`
@@ -78,7 +74,6 @@ type Homework struct {
 	State             string           `json:"stav"`
 	LastResult        string           `json:"posledny_vysledok"`
 	Groups            []string         `json:"skupiny"`
-	HWKID             string           `json:"hwkid"`
 	ETestCards        int              `json:"etestCards"`
 	ETestAnswerCards  int              `json:"etestAnswerCards"`
 	StudyTopics       bool             `json:"studyTopics"`
@@ -91,6 +86,46 @@ type Homework struct {
 	Attachments       interface{}      `json:"attachements"`
 	AuthorName        string           `json:"autor_meno"`
 	LessonName        string           `json:"predmet_meno"`
+}
+
+// Timeline contains all timeline information
+type Timeline struct {
+	Homeworks map[string]Homework
+	Items     map[string]TimelineItem
+}
+
+func (t *Timeline) Merge(src *Timeline) {
+	maps.Copy(t.Homeworks, src.Homeworks)
+	maps.Copy(t.Items, src.Items)
+}
+
+func ParseTimeline(data []byte) (Timeline, error) {
+	type RawTimeline struct {
+		Homeworks []Homework     `json:"homeworks"`
+		Items     []TimelineItem `json:"timelineItems"`
+	}
+
+	var raw RawTimeline
+
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		return Timeline{}, err
+	}
+
+	timeline := Timeline{
+		make(map[string]Homework, len(raw.Homeworks)),
+		make(map[string]TimelineItem, len(raw.Items)),
+	}
+
+	for _, v := range raw.Items {
+		timeline.Items[v.ID] = v
+	}
+
+	for _, v := range raw.Homeworks {
+		timeline.Homeworks[v.ID] = v
+	}
+
+	return timeline, nil
 }
 
 func (t *Timeline) GetHomeworkFromTimeline(superid string) (Homework, error) {

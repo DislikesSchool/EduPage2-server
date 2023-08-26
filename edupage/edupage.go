@@ -24,9 +24,9 @@ type EdupageClient struct {
 }
 
 type EdupageData struct {
-	Timeline model.Timeline
-	User     model.User
-	Grades   map[string]model.Grade
+	Timeline *model.Timeline
+	User     *model.User
+	Results  *model.Results
 }
 
 // Fetch loads all possible data into the object
@@ -41,7 +41,7 @@ func (client *EdupageClient) Fetch() error {
 		return err
 	}
 
-	err = client.LoadGrades("2022", "RX")
+	err = client.LoadResults("2022", "RX")
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,6 @@ func (client *EdupageClient) LoadRecentTimeline() error {
 }
 
 // LoadTimeline loads the timeline data from the specified date range.
-// Also updates the Timeline property in Edupage struct.
 func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", client.server)
 
@@ -103,14 +102,21 @@ func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 	}
 
 	decoded_body = bytes.Trim(decoded_body, "\x00")
-	err = json.Unmarshal(decoded_body, &client.EdupageData.Timeline)
+	timeline, err := model.ParseTimeline(decoded_body)
 	if err != nil {
 		return fmt.Errorf("failed to parse timeline json into json object: %s", err)
+	}
+
+	if client.EdupageData.Timeline == nil {
+		client.EdupageData.Timeline = &timeline
+	} else {
+		client.EdupageData.Timeline.Merge(&timeline)
 	}
 
 	return nil
 }
 
+// LoadUser loads the user data
 func (client *EdupageClient) LoadUser() error {
 	url := fmt.Sprintf("https://%s/user/", client.server)
 	response, err := client.hc.Get(url)
@@ -141,22 +147,17 @@ func (client *EdupageClient) LoadUser() error {
 	}
 
 	js := matches[0][1]
-
 	err = json.Unmarshal([]byte(js), &client.EdupageData.User)
 	if err != nil {
-		return fmt.Errorf("failed to read json: %s", err)
+		return fmt.Errorf("failed to parse user json into json object: %s", err)
 	}
 
 	return nil
 }
 
-// LoadGrades loads the grade data from specified year and halfyear
+// LoadResults loads the grade data from specified year and halfyear
 // Halfyears types are: P1 (first halfyear), P2 (second halfyear), RX (whole year)
-func (client *EdupageClient) LoadGrades(year, halfyear string) error {
-	if halfyear != "P1" && halfyear != "P2" && halfyear != "RX" {
-		return errors.New("invalid halfyear type")
-	}
-
+func (client *EdupageClient) LoadResults(year, halfyear string) error {
 	url := fmt.Sprintf("https://%s/znamky/?what=studentviewer&akcia=studentData&eqav=1&maxEqav=7", client.server)
 
 	form, err := CreatePayload(map[string]string{
@@ -200,29 +201,17 @@ func (client *EdupageClient) LoadGrades(year, halfyear string) error {
 		return fmt.Errorf("failed to decode response body: %s", err)
 	}
 
-	type GradesData struct {
-		Grades []model.Grade `json:"vsetkyZnamky"`
-	}
-
-	type Grades struct {
-		Status string     `json:"status"`
-		Data   GradesData `json:"data"`
-	}
-
-	var grades Grades
-
 	decoded_body = bytes.Trim(decoded_body, "\x00")
-	err = json.Unmarshal(decoded_body, &grades)
+
+	results, err := model.ParseResults(decoded_body)
 	if err != nil {
-		return fmt.Errorf("failed to parse grades json into json object: %s", err)
+		return fmt.Errorf("failed to parse results: %s", err)
 	}
 
-	if client.EdupageData.Grades == nil {
-		client.EdupageData.Grades = make(map[string]model.Grade, len(grades.Data.Grades))
-	}
-
-	for _, v := range grades.Data.Grades {
-		client.EdupageData.Grades[v.ID] = v
+	if client.EdupageData.Results == nil {
+		client.EdupageData.Results = &results
+	} else {
+		client.EdupageData.Results.Merge(&results)
 	}
 
 	return nil

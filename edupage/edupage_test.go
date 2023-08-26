@@ -84,7 +84,7 @@ func TestEdupage(t *testing.T) {
 		t.Error("Recieved teacher map is empty")
 	}
 
-	if len(client.EdupageData.Grades) == 0 {
+	if len(client.EdupageData.Results.Grades) == 0 {
 		t.Error("Recieved grade array is empty")
 	}
 }
@@ -175,7 +175,7 @@ func BenchmarkGrades(t *testing.B) {
 
 	t.ResetTimer()
 
-	err = client.LoadGrades("2022", "RX")
+	err = client.LoadResults("2022", "RX")
 	if err != nil {
 		t.Error(err)
 		return
@@ -183,7 +183,7 @@ func BenchmarkGrades(t *testing.B) {
 
 	t.StopTimer()
 
-	if len(client.EdupageData.Grades) == 0 {
+	if len(client.EdupageData.Results.Grades) == 0 {
 		t.Error("Recieved grades array is empty")
 	}
 }
