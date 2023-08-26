@@ -1,6 +1,7 @@
 package edupage
 
 import (
+	"errors"
 	"flag"
 	"testing"
 )
@@ -15,6 +16,21 @@ func init() {
 	flag.StringVar(&username, "username", "", "Edupage user name")
 	flag.StringVar(&password, "password", "", "Edupage user password")
 	flag.StringVar(&server, "server", "", "Edupage user server")
+}
+
+func checkCredentials() error {
+	if len(username) == 0 {
+		return errors.New("username parameter missing, (-username=?)")
+	}
+
+	if len(password) == 0 {
+		return errors.New("password parameter missing, (-password=?)")
+	}
+
+	if len(server) == 0 {
+		return errors.New("server parameter missing, (-server=?)")
+	}
+	return nil
 }
 
 func TestAutoLogin(t *testing.T) {
@@ -37,47 +53,75 @@ func TestAutoLogin(t *testing.T) {
 }
 
 func TestEdupage(t *testing.T) {
-	if len(username) == 0 {
-		t.Log("Username parameter missing, (-username=?)")
-		return
-	}
-
-	if len(password) == 0 {
-		t.Log("Password parameter missing, (-password=?)")
-		return
-	}
-
-	if len(server) == 0 {
-		t.Log("Server parameter missing, (-server=?)")
-		return
-	}
-
-	e, err := Login(server, username, password)
+	err := checkCredentials()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = e.Fetch()
+	client, err := Login(server, username, password)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = client.Fetch()
 
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	if len(e.EdupageData.Timeline.Items) == 0 {
+	if len(client.EdupageData.Timeline.Items) == 0 {
 		t.Error("Recieved timeline array is empty")
 	}
 
-	if len(e.EdupageData.User.UserGroups) == 0 {
+	if len(client.EdupageData.User.UserGroups) == 0 {
 		t.Error("Recieved usergroup array is empty")
 	}
 
-	if len(e.EdupageData.User.DBI.Teachers) == 0 {
+	if len(client.EdupageData.User.DBI.Teachers) == 0 {
 		t.Error("Recieved teacher map is empty")
 	}
 
-	if len(e.EdupageData.Grades) == 0 {
+	if len(client.EdupageData.Grades) == 0 {
 		t.Error("Recieved grade array is empty")
+	}
+}
+
+func BenchmarkLogin(t *testing.B) {
+	err := checkCredentials()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.ResetTimer()
+
+	_, err = Login(server, username, password)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+}
+
+func BenchmarkTimeline(t *testing.B) {
+	err := checkCredentials()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	client, err := Login(server, username, password)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	t.ResetTimer()
+
+	err = client.LoadRecentTimeline()
+	if err != nil {
+		t.Error(err)
+		return
 	}
 }
