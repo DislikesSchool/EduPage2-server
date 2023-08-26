@@ -37,3 +37,14 @@ type LoginInternalErrorResponse struct {
 	Success bool   `json:"success" example:"false"`
 	Error   string `json:"error" example:"failed to login: Post https://example.edupage.org/login/edubarLogin.php: dial tcp: lookup example.edupage.org: no such host"`
 }
+
+type ValidateTokenSuccessResponse struct {
+	Success bool   `json:"success" example:"true"`
+	Error   string `json:"error" example:""`
+	Expires string `json:"expires" example:"1620000000"`
+}
+
+type ValidateTokenUnauthorizedResponse struct {
+	Success bool   `json:"success" example:"false"`
+	Error   string `json:"error" example:"Unauthorized"`
+}

@@ -46,6 +46,7 @@ func main() {
 	store := persistence.NewInMemoryStore(time.Second)
 
 	router.POST("/login", cache.CachePage(store, time.Hour, LoginHandler))
+	router.GET("/validate-token", cache.CachePage(store, time.Hour, ValidateTokenHandler))
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	api.GET("/timeline/recent", cache.CachePage(store, time.Minute, RecentTimelineHandler))

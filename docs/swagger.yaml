@@ -101,6 +101,27 @@ definitions:
         example: false
         type: boolean
     type: object
+  main.ValidateTokenSuccessResponse:
+    properties:
+      error:
+        example: ""
+        type: string
+      expires:
+        example: "1620000000"
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  main.ValidateTokenUnauthorizedResponse:
+    properties:
+      error:
+        example: Unauthorized
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
   model.Homework:
     properties:
       attachements: {}
@@ -248,6 +269,12 @@ paths:
   /api/timeline/recent:
     get:
       description: Returns the user's timeline from today to 30 days in the past.
+      parameters:
+      - description: JWT token
+        in: header
+        name: token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -304,6 +331,29 @@ paths:
           schema:
             $ref: '#/definitions/main.LoginInternalErrorResponse'
       summary: Login to your Edupage account
+      tags:
+      - auth
+  /validate-token:
+    get:
+      description: Validates your token and returns a 200 OK if it's valid.
+      parameters:
+      - description: JWT token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.ValidateTokenSuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.ValidateTokenUnauthorizedResponse'
+      summary: Validate your token
       tags:
       - auth
 swagger: "2.0"

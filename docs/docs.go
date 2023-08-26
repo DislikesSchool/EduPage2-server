@@ -26,6 +26,15 @@ const docTemplate = `{
                     "timeline"
                 ],
                 "summary": "Get the user's recent timeline",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -104,6 +113,41 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/main.LoginInternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/validate-token": {
+            "get": {
+                "description": "Validates your token and returns a 200 OK if it's valid.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Validate your token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.ValidateTokenSuccessResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.ValidateTokenUnauthorizedResponse"
                         }
                     }
                 }
@@ -242,6 +286,36 @@ const docTemplate = `{
             }
         },
         "main.RecentTimelineUnauthorizedResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Unauthorized"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "main.ValidateTokenSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": ""
+                },
+                "expires": {
+                    "type": "string",
+                    "example": "1620000000"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "main.ValidateTokenUnauthorizedResponse": {
             "type": "object",
             "properties": {
                 "error": {

@@ -11,6 +11,7 @@ import (
 // @Schemes
 // @Description Returns the user's timeline from today to 30 days in the past.
 // @Tags timeline
+// @Param token header string true "JWT token"
 // @Produce json
 // @Success 200 {object} RecentTimelineSuccessResponse
 // @Failure 401 {object} RecentTimelineUnauthorizedResponse

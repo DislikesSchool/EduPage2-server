@@ -112,6 +112,29 @@ func getUserIDAndUsername(c *gin.Context) (string, string, error) {
 	return userID, username, nil
 }
 
+func getClaims(c *gin.Context) (jwt.MapClaims, error) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		return nil, errors.New("missing Authorization header")
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return getSecretKey(), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid token claims")
+	}
+
+	return claims, nil
+}
+
 type LoginData struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -186,5 +209,43 @@ func LoginHandler(c *gin.Context) {
 		"success": true,
 		"name":    h.EdupageData.User.UserRow.Firstname + " " + h.EdupageData.User.UserRow.Lastname,
 		"token":   token,
+	})
+}
+
+// ValidateTokenHandler godoc
+// @Summary Validate your token
+// @Schemes
+// @Description Validates your token and returns a 200 OK if it's valid.
+// @Tags auth
+// @Param token header string true "JWT token"
+// @Produce json
+// @Success 200 {object} ValidateTokenSuccessResponse
+// @Failure 401 {object} ValidateTokenUnauthorizedResponse
+// @Router /validate-token [get]
+func ValidateTokenHandler(c *gin.Context) {
+	userID, username, err := getUserIDAndUsername(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, ok := clients[userID+username]
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
+		return
+	}
+
+	claims, err := getClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	exp := claims["exp"].(float64)
+
+	c.JSON(http.StatusOK, gin.H{
+		"error":   "",
+		"success": true,
+		"expires": exp,
 	})
 }
