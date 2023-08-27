@@ -75,43 +75,6 @@ func authMiddleware() gin.HandlerFunc {
 	}
 }
 
-func getUserIDAndUsername(c *gin.Context) (string, string, error) {
-	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" {
-		return "", "", errors.New("missing Authorization header")
-	}
-
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return getSecretKey(), nil
-	})
-	if err != nil {
-		return "", "", err
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return "", "", errors.New("invalid token claims")
-	}
-
-	userID, ok := claims["userID"].(string)
-	if !ok {
-		return "", "", errors.New("invalid user ID in token claims")
-	}
-
-	username, ok := claims["username"].(string)
-	if !ok {
-		return "", "", errors.New("invalid user ID in token claims")
-	}
-
-	return userID, username, nil
-}
-
 func getClaims(c *gin.Context) (jwt.MapClaims, error) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
@@ -223,25 +186,20 @@ func LoginHandler(c *gin.Context) {
 // @Failure 401 {object} ValidateTokenUnauthorizedResponse
 // @Router /validate-token [get]
 func ValidateTokenHandler(c *gin.Context) {
-	userID, username, err := getUserIDAndUsername(c)
+	claims, err := getClaims(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
+	userID := claims["userID"].(string)
+	username := claims["username"].(string)
+	exp := claims["exp"].(float64)
 
 	_, ok := clients[userID+username]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
 		return
 	}
-
-	claims, err := getClaims(c)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-
-	exp := claims["exp"].(float64)
 
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
