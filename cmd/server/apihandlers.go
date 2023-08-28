@@ -18,7 +18,13 @@ import (
 // @Failure 500 {object} RecentTimelineInternalErrorResponse
 // @Router /api/timeline/recent [get]
 func RecentTimelineHandler(c *gin.Context) {
-	userID, username, err := getUserIDAndUsername(c)
+	claims, err := getClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	userID := claims["userID"].(string)
+	username := claims["username"].(string)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -36,5 +42,5 @@ func RecentTimelineHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, client.EdupageData.Timeline)
+	c.JSON(http.StatusOK, client.Timeline)
 }

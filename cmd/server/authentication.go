@@ -158,7 +158,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	userID := h.EdupageData.User.UserRow.UserID
+	userID := h.User.UserRow.UserID
 	username := loginData.Username
 
 	token, err := generateJWT(userID, loginData.Username)
@@ -170,7 +170,7 @@ func LoginHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
 		"success": true,
-		"name":    h.EdupageData.User.UserRow.Firstname + " " + h.EdupageData.User.UserRow.Lastname,
+		"name":    h.User.UserRow.Firstname + " " + h.User.UserRow.Lastname,
 		"token":   token,
 	})
 }
