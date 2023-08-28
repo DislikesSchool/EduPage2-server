@@ -44,3 +44,43 @@ func RecentTimelineHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, client.Timeline)
 }
+
+// TimelineHandler godoc
+// @Summary Get the user's timeline
+// @Schemes
+// @Description Returns the user's timeline from any date to any other date or today.
+// @Tags timeline
+// @Param token header string true "JWT token"
+// @Param range body TimelineRequest true "Date range"
+// @Produce json
+// @Success 200 {object} TimelineSuccessResponse
+// @Failure 401 {object} TimelineUnauthorizedResponse
+// @Failure 500 {object} TimelineInternalErrorResponse
+// @Router /api/timeline [get]
+func TimelineHandler(c *gin.Context) {
+	claims, err := getClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	userID := claims["userID"].(string)
+	username := claims["username"].(string)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	client, ok := clients[userID+username]
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
+		return
+	}
+
+	err = client.LoadRecentTimeline()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, client.Timeline)
+}

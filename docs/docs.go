@@ -16,6 +16,56 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/timeline": {
+            "get": {
+                "description": "Returns the user's timeline from any date to any other date or today.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "timeline"
+                ],
+                "summary": "Get the user's timeline",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Date range",
+                        "name": "range",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.TimelineRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.TimelineSuccessResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.TimelineUnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.TimelineInternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/timeline/recent": {
             "get": {
                 "description": "Returns the user's timeline from today to 30 days in the past.",
@@ -155,6 +205,68 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "main.HomeworkReduced": {
+            "type": "object",
+            "properties": {
+                "attachements": {},
+                "data": {
+                    "$ref": "#/definitions/model.TimelineItemData"
+                },
+                "datecreated": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "homeworkid": {
+                    "type": "string"
+                },
+                "hwkid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "period": {},
+                "pocet_done": {
+                    "type": "string"
+                },
+                "pocet_like": {
+                    "type": "string"
+                },
+                "pocet_reakcii": {
+                    "type": "string"
+                },
+                "posledny_vysledok": {
+                    "type": "string"
+                },
+                "predmetid": {
+                    "type": "string"
+                },
+                "stav": {
+                    "type": "string"
+                },
+                "stavhodnotetimelinePathd": {
+                    "type": "string"
+                },
+                "students_hidden": {
+                    "type": "string"
+                },
+                "testid": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "typ": {
+                    "$ref": "#/definitions/model.TimelineItemType"
+                },
+                "userid": {
+                    "type": "string"
+                },
+                "znamky_udalostid": {}
+            }
+        },
         "main.LoginBadRequestResponse": {
             "type": "object",
             "properties": {
@@ -280,12 +392,132 @@ const docTemplate = `{
                 "timeline": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/model.Timeline"
+                        "$ref": "#/definitions/main.Timeline"
                     }
                 }
             }
         },
         "main.RecentTimelineUnauthorizedResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Unauthorized"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "main.Timeline": {
+            "type": "object",
+            "properties": {
+                "homeworks": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/main.HomeworkReduced"
+                    }
+                },
+                "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/main.TimelineItemReduced"
+                    }
+                }
+            }
+        },
+        "main.TimelineInternalErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "failed to create payload"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "main.TimelineItemReduced": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.TimelineItemData"
+                },
+                "poct_reakcii": {
+                    "type": "integer"
+                },
+                "reakcia_na": {
+                    "type": "string"
+                },
+                "removed": {
+                    "type": "string"
+                },
+                "target_user": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "timelineid": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "typ": {
+                    "$ref": "#/definitions/model.TimelineItemType"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "vlastnik": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.TimelineRequest": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "example": "1620000000"
+                },
+                "to": {
+                    "type": "string",
+                    "default": "time.Now().Unix()",
+                    "example": "1620000000"
+                }
+            }
+        },
+        "main.TimelineSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": ""
+                },
+                "from": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "timeline": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/main.Timeline"
+                    }
+                },
+                "to": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.TimelineUnauthorizedResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -325,193 +557,6 @@ const docTemplate = `{
                 "success": {
                     "type": "boolean",
                     "example": false
-                }
-            }
-        },
-        "model.Homework": {
-            "type": "object",
-            "properties": {
-                "attachements": {},
-                "autor_meno": {
-                    "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/model.TimelineItemData"
-                },
-                "datecreated": {
-                    "type": "string"
-                },
-                "datefrom": {
-                    "type": "string"
-                },
-                "datetimefrom": {
-                    "type": "string"
-                },
-                "datetimeto": {
-                    "type": "string"
-                },
-                "dateto": {
-                    "type": "string"
-                },
-                "details": {
-                    "type": "string"
-                },
-                "e_superid": {
-                    "type": "string"
-                },
-                "etestAnswerCards": {
-                    "type": "integer"
-                },
-                "etestCards": {
-                    "type": "integer"
-                },
-                "homeworkid": {
-                    "type": "string"
-                },
-                "hwkid": {
-                    "type": "string"
-                },
-                "missingNextLesson": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "period": {},
-                "planid": {
-                    "type": "string"
-                },
-                "pocet_done": {
-                    "type": "string"
-                },
-                "pocet_like": {
-                    "type": "string"
-                },
-                "pocet_reakcii": {
-                    "type": "string"
-                },
-                "posledny_vysledok": {
-                    "type": "string"
-                },
-                "predmet_meno": {
-                    "type": "string"
-                },
-                "predmetid": {
-                    "type": "string"
-                },
-                "skoncil": {},
-                "skupiny": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "stav": {
-                    "type": "string"
-                },
-                "stavhodnotetimelinePathd": {
-                    "type": "string"
-                },
-                "students_hidden": {
-                    "type": "string"
-                },
-                "studyTopics": {
-                    "type": "boolean"
-                },
-                "testid": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "type": "string"
-                },
-                "typ": {
-                    "$ref": "#/definitions/model.TimelineItemType"
-                },
-                "userid": {
-                    "type": "string"
-                },
-                "znamky_udalostid": {}
-            }
-        },
-        "model.Timeline": {
-            "type": "object",
-            "properties": {
-                "homeworks": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/model.Homework"
-                    }
-                },
-                "items": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/model.TimelineItem"
-                    }
-                }
-            }
-        },
-        "model.TimelineItem": {
-            "type": "object",
-            "properties": {
-                "cas_pridania": {
-                    "type": "string"
-                },
-                "cas_pridania_btc": {
-                    "type": "string"
-                },
-                "cas_udalosti": {
-                    "type": "string"
-                },
-                "cas_udalosti_btc": {
-                    "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/model.TimelineItemData"
-                },
-                "ineid": {
-                    "type": "string"
-                },
-                "poct_reakcii": {
-                    "type": "integer"
-                },
-                "pomocny_zaznam": {
-                    "type": "string"
-                },
-                "posledna_reakcia": {
-                    "type": "string"
-                },
-                "reakcia_na": {
-                    "type": "string"
-                },
-                "removed": {
-                    "type": "string"
-                },
-                "target_user": {
-                    "type": "string"
-                },
-                "text": {
-                    "type": "string"
-                },
-                "timelineid": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "type": "string"
-                },
-                "typ": {
-                    "$ref": "#/definitions/model.TimelineItemType"
-                },
-                "user": {
-                    "type": "string"
-                },
-                "user_meno": {
-                    "type": "string"
-                },
-                "vlastnik": {
-                    "type": "string"
-                },
-                "vlastnik_meno": {
-                    "type": "string"
                 }
             }
         },

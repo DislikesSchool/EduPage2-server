@@ -1,5 +1,47 @@
 basePath: /
 definitions:
+  main.HomeworkReduced:
+    properties:
+      attachements: {}
+      data:
+        $ref: '#/definitions/model.TimelineItemData'
+      datecreated:
+        type: string
+      details:
+        type: string
+      homeworkid:
+        type: string
+      hwkid:
+        type: string
+      name:
+        type: string
+      period: {}
+      pocet_done:
+        type: string
+      pocet_like:
+        type: string
+      pocet_reakcii:
+        type: string
+      posledny_vysledok:
+        type: string
+      predmetid:
+        type: string
+      stav:
+        type: string
+      stavhodnotetimelinePathd:
+        type: string
+      students_hidden:
+        type: string
+      testid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        $ref: '#/definitions/model.TimelineItemType'
+      userid:
+        type: string
+      znamky_udalostid: {}
+    type: object
   main.LoginBadRequestResponse:
     properties:
       error:
@@ -89,10 +131,91 @@ definitions:
         type: boolean
       timeline:
         items:
-          $ref: '#/definitions/model.Timeline'
+          $ref: '#/definitions/main.Timeline'
         type: array
     type: object
   main.RecentTimelineUnauthorizedResponse:
+    properties:
+      error:
+        example: Unauthorized
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  main.Timeline:
+    properties:
+      homeworks:
+        additionalProperties:
+          $ref: '#/definitions/main.HomeworkReduced'
+        type: object
+      items:
+        additionalProperties:
+          $ref: '#/definitions/main.TimelineItemReduced'
+        type: object
+    type: object
+  main.TimelineInternalErrorResponse:
+    properties:
+      error:
+        example: failed to create payload
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  main.TimelineItemReduced:
+    properties:
+      data:
+        $ref: '#/definitions/model.TimelineItemData'
+      poct_reakcii:
+        type: integer
+      reakcia_na:
+        type: string
+      removed:
+        type: string
+      target_user:
+        type: string
+      text:
+        type: string
+      timelineid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        $ref: '#/definitions/model.TimelineItemType'
+      user:
+        type: string
+      vlastnik:
+        type: string
+    type: object
+  main.TimelineRequest:
+    properties:
+      from:
+        example: "1620000000"
+        type: string
+      to:
+        default: time.Now().Unix()
+        example: "1620000000"
+        type: string
+    type: object
+  main.TimelineSuccessResponse:
+    properties:
+      error:
+        example: ""
+        type: string
+      from:
+        type: string
+      success:
+        example: true
+        type: boolean
+      timeline:
+        items:
+          $ref: '#/definitions/main.Timeline'
+        type: array
+      to:
+        type: string
+    type: object
+  main.TimelineUnauthorizedResponse:
     properties:
       error:
         example: Unauthorized
@@ -122,131 +245,6 @@ definitions:
         example: false
         type: boolean
     type: object
-  model.Homework:
-    properties:
-      attachements: {}
-      autor_meno:
-        type: string
-      data:
-        $ref: '#/definitions/model.TimelineItemData'
-      datecreated:
-        type: string
-      datefrom:
-        type: string
-      datetimefrom:
-        type: string
-      datetimeto:
-        type: string
-      dateto:
-        type: string
-      details:
-        type: string
-      e_superid:
-        type: string
-      etestAnswerCards:
-        type: integer
-      etestCards:
-        type: integer
-      homeworkid:
-        type: string
-      hwkid:
-        type: string
-      missingNextLesson:
-        type: boolean
-      name:
-        type: string
-      period: {}
-      planid:
-        type: string
-      pocet_done:
-        type: string
-      pocet_like:
-        type: string
-      pocet_reakcii:
-        type: string
-      posledny_vysledok:
-        type: string
-      predmet_meno:
-        type: string
-      predmetid:
-        type: string
-      skoncil: {}
-      skupiny:
-        items:
-          type: string
-        type: array
-      stav:
-        type: string
-      stavhodnotetimelinePathd:
-        type: string
-      students_hidden:
-        type: string
-      studyTopics:
-        type: boolean
-      testid:
-        type: string
-      timestamp:
-        type: string
-      typ:
-        $ref: '#/definitions/model.TimelineItemType'
-      userid:
-        type: string
-      znamky_udalostid: {}
-    type: object
-  model.Timeline:
-    properties:
-      homeworks:
-        additionalProperties:
-          $ref: '#/definitions/model.Homework'
-        type: object
-      items:
-        additionalProperties:
-          $ref: '#/definitions/model.TimelineItem'
-        type: object
-    type: object
-  model.TimelineItem:
-    properties:
-      cas_pridania:
-        type: string
-      cas_pridania_btc:
-        type: string
-      cas_udalosti:
-        type: string
-      cas_udalosti_btc:
-        type: string
-      data:
-        $ref: '#/definitions/model.TimelineItemData'
-      ineid:
-        type: string
-      poct_reakcii:
-        type: integer
-      pomocny_zaznam:
-        type: string
-      posledna_reakcia:
-        type: string
-      reakcia_na:
-        type: string
-      removed:
-        type: string
-      target_user:
-        type: string
-      text:
-        type: string
-      timelineid:
-        type: string
-      timestamp:
-        type: string
-      typ:
-        $ref: '#/definitions/model.TimelineItemType'
-      user:
-        type: string
-      user_meno:
-        type: string
-      vlastnik:
-        type: string
-      vlastnik_meno:
-        type: string
-    type: object
   model.TimelineItemData:
     properties:
       value:
@@ -264,6 +262,40 @@ info:
   title: EduPage2 API
   version: "1.0"
 paths:
+  /api/timeline:
+    get:
+      description: Returns the user's timeline from any date to any other date or
+        today.
+      parameters:
+      - description: JWT token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Date range
+        in: body
+        name: range
+        required: true
+        schema:
+          $ref: '#/definitions/main.TimelineRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.TimelineSuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.TimelineUnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.TimelineInternalErrorResponse'
+      summary: Get the user's timeline
+      tags:
+      - timeline
   /api/timeline/recent:
     get:
       description: Returns the user's timeline from today to 30 days in the past.
