@@ -437,16 +437,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "homeworks": {
-                    "description": "Homeworks",
-                    "type": "array",
-                    "items": {
+                    "type": "object",
+                    "additionalProperties": {
                         "$ref": "#/definitions/model.Homework"
                     }
                 },
-                "timelineItems": {
-                    "description": "Detailed timeline",
-                    "type": "array",
-                    "items": {
+                "items": {
+                    "type": "object",
+                    "additionalProperties": {
                         "$ref": "#/definitions/model.TimelineItem"
                     }
                 }

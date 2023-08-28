@@ -196,15 +196,13 @@ definitions:
   model.Timeline:
     properties:
       homeworks:
-        description: Homeworks
-        items:
+        additionalProperties:
           $ref: '#/definitions/model.Homework'
-        type: array
-      timelineItems:
-        description: Detailed timeline
-        items:
+        type: object
+      items:
+        additionalProperties:
           $ref: '#/definitions/model.TimelineItem'
-        type: array
+        type: object
     type: object
   model.TimelineItem:
     properties:
