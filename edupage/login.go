@@ -68,8 +68,6 @@ func LoginAuto(username string, password string) (EdupageClient, error) {
 	client.hc = http.DefaultClient
 	client.hc.Jar, _ = cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
 
-	log.Printf("[Login] Logging in as %s...\n", username)
-
 	payload := url.Values{
 		"m":             {username},
 		"h":             {password},
@@ -99,8 +97,6 @@ func LoginAuto(username string, password string) (EdupageClient, error) {
 	}
 	defer resp.Body.Close()
 
-	log.Printf("[Login] Saving received cookies...\n")
-
 	var authResponse MAuthResponse
 	err = json.NewDecoder(resp.Body).Decode(&authResponse)
 	if err != nil {
@@ -127,11 +123,8 @@ func LoginAuto(username string, password string) (EdupageClient, error) {
 				return EdupageClient{}, nil
 			}
 		} else {
-			log.Printf("[Login] Successfully logged in\n")
 		}
 	} else {
-		log.Printf("[Login] Found multiple users with the same username\n")
-		fmt.Printf("[Login] No user selected\n")
 		return EdupageClient{}, errors.New("multiple users found. Please, pass the selected user as 'user' option to login options")
 	}
 
@@ -148,9 +141,6 @@ func LoginAuto(username string, password string) (EdupageClient, error) {
 		}
 	}
 	client.hc.Jar.SetCookies(u, cookies)
-	fmt.Println(resp.Cookies())
-	fmt.Println(u)
-	log.Printf("[Login] Login successful\n")
 	return client, nil
 }
 
