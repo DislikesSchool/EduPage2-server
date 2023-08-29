@@ -122,7 +122,6 @@ func LoginAuto(username string, password string) (EdupageClient, error) {
 				log.Printf("[Login] 2FA was requested by the Edupage\n")
 				return EdupageClient{}, nil
 			}
-		} else {
 		}
 	} else {
 		return EdupageClient{}, errors.New("multiple users found. Please, pass the selected user as 'user' option to login options")
