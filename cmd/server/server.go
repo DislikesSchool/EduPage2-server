@@ -45,8 +45,8 @@ func main() {
 	router.Use(sentrygin.New(sentrygin.Options{}))
 	store := persistence.NewInMemoryStore(time.Second)
 
-	router.POST("/login", cache.CachePage(store, time.Hour, LoginHandler))
-	router.GET("/validate-token", cache.CachePage(store, time.Hour, ValidateTokenHandler))
+	router.POST("/login", cache.CachePage(store, time.Second, LoginHandler))
+	router.GET("/validate-token", cache.CachePage(store, time.Second, ValidateTokenHandler))
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	api.GET("/timeline/recent", cache.CachePage(store, time.Minute, RecentTimelineHandler))
