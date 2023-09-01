@@ -179,7 +179,14 @@ func (n *TimelineItemType) UnmarshalJSON(b []byte) error {
 }
 
 func (n *TimelineItemType) MarshalJSON() ([]byte, error) {
-	return []byte{n.uint8}, nil
+	if n.uint8 == 0 {
+		return []byte("message"), nil
+	}
+	if n.uint8 == 1 {
+		return []byte("homework"), nil
+	}
+
+	return []byte("invalid"), nil
 }
 
 func (n *TimelineItemData) UnmarshalJSON(b []byte) error {
