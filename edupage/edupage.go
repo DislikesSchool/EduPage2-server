@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"regexp"
 	"strconv"
 	"time"
@@ -109,15 +108,6 @@ func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 // LoadUser loads the user data
 func (client *EdupageClient) LoadUser() error {
 	u := fmt.Sprintf("https://%s/user/?", client.Credentials.Server)
-
-	url, err := url.Parse(u)
-	if err != nil {
-		return err
-	}
-
-	for _, v := range client.Credentials.httpClient.Jar.Cookies(url) {
-		println(v.Name + " " + v.Value)
-	}
 
 	response, err := client.Credentials.httpClient.Get(u)
 
@@ -248,8 +238,6 @@ func (client *EdupageClient) LoadTimetable(datefrom, dateto time.Time) error {
 		return fmt.Errorf("failed to create request: %s", err)
 	}
 
-	println(string(request_body))
-
 	response, err := client.Credentials.httpClient.Post(u, "application/json", bytes.NewBuffer(request_body))
 	if err == ErrRedirect {
 		return ErrAuthorization
@@ -267,8 +255,6 @@ func (client *EdupageClient) LoadTimetable(datefrom, dateto time.Time) error {
 	if err != nil {
 		return fmt.Errorf("failed to read response body: %s", err)
 	}
-
-	println(string(body))
 
 	tt, err := model.ParseTimetable(body)
 	if err != nil {
