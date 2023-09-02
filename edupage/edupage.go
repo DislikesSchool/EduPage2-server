@@ -66,12 +66,8 @@ func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 	}
 
 	response, err := client.Credentials.httpClient.PostForm(url, form)
-	if err == ErrRedirect {
-		return ErrAuthorization
-	}
-
 	if err != nil {
-		return fmt.Errorf("failed to fetch timeline: %s", err)
+		return ErrAuthorization // most likely case
 	}
 
 	if response.StatusCode != 200 {
@@ -110,9 +106,8 @@ func (client *EdupageClient) LoadUser() error {
 	u := fmt.Sprintf("https://%s/user/?", client.Credentials.Server)
 
 	response, err := client.Credentials.httpClient.Get(u)
-
 	if err != nil {
-		return fmt.Errorf("failed to load user: %s", err)
+		return ErrAuthorization // most likely case
 	}
 
 	if response.StatusCode != 200 {
@@ -165,12 +160,8 @@ func (client *EdupageClient) LoadResults(year, halfyear string) error {
 	}
 
 	response, err := client.Credentials.httpClient.PostForm(url, form)
-	if err == ErrRedirect {
-		return ErrAuthorization
-	}
-
 	if err != nil {
-		return fmt.Errorf("failed to fetch grades: %s", err)
+		return ErrAuthorization // most likely case
 	}
 
 	if response.StatusCode != 200 {
@@ -239,12 +230,8 @@ func (client *EdupageClient) LoadTimetable(datefrom, dateto time.Time) error {
 	}
 
 	response, err := client.Credentials.httpClient.Post(u, "application/json", bytes.NewBuffer(request_body))
-	if err == ErrRedirect {
-		return ErrAuthorization
-	}
-
 	if err != nil {
-		return fmt.Errorf("failed to fetch timetable: %s", err)
+		return ErrAuthorization // most likely case
 	}
 
 	if response.StatusCode != 200 {
