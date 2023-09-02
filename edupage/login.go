@@ -46,8 +46,6 @@ func Login(server, username, password string) (EdupageClient, error) {
 				return EdupageClient{}, ErrAuthorization
 			} else if rs.Header.Get("Location") == "/user/" {
 				client.hc.Jar.SetCookies(rs.Request.URL, rs.Cookies())
-				fmt.Println(rs.Cookies())
-				fmt.Println(rs.Request.URL)
 				client.server = Server
 				return client, nil
 			}
