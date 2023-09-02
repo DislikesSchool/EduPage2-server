@@ -19,6 +19,15 @@ var (
 	ErrorNotFound    = errors.New("not found")
 )
 
+// GetStudentID is used to retrieve the client's student ID.
+// Returns ErrorUnitialized if the user object hasn't been initialized.
+func (client *EdupageClient) GetStudentID() (string, error) {
+	if client.User == nil {
+		return "", ErrorUnitialized
+	}
+	return client.User.UserRow.StudentID, nil
+}
+
 // GetSubjectByID is used to retrieve the subject by it's specified ID.
 // Returns ErrorNotFound if the subject can't be found.
 // Returns ErrorUnitialized if the user object hasn't been initialized.
@@ -101,8 +110,8 @@ func (client *EdupageClient) FetchHomeworkAttachments(i *model.Homework) (map[st
 		return nil, fmt.Errorf("failed to create payload: %w", err)
 	}
 
-	resp, err := client.hc.PostForm(
-		"https://"+path.Join(client.server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
+	resp, err := client.Credentials.httpClient.PostForm(
+		"https://"+path.Join(client.Credentials.Server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
 		payload,
 	)
 	if err != nil {

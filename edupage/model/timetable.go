@@ -1,9 +1,12 @@
 package model
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"maps"
+)
 
 type Timetable struct {
-	Items map[string]TimetableItem
+	Days map[string][]TimetableItem
 }
 
 type TimetableItem struct {
@@ -20,6 +23,10 @@ type TimetableItem struct {
 	ClassroomIDs []string `json:"classroomids"`
 	StudentIDs   []string `json:"studentids"`
 	Colors       []string `json:"colors"`
+}
+
+func (t *Timetable) Merge(src *Timetable) {
+	maps.Copy(t.Days, src.Days)
 }
 
 func ParseTimetable(data []byte) (Timetable, error) {
@@ -40,9 +47,14 @@ func ParseTimetable(data []byte) (Timetable, error) {
 
 	var t Timetable
 
-	t.Items = make(map[string]TimetableItem, len(r.Response.Items))
-	for _, v := range r.Response.Items {
-		t.Items[v.Date] = v
+	t.Days = make(map[string][]TimetableItem, len(r.Response.Items))
+	for _, new := range r.Response.Items {
+		if original, ok := t.Days[new.Date]; ok {
+			t.Days[new.Date] = append(original, new)
+		} else {
+			t.Days[new.Date] = []TimetableItem{new}
+		}
+
 	}
 
 	return t, nil

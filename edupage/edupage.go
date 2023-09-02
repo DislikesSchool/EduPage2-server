@@ -7,9 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
@@ -17,32 +17,27 @@ import (
 
 // EdupageClient is used to access the edupage api.
 type EdupageClient struct {
-	hc     *http.Client //TODO: remove, save only edid, hsid, phpsessid tokens
-	server string
+	Credentials Credentials
+	gsechash    string
 
-	User     *model.User
-	Timeline *model.Timeline
-	Results  *model.Results
+	User      *model.User
+	Timeline  *model.Timeline
+	Results   *model.Results
+	Timetable *model.Timetable
 }
 
-// Fetch loads all possible data into the object
-func (client *EdupageClient) Fetch() error {
-	err := client.LoadUser()
-	if err != nil {
-		return err
+func CreateClient(credentials Credentials) (EdupageClient, error) {
+	var client EdupageClient
+	//if credentials.httpClient == nil {
+	//		return EdupageClient{}, errors.New("http client in credentials can not be nil")
+	//	}
+	client.Credentials = credentials
+
+	if err := client.LoadUser(); err != nil {
+		return EdupageClient{}, err
 	}
 
-	err = client.LoadRecentTimeline()
-	if err != nil {
-		return err
-	}
-
-	err = client.LoadResults("2022", "RX")
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return client, nil
 }
 
 // LoadRecentTimeline loads the recent timeline data.
@@ -60,7 +55,7 @@ func (client *EdupageClient) LoadRecentTimeline() error {
 
 // LoadTimeline loads the timeline data from the specified date range.
 func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
-	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", client.server)
+	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", client.Credentials.Server)
 
 	form, err := CreatePayload(map[string]string{
 		"datefrom": datefrom.Format("2006-01-02"),
@@ -71,14 +66,13 @@ func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 		return fmt.Errorf("failed to create payload: %s", err)
 	}
 
-	response, err := client.hc.PostForm(url, form)
-	if err != nil {
-		return fmt.Errorf("failed to fetch timeline: %s", err)
+	response, err := client.Credentials.httpClient.PostForm(url, form)
+	if err == ErrRedirect {
+		return ErrAuthorization
 	}
 
-	if response.StatusCode == 302 {
-		// edupage is trying to redirect us, that means an authorization error
-		return ErrAuthorization
+	if err != nil {
+		return fmt.Errorf("failed to fetch timeline: %s", err)
 	}
 
 	if response.StatusCode != 200 {
@@ -114,15 +108,18 @@ func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
 
 // LoadUser loads the user data
 func (client *EdupageClient) LoadUser() error {
-	url := fmt.Sprintf("https://%s/user/", client.server)
-	response, err := client.hc.Get(url)
+	u := fmt.Sprintf("https://%s/user/?", client.Credentials.Server)
+
+	url, err := url.Parse(u)
 	if err != nil {
-		return fmt.Errorf("failed to fetch timeline: %s", err)
+		return err
 	}
 
-	if response.StatusCode == 302 {
-		// edupage is trying to redirect us, that means an authorization error
-		return ErrAuthorization
+	println(len(client.Credentials.httpClient.Jar.Cookies(url)))
+
+	response, err := client.Credentials.httpClient.Get(u)
+	if err != nil {
+		return fmt.Errorf("failed to load user: %s", err)
 	}
 
 	if response.StatusCode != 200 {
@@ -134,15 +131,18 @@ func (client *EdupageClient) LoadUser() error {
 		return fmt.Errorf("failed to read response body: %s", err)
 	}
 
-	text := string(body)
-
-	rg, _ := regexp.Compile(`\.userhome\((.*)\);`)
-	matches := rg.FindAllStringSubmatch(text, -1)
-	if len(matches) == 0 {
-		return errors.New("userhome not found in the document body")
+	hash, err := findGSCEhash(body)
+	if err != nil {
+		return fmt.Errorf("failed to parse user json into json object: %s", err)
 	}
 
-	js := matches[0][1]
+	client.gsechash = hash
+
+	js, err := findUserHome(body)
+	if err != nil {
+		return fmt.Errorf("failed to parse user json into json object: %s", err)
+	}
+
 	err = json.Unmarshal([]byte(js), &client.User)
 	if err != nil {
 		return fmt.Errorf("failed to parse user json into json object: %s", err)
@@ -154,7 +154,7 @@ func (client *EdupageClient) LoadUser() error {
 // LoadResults loads the grade data from specified year and halfyear
 // Halfyears types are: P1 (first halfyear), P2 (second halfyear), RX (whole year)
 func (client *EdupageClient) LoadResults(year, halfyear string) error {
-	url := fmt.Sprintf("https://%s/znamky/?what=studentviewer&akcia=studentData&eqav=1&maxEqav=7", client.server)
+	url := fmt.Sprintf("https://%s/znamky/?what=studentviewer&akcia=studentData&eqav=1&maxEqav=7", client.Credentials.Server)
 
 	form, err := CreatePayload(map[string]string{
 		"pohlad":           "podladatumu",
@@ -171,14 +171,13 @@ func (client *EdupageClient) LoadResults(year, halfyear string) error {
 		return fmt.Errorf("failed to create payload: %s", err)
 	}
 
-	response, err := client.hc.PostForm(url, form)
-	if err != nil {
-		return fmt.Errorf("failed to fetch grades: %s", err)
+	response, err := client.Credentials.httpClient.PostForm(url, form)
+	if err == ErrRedirect {
+		return ErrAuthorization
 	}
 
-	if response.StatusCode == 302 {
-		// edupage is trying to redirect us, that means an authorization error
-		return ErrAuthorization
+	if err != nil {
+		return fmt.Errorf("failed to fetch grades: %s", err)
 	}
 
 	if response.StatusCode != 200 {
@@ -214,25 +213,49 @@ func (client *EdupageClient) LoadResults(year, halfyear string) error {
 }
 
 func (client *EdupageClient) LoadTimetable(datefrom, dateto time.Time) error {
-	u := fmt.Sprintf("https://%s/timetable/server/currenttt.js?__func=curentttGetData", client.server)
+	u := fmt.Sprintf("https://%s/timetable/server/currenttt.js?__func=curentttGetData", client.Credentials.Server)
 
-	form := url.Values{
-		"datefrom": []string{datefrom.Format(model.TimeFormatYearMonthDay)},
-		"dateto":   []string{dateto.Format(model.TimeFormatYearMonthDay)},
+	id, err := client.GetStudentID()
+	if err == ErrorUnitialized {
+		return errors.New("failed to create request, user is not initialized")
 	}
 
-	response, err := client.hc.PostForm(u, form)
+	year, _ := strconv.Atoi(datefrom.Format("2006"))
+
+	request := map[string]interface{}{
+		"__args": []map[string]interface{}{
+			nil,
+			{
+				"year":                 year,
+				"datefrom":             datefrom.Format(model.TimeFormatYearMonthDay),
+				"dateto":               dateto.Format(model.TimeFormatYearMonthDay),
+				"table":                "students",
+				"id":                   id,
+				"showColors":           false,
+				"showOrig":             true,
+				"showIgroupsInClasses": false,
+				"log_module":           "CurrentTTView",
+			},
+		},
+		"__gsh": client.gsechash,
+	}
+
+	request_body, err := json.Marshal(request)
 	if err != nil {
-		return fmt.Errorf("failed to fetch timeline: %s", err)
+		return fmt.Errorf("failed to create request: %s", err)
 	}
 
-	if response.StatusCode == 302 {
-		// edupage is trying to redirect us, that means an authorization error
+	response, err := client.Credentials.httpClient.Post(u, "application/json", bytes.NewBuffer(request_body))
+	if err == ErrRedirect {
 		return ErrAuthorization
 	}
 
+	if err != nil {
+		return fmt.Errorf("failed to fetch timetable: %s", err)
+	}
+
 	if response.StatusCode != 200 {
-		return fmt.Errorf("server returned code:%d", response.StatusCode)
+		return fmt.Errorf("server returned code: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
@@ -240,24 +263,38 @@ func (client *EdupageClient) LoadTimetable(datefrom, dateto time.Time) error {
 		return fmt.Errorf("failed to read response body: %s", err)
 	}
 
-	decoded_body := make([]byte, base64.StdEncoding.DecodedLen(len(body)-4))
+	println(string(body))
 
-	_, err = base64.StdEncoding.Decode(decoded_body, body[4:])
+	tt, err := model.ParseTimetable(body)
 	if err != nil {
-		return fmt.Errorf("failed to decode response body: %s", err)
+		return fmt.Errorf("failed to read response body: %s", err)
 	}
 
-	decoded_body = bytes.Trim(decoded_body, "\x00")
-	timeline, err := model.ParseTimeline(decoded_body)
-	if err != nil {
-		return fmt.Errorf("failed to parse timeline json into json object: %s", err)
-	}
-
-	if client.Timeline == nil {
-		client.Timeline = &timeline
+	if client.Timetable == nil {
+		client.Timetable = &tt
 	} else {
-		client.Timeline.Merge(&timeline)
+		client.Timetable.Merge(&tt)
 	}
 
 	return nil
+}
+
+func findGSCEhash(body []byte) (string, error) {
+	rg, _ := regexp.Compile(`ASC\.gsechash=(.*);`)
+	matches := rg.FindAllStringSubmatch(string(body), -1)
+	if len(matches) == 0 {
+		return "", errors.New("gsechash not found in the document body")
+	}
+
+	return matches[0][1], nil
+}
+
+func findUserHome(body []byte) (string, error) {
+	rg, _ := regexp.Compile(`\.userhome\((.*)\);`)
+	matches := rg.FindAllStringSubmatch(string(body), -1)
+	if len(matches) == 0 {
+		return "", errors.New("userhome not found in the document body")
+	}
+
+	return matches[0][1], nil
 }
