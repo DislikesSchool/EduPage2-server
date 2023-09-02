@@ -9,7 +9,6 @@ import (
 	"io"
 	"path"
 	"reflect"
-	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
@@ -22,21 +21,21 @@ var (
 // GetStudentID is used to retrieve the client's student ID.
 // Returns ErrorUnitialized if the user object hasn't been initialized.
 func (client *EdupageClient) GetStudentID() (string, error) {
-	if client.User == nil {
+	if client.user == nil {
 		return "", ErrorUnitialized
 	}
-	return client.User.UserRow.StudentID, nil
+	return client.user.UserRow.StudentID, nil
 }
 
 // GetSubjectByID is used to retrieve the subject by it's specified ID.
 // Returns ErrorNotFound if the subject can't be found.
 // Returns ErrorUnitialized if the user object hasn't been initialized.
 func (client *EdupageClient) GetSubjectByID(id string) (model.Subject, error) {
-	if client.User == nil {
+	if client.user == nil {
 		return model.Subject{}, ErrorUnitialized
 	}
 
-	if teacher, ok := client.User.DBI.Subjects[id]; ok {
+	if teacher, ok := client.user.DBI.Subjects[id]; ok {
 		return teacher, nil
 	}
 	return model.Subject{}, ErrorNotFound
@@ -46,11 +45,11 @@ func (client *EdupageClient) GetSubjectByID(id string) (model.Subject, error) {
 // Returns ErrorNotFound if the teacher can't be found.
 // Returns ErrorUnitialized if the user object hasn't been initialized.
 func (client *EdupageClient) GetTeacherByID(id string) (model.Teacher, error) {
-	if client.User == nil {
+	if client.user == nil {
 		return model.Teacher{}, ErrorUnitialized
 	}
 
-	if teacher, ok := client.User.DBI.Teachers[id]; ok {
+	if teacher, ok := client.user.DBI.Teachers[id]; ok {
 		return teacher, nil
 	}
 	return model.Teacher{}, ErrorNotFound
@@ -60,36 +59,14 @@ func (client *EdupageClient) GetTeacherByID(id string) (model.Teacher, error) {
 // Returns ErrorNotFound if the classroom can't be found.
 // Returns ErrorUnitialized if the user object hasn't been initialized.
 func (client *EdupageClient) GetClassroomByID(id string) (model.Classroom, error) {
-	if client.User == nil {
+	if client.user == nil {
 		return model.Classroom{}, ErrorUnitialized
 	}
 
-	if teacher, ok := client.User.DBI.Classrooms[id]; ok {
+	if teacher, ok := client.user.DBI.Classrooms[id]; ok {
 		return teacher, nil
 	}
 	return model.Classroom{}, ErrorNotFound
-}
-
-// GetTimetableToday returns the timetable for today.
-// Returns ErrorNotFound if the timetable can't be found.
-// Returns ErrorUnitialized if the user object hasn't been initialized.
-func (client *EdupageClient) GetTimetableToday() (model.Date, error) {
-	return client.GetTimetable(time.Now().Format(model.TimeFormatYearMonthDay))
-}
-
-// GetTimetableToday returns the timetable for a specified date,
-// the time format is specified in model.TimeFormatYearMonthDay.
-// Returns ErrorNotFound if the timetable can't be found.
-// Returns ErrorUnitialized if the user object hasn't been initialized.
-func (client *EdupageClient) GetTimetable(date string) (model.Date, error) {
-	if client.User == nil {
-		return model.Date{}, ErrorUnitialized
-	}
-	if v, ok := client.User.DayPlan.Dates[date]; ok {
-		return v, nil
-	}
-
-	return model.Date{}, ErrorNotFound
 }
 
 // FetchHomeworkAttachmens obtains the homework attchments for the specified homework.
