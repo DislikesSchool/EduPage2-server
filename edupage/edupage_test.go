@@ -99,7 +99,6 @@ func TestEdupage(t *testing.T) {
 		return
 	}
 
-	println(len(client.Timetable.Days))
 	for _, v := range client.Timetable.Days {
 		for _, sobj := range v {
 			subject, err := client.GetSubjectByID(sobj.SubjectID)

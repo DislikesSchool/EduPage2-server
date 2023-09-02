@@ -28,9 +28,9 @@ type EdupageClient struct {
 
 func CreateClient(credentials Credentials) (EdupageClient, error) {
 	var client EdupageClient
-	//if credentials.httpClient == nil {
-	//		return EdupageClient{}, errors.New("http client in credentials can not be nil")
-	//	}
+	if credentials.httpClient == nil {
+		return EdupageClient{}, errors.New("http client in credentials can not be nil")
+	}
 	client.Credentials = credentials
 
 	if err := client.LoadUser(); err != nil {
@@ -115,9 +115,12 @@ func (client *EdupageClient) LoadUser() error {
 		return err
 	}
 
-	println(len(client.Credentials.httpClient.Jar.Cookies(url)))
+	for _, v := range client.Credentials.httpClient.Jar.Cookies(url) {
+		println(v.Name + " " + v.Value)
+	}
 
 	response, err := client.Credentials.httpClient.Get(u)
+
 	if err != nil {
 		return fmt.Errorf("failed to load user: %s", err)
 	}
@@ -245,6 +248,8 @@ func (client *EdupageClient) LoadTimetable(datefrom, dateto time.Time) error {
 		return fmt.Errorf("failed to create request: %s", err)
 	}
 
+	println(string(request_body))
+
 	response, err := client.Credentials.httpClient.Post(u, "application/json", bytes.NewBuffer(request_body))
 	if err == ErrRedirect {
 		return ErrAuthorization
@@ -280,7 +285,7 @@ func (client *EdupageClient) LoadTimetable(datefrom, dateto time.Time) error {
 }
 
 func findGSCEhash(body []byte) (string, error) {
-	rg, _ := regexp.Compile(`ASC\.gsechash=(.*);`)
+	rg, _ := regexp.Compile(`ASC\.gsechash="(.*)";`)
 	matches := rg.FindAllStringSubmatch(string(body), -1)
 	if len(matches) == 0 {
 		return "", errors.New("gsechash not found in the document body")
