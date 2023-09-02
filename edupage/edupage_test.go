@@ -87,7 +87,6 @@ func TestEdupage(t *testing.T) {
 	if len(client.Results.Grades) == 0 {
 		t.Error("Recieved grade array is empty")
 	}
-
 }
 
 func BenchmarkLogin(t *testing.B) {

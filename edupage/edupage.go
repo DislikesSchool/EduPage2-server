@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"regexp"
 	"time"
 
@@ -207,6 +208,55 @@ func (client *EdupageClient) LoadResults(year, halfyear string) error {
 		client.Results = &results
 	} else {
 		client.Results.Merge(&results)
+	}
+
+	return nil
+}
+
+func (client *EdupageClient) LoadTimetable(datefrom, dateto time.Time) error {
+	u := fmt.Sprintf("https://%s/timetable/server/currenttt.js?__func=curentttGetData", client.server)
+
+	form := url.Values{
+		"datefrom": []string{datefrom.Format(model.TimeFormatYearMonthDay)},
+		"dateto":   []string{dateto.Format(model.TimeFormatYearMonthDay)},
+	}
+
+	response, err := client.hc.PostForm(u, form)
+	if err != nil {
+		return fmt.Errorf("failed to fetch timeline: %s", err)
+	}
+
+	if response.StatusCode == 302 {
+		// edupage is trying to redirect us, that means an authorization error
+		return ErrAuthorization
+	}
+
+	if response.StatusCode != 200 {
+		return fmt.Errorf("server returned code:%d", response.StatusCode)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %s", err)
+	}
+
+	decoded_body := make([]byte, base64.StdEncoding.DecodedLen(len(body)-4))
+
+	_, err = base64.StdEncoding.Decode(decoded_body, body[4:])
+	if err != nil {
+		return fmt.Errorf("failed to decode response body: %s", err)
+	}
+
+	decoded_body = bytes.Trim(decoded_body, "\x00")
+	timeline, err := model.ParseTimeline(decoded_body)
+	if err != nil {
+		return fmt.Errorf("failed to parse timeline json into json object: %s", err)
+	}
+
+	if client.Timeline == nil {
+		client.Timeline = &timeline
+	} else {
+		client.Timeline.Merge(&timeline)
 	}
 
 	return nil

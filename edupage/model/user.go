@@ -12,8 +12,42 @@ type User struct {
 	UserRow          UserRow                `json:"userrow"`
 	EventTypes       []EventType            `json:"eventtypes"`
 	UserGroups       []string               `json:"usergroups"`
+	DayPlan          DayPlan                `json:"dp"`
 	NamedayToday     string                 `json:"meninyDnes"`
 	NamedayTommorrow string                 `json:"meninyZajtra"`
+}
+
+type HeaderItem struct {
+	SubjectID string      `json:"subjectid"`
+	Changes   interface{} `json:"changes"`
+}
+
+type Plan struct {
+	Period       string       `json:"uniperiod"`
+	Type         string       `json:"type"`
+	Header       []HeaderItem `json:"header"`
+	SubjectID    string       `json:"subjectid"`
+	ClassIDs     []string     `json:"classids"`
+	GroupNames   []string     `json:"groupnames"`
+	LID          string       `json:"lid"`
+	TeacherIDs   []string     `json:"teacherids"`
+	ClassroomIDs []string     `json:"classroomids"`
+	StudentIDs   []string     `json:"studentids"`
+	StartTime    string       `json:"starttime"`
+	EndTime      string       `json:"endtime"`
+}
+
+type Date struct {
+	Plans          []Plan        `json:"plan"`
+	StudentAbsents []interface{} `json:"student_absents"` //TODO: check type
+	Number         json.Number   `json:"tt_num"`
+	Day            json.Number   `json:"tt_day"`
+	Week           json.Number   `json:"tt_week"`
+	Term           json.Number   `json:"tt_term"`
+}
+
+type DayPlan struct {
+	Dates map[string]Date `json:"dates"`
 }
 
 type UserRow struct {
