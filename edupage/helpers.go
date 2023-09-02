@@ -47,6 +47,20 @@ func (client *EdupageClient) GetTeacherByID(id string) (model.Teacher, error) {
 	return model.Teacher{}, ErrorNotFound
 }
 
+// GetClassroomByID is used to retrieve the classroom by it's specified ID.
+// Returns ErrorNotFound if the classroom can't be found.
+// Returns ErrorUnitialized if the user object hasn't been initialized.
+func (client *EdupageClient) GetClassroomByID(id string) (model.Classroom, error) {
+	if client.User == nil {
+		return model.Classroom{}, ErrorUnitialized
+	}
+
+	if teacher, ok := client.User.DBI.Classrooms[id]; ok {
+		return teacher, nil
+	}
+	return model.Classroom{}, ErrorNotFound
+}
+
 // GetTimetableToday returns the timetable for today.
 // Returns ErrorNotFound if the timetable can't be found.
 // Returns ErrorUnitialized if the user object hasn't been initialized.

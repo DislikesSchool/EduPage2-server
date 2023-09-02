@@ -83,7 +83,7 @@ type DBI struct {
 	Teachers           map[string]Teacher           `json:"teachers"`
 	Classes            map[string]Class             `json:"classes"`
 	Subjects           map[string]Subject           `json:"subjects"`
-	Classrooms         map[string]Classrom          `json:"classrooms"`
+	Classrooms         map[string]Classroom         `json:"classrooms"`
 	Students           map[string]Students          `json:"students"`
 	Parents            map[string]Parents           `json:"parents"`
 	Periods            map[json.Number]Period       `json:"periods"`
@@ -126,7 +126,7 @@ type Subject struct {
 	CBHidden bool   `json:"cbhidden"`
 }
 
-type Classrom struct {
+type Classroom struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Short string `json:"short"`
