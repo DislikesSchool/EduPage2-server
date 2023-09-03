@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	ErrorUnitialized = errors.New("unitialized")
-	ErrorNotFound    = errors.New("not found")
+	ErrorUnitialized  = errors.New("unitialized")
+	ErrorNotFound     = errors.New("not found")
+	ErrorUnauthorized = errors.New("unauthorized")
 )
 
 // EdupageClient is used to access the edupage api.
@@ -31,7 +32,6 @@ type EdupageClient struct {
 }
 
 // CreateClient is used to create a client struct
-// Returns Error
 func CreateClient(credentials Credentials) (EdupageClient, error) {
 	var client EdupageClient
 	if credentials.httpClient == nil {
@@ -49,8 +49,15 @@ func CreateClient(credentials Credentials) (EdupageClient, error) {
 	return client, nil
 }
 
+// UpdateCredentials updates the credentials and allows this struct to continue
+// working after token expiry.
+func (client *EdupageClient) UpdateCredentials(credentials Credentials) {
+	client.Credentials = credentials
+}
+
 // GetUser retrieves the user from edupage or returns the stored data.
 // If update is set to true, user data wil explicitly update
+// Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetUser(update bool) (model.User, error) {
 	if client.user == nil || update {
 		user, err := client.fetchUser()
@@ -66,6 +73,7 @@ func (client *EdupageClient) GetUser(update bool) (model.User, error) {
 }
 
 // GetRecentTimeline retrieves last 30 days of timeline from edupage.
+// Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetRecentTimeline() (model.Timeline, error) {
 	timeline, err := client.fetchTimeline(time.Now().AddDate(0, 0, -30), time.Now())
 	if err != nil {
@@ -76,6 +84,7 @@ func (client *EdupageClient) GetRecentTimeline() (model.Timeline, error) {
 }
 
 // GetUser retrieves the timeline in a specified time interval from edupage.
+// Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetTimeline(from, to time.Time) (model.Timeline, error) {
 	tt, err := client.fetchTimeline(from, to)
 	if err != nil {
@@ -85,6 +94,7 @@ func (client *EdupageClient) GetTimeline(from, to time.Time) (model.Timeline, er
 }
 
 // GetRecentResults retrieves the results from the current year from edupage.
+// Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetRecentResults() (model.Results, error) {
 	year := time.Now().Format("2006")
 	halfyear := "RX" //TODO
@@ -93,6 +103,7 @@ func (client *EdupageClient) GetRecentResults() (model.Results, error) {
 
 // GetResults retrieves the results in a specified interval from edupage.
 // Halfyears types are: P1 (first halfyear), P2 (second halfyear), RX (whole year)
+// Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetResults(year, halfyear string) (model.Results, error) {
 	results, err := client.fetchResults(year, halfyear)
 	if err != nil {
@@ -104,7 +115,7 @@ func (client *EdupageClient) GetResults(year, halfyear string) (model.Results, e
 
 // GetResults retrieves this week's timetable from edupage.
 func (client *EdupageClient) GetRecentTimetable() (model.Timetable, error) {
-	tt, err := client.fetchTimetable(time.Now().AddDate(0, 0, -7), time.Now())
+	tt, err := client.fetchTimetable(time.Now(), time.Now().AddDate(0, 0, 7))
 	if err != nil {
 		return model.Timetable{}, err
 	}
@@ -113,6 +124,7 @@ func (client *EdupageClient) GetRecentTimetable() (model.Timetable, error) {
 }
 
 // GetResults retrieves the timetable in the specified interval from edupage.
+// Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetTimetable(from, to time.Time) (model.Timetable, error) {
 	tt, err := client.fetchTimetable(from, to)
 	if err != nil {
@@ -176,7 +188,7 @@ func (client *EdupageClient) GetClassroomByID(id string) (model.Classroom, error
 // FetchHomeworkAttachmens obtains the homework attchments for the specified homework.
 // Returns ErrUnobtainableAttachments in case the attachments are not present.
 // Retruns map, key is the resource name and value is the resource link
-func (client *EdupageClient) FetchHomeworkAttachments(i *model.Homework) (map[string]string, error) {
+func (client *EdupageClient) FetchHomeworkAttachments(i model.Homework) (map[string]string, error) {
 	if len(i.ESuperID) == 0 || len(i.TestID) == 0 {
 		return nil, errors.New("required fields superid and testid not set")
 	}

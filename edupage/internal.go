@@ -14,13 +14,9 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
-var (
-	ErrorUnauthorized = errors.New("unauthorized")
-)
-
 func (client *EdupageClient) fetchTimeline(datefrom, dateto time.Time) (model.Timeline, error) {
 	if client.Credentials.httpClient == nil {
-		return model.Timeline{}, errors.New("http client is nil")
+		return model.Timeline{}, errors.New("invalid credentials")
 	}
 
 	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", client.Credentials.Server)
@@ -66,7 +62,7 @@ func (client *EdupageClient) fetchTimeline(datefrom, dateto time.Time) (model.Ti
 
 func (client *EdupageClient) fetchUser() (model.User, error) {
 	if client.Credentials.httpClient == nil {
-		return model.User{}, errors.New("http client is nil")
+		return model.User{}, errors.New("invalid credentials")
 	}
 	u := fmt.Sprintf("https://%s/user/?", client.Credentials.Server)
 
@@ -84,7 +80,7 @@ func (client *EdupageClient) fetchUser() (model.User, error) {
 		return model.User{}, fmt.Errorf("failed to read response body: %s", err)
 	}
 
-	hash, err := findGSCEhash(body)
+	hash, err := findGSCEHash(body)
 	if err != nil {
 		return model.User{}, fmt.Errorf("failed to parse user json: %s", err)
 	}
@@ -107,7 +103,7 @@ func (client *EdupageClient) fetchUser() (model.User, error) {
 
 func (client *EdupageClient) fetchResults(year, halfyear string) (model.Results, error) {
 	if client.Credentials.httpClient == nil {
-		return model.Results{}, errors.New("http client is nil")
+		return model.Results{}, errors.New("invalid credentials")
 	}
 
 	url := fmt.Sprintf("https://%s/znamky/?what=studentviewer&akcia=studentData&eqav=1&maxEqav=7", client.Credentials.Server)
@@ -160,7 +156,7 @@ func (client *EdupageClient) fetchResults(year, halfyear string) (model.Results,
 
 func (client *EdupageClient) fetchTimetable(datefrom, dateto time.Time) (model.Timetable, error) {
 	if client.Credentials.httpClient == nil {
-		return model.Timetable{}, errors.New("http client is nil")
+		return model.Timetable{}, errors.New("invalid credentials")
 	}
 
 	u := fmt.Sprintf("https://%s/timetable/server/currenttt.js?__func=curentttGetData", client.Credentials.Server)
@@ -217,7 +213,7 @@ func (client *EdupageClient) fetchTimetable(datefrom, dateto time.Time) (model.T
 	return tt, nil
 }
 
-func findGSCEhash(body []byte) (string, error) {
+func findGSCEHash(body []byte) (string, error) {
 	rg, _ := regexp.Compile(`ASC\.gsechash="(.*)";`)
 	matches := rg.FindAllStringSubmatch(string(body), -1)
 	if len(matches) == 0 {

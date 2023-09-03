@@ -10,7 +10,6 @@ if err != nil {
 ```
 This struct contains the important authorization and server information.
 
-
 Then you can create the `EdupageClient` struct
 
 ```golang
@@ -19,7 +18,9 @@ if err != nil {
     //Proper error handling...
 }
 ```
-This is the most important part, the `EdupageClient` struct takes care of data management and fetching.
+This is the most important part, the `EdupageClient` struct. You will use this to interact with the Edupage API.
+
+To update credentials of an existing client use `EdupageClient#UpdateCredentials(Credentials)`
 
 ## Timeline
 To retrieve timeline information use function `EdupageClient#GetRecentTimeline` or `EdupageClient#GetTimeline(Time, Time)`
@@ -40,3 +41,4 @@ if err != nil {
     //Proper error handling...
 }
 ```
+

@@ -105,6 +105,14 @@ func TestEdupage(t *testing.T) {
 	if len(timetable.Days) == 0 {
 		t.Log("Recieved timetable is empty")
 	}
+	for k, _ := range timetable.Days {
+		println(k)
+	}
+
+	for _, v := range timetable.Days["2023-09-04"] {
+		subject, _ := client.GetSubjectByID(v.SubjectID)
+		println(subject.Name)
+	}
 
 }
 

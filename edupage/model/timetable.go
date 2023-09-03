@@ -6,7 +6,7 @@ import (
 )
 
 type Timetable struct {
-	Days map[string][]TimetableItem
+	Days map[string][]TimetableItem // key format is YYYY-MM-dd or 2006-01-02
 }
 
 type TimetableItem struct {
