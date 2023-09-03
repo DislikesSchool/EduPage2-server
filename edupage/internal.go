@@ -32,7 +32,7 @@ func (client *EdupageClient) fetchTimeline(datefrom, dateto time.Time) (model.Ti
 	}
 
 	if response.StatusCode != 200 {
-		return model.Timeline{}, fmt.Errorf("server returned code:%d", response.StatusCode)
+		return model.Timeline{}, fmt.Errorf("server returned code: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
@@ -50,7 +50,7 @@ func (client *EdupageClient) fetchTimeline(datefrom, dateto time.Time) (model.Ti
 	decoded_body = bytes.Trim(decoded_body, "\x00")
 	timeline, err := model.ParseTimeline(decoded_body)
 	if err != nil {
-		return model.Timeline{}, fmt.Errorf("failed to parse timeline json into json object: %s", err)
+		return model.Timeline{}, fmt.Errorf("failed to parse timeline json: %s", err)
 	}
 
 	return timeline, nil
@@ -75,20 +75,20 @@ func (client *EdupageClient) fetchUser() (model.User, error) {
 
 	hash, err := findGSCEhash(body)
 	if err != nil {
-		return model.User{}, fmt.Errorf("failed to parse user json into json object: %s", err)
+		return model.User{}, fmt.Errorf("failed to parse user json: %s", err)
 	}
 
 	client.gsechash = hash
 
 	js, err := findUserHome(body)
 	if err != nil {
-		return model.User{}, fmt.Errorf("failed to parse user json into json object: %s", err)
+		return model.User{}, fmt.Errorf("failed to parse user json: %s", err)
 	}
 
 	var user model.User
 	err = json.Unmarshal([]byte(js), &user)
 	if err != nil {
-		return model.User{}, fmt.Errorf("failed to parse user json into json object: %s", err)
+		return model.User{}, fmt.Errorf("failed to parse user json: %s", err)
 	}
 
 	return user, nil
@@ -118,7 +118,7 @@ func (client *EdupageClient) fetchResults(year, halfyear string) (model.Results,
 	}
 
 	if response.StatusCode != 200 {
-		return model.Results{}, fmt.Errorf("server returned code:%d", response.StatusCode)
+		return model.Results{}, fmt.Errorf("server returned code: %d", response.StatusCode)
 	}
 
 	body, err := io.ReadAll(response.Body)
@@ -192,7 +192,7 @@ func (client *EdupageClient) fetchTimetable(datefrom, dateto time.Time) (model.T
 
 	tt, err := model.ParseTimetable(body)
 	if err != nil {
-		return model.Timetable{}, fmt.Errorf("failed to read response body: %s", err)
+		return model.Timetable{}, fmt.Errorf("failed to parse timetable json: %s", err)
 	}
 
 	return tt, nil
