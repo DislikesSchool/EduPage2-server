@@ -98,8 +98,18 @@ func (client *EdupageClient) GetResults(year, halfyear string) (model.Results, e
 }
 
 // GetResults retrieves this week's timetable from edupage.
-func (client *EdupageClient) GetTimetable() (model.Timetable, error) {
+func (client *EdupageClient) GetRecentTimetable() (model.Timetable, error) {
 	tt, err := client.fetchTimetable(time.Now().AddDate(0, 0, -7), time.Now())
+	if err != nil {
+		return model.Timetable{}, err
+	}
+
+	return tt, nil
+}
+
+// GetResults retrieves the timetable in the specified interval from edupage.
+func (client *EdupageClient) GetTimetable(from, to time.Time) (model.Timetable, error) {
+	tt, err := client.fetchTimetable(from, to)
 	if err != nil {
 		return model.Timetable{}, err
 	}
