@@ -134,8 +134,6 @@ func Login(username, password, server string) (Credentials, error) {
 			if rs.Header.Get("Location") != "/user/" {
 				return Credentials{}, ErrAuthorization
 			} else if rs.Header.Get("Location") == "/user/" {
-				client.Jar.SetCookies(rs.Request.URL, rs.Cookies())
-
 				var credentials Credentials
 				credentials.Server = Server
 				credentials.httpClient = client

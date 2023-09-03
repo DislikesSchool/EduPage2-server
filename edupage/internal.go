@@ -14,7 +14,15 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
+var (
+	ErrorUnauthorized = errors.New("unauthorized")
+)
+
 func (client *EdupageClient) fetchTimeline(datefrom, dateto time.Time) (model.Timeline, error) {
+	if client.Credentials.httpClient == nil {
+		return model.Timeline{}, errors.New("http client is nil")
+	}
+
 	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", client.Credentials.Server)
 
 	form, err := CreatePayload(map[string]string{
@@ -28,7 +36,7 @@ func (client *EdupageClient) fetchTimeline(datefrom, dateto time.Time) (model.Ti
 
 	response, err := client.Credentials.httpClient.PostForm(url, form)
 	if err != nil {
-		return model.Timeline{}, ErrAuthorization // most likely case
+		return model.Timeline{}, ErrorUnauthorized // most likely case
 	}
 
 	if response.StatusCode != 200 {
@@ -57,11 +65,14 @@ func (client *EdupageClient) fetchTimeline(datefrom, dateto time.Time) (model.Ti
 }
 
 func (client *EdupageClient) fetchUser() (model.User, error) {
+	if client.Credentials.httpClient == nil {
+		return model.User{}, errors.New("http client is nil")
+	}
 	u := fmt.Sprintf("https://%s/user/?", client.Credentials.Server)
 
 	response, err := client.Credentials.httpClient.Get(u)
 	if err != nil {
-		return model.User{}, ErrAuthorization // most likely case
+		return model.User{}, ErrorUnauthorized // most likely case
 	}
 
 	if response.StatusCode != 200 {
@@ -95,6 +106,10 @@ func (client *EdupageClient) fetchUser() (model.User, error) {
 }
 
 func (client *EdupageClient) fetchResults(year, halfyear string) (model.Results, error) {
+	if client.Credentials.httpClient == nil {
+		return model.Results{}, errors.New("http client is nil")
+	}
+
 	url := fmt.Sprintf("https://%s/znamky/?what=studentviewer&akcia=studentData&eqav=1&maxEqav=7", client.Credentials.Server)
 
 	form, err := CreatePayload(map[string]string{
@@ -114,7 +129,7 @@ func (client *EdupageClient) fetchResults(year, halfyear string) (model.Results,
 
 	response, err := client.Credentials.httpClient.PostForm(url, form)
 	if err != nil {
-		return model.Results{}, ErrAuthorization // most likely case
+		return model.Results{}, ErrorUnauthorized // most likely case
 	}
 
 	if response.StatusCode != 200 {
@@ -144,6 +159,10 @@ func (client *EdupageClient) fetchResults(year, halfyear string) (model.Results,
 }
 
 func (client *EdupageClient) fetchTimetable(datefrom, dateto time.Time) (model.Timetable, error) {
+	if client.Credentials.httpClient == nil {
+		return model.Timetable{}, errors.New("http client is nil")
+	}
+
 	u := fmt.Sprintf("https://%s/timetable/server/currenttt.js?__func=curentttGetData", client.Credentials.Server)
 
 	id, err := client.GetStudentID()
@@ -178,7 +197,7 @@ func (client *EdupageClient) fetchTimetable(datefrom, dateto time.Time) (model.T
 
 	response, err := client.Credentials.httpClient.Post(u, "application/json", bytes.NewBuffer(request_body))
 	if err != nil {
-		return model.Timetable{}, ErrAuthorization // most likely case
+		return model.Timetable{}, ErrorUnauthorized // most likely case
 	}
 
 	if response.StatusCode != 200 {

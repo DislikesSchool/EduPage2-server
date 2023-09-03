@@ -73,13 +73,13 @@ func TestEdupage(t *testing.T) {
 	client, err := CreateClient(credentials)
 	if err != nil {
 		t.Error(err)
-		return
+		//return
 	}
 
 	timeline, err := client.GetRecentTimeline()
 	if err != nil {
 		t.Error(fmt.Errorf("failed to recieve timeline: %s", err))
-		return
+		//return
 	}
 
 	if len(timeline.Items) == 0 {
@@ -89,7 +89,7 @@ func TestEdupage(t *testing.T) {
 	results, err := client.GetRecentResults()
 	if err != nil {
 		t.Error(fmt.Errorf("failed to recieve results: %s", err))
-		return
+		//return
 	}
 
 	if len(results.Grades) == 0 {
@@ -99,7 +99,7 @@ func TestEdupage(t *testing.T) {
 	timetable, err := client.GetRecentTimetable()
 	if err != nil {
 		t.Error(fmt.Errorf("failed to recieve timetable: %s", err))
-		return
+		//return
 	}
 
 	if len(timetable.Days) == 0 {

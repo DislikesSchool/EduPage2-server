@@ -14,6 +14,11 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
+var (
+	ErrorUnitialized = errors.New("unitialized")
+	ErrorNotFound    = errors.New("not found")
+)
+
 // EdupageClient is used to access the edupage api.
 type EdupageClient struct {
 	Credentials Credentials
@@ -26,6 +31,7 @@ type EdupageClient struct {
 }
 
 // CreateClient is used to create a client struct
+// Returns Error
 func CreateClient(credentials Credentials) (EdupageClient, error) {
 	var client EdupageClient
 	if credentials.httpClient == nil {
@@ -34,7 +40,6 @@ func CreateClient(credentials Credentials) (EdupageClient, error) {
 	client.Credentials = credentials
 
 	user, err := client.fetchUser()
-
 	if err != nil {
 		return EdupageClient{}, err
 	}
@@ -116,11 +121,6 @@ func (client *EdupageClient) GetTimetable(from, to time.Time) (model.Timetable, 
 
 	return tt, nil
 }
-
-var (
-	ErrorUnitialized = errors.New("unitialized")
-	ErrorNotFound    = errors.New("not found")
-)
 
 // GetStudentID is used to retrieve the client's student ID.
 // Returns ErrorUnitialized if the user object hasn't been initialized.
