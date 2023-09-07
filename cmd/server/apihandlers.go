@@ -103,3 +103,31 @@ func TimelineHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, timeline)
 }
+
+func RecentTimetableHangler(c *gin.Context) {
+	claims, err := getClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	userID := claims["userID"].(string)
+	username := claims["username"].(string)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	client, ok := clients[userID+username]
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
+		return
+	}
+
+	timetable, err := client.GetRecentTimetable()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, timetable)
+}

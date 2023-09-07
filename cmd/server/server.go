@@ -49,7 +49,9 @@ func main() {
 	router.GET("/validate-token", cache.CachePage(store, time.Second, ValidateTokenHandler))
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
+	api.GET("/timeline", cache.CachePage(store, time.Minute, TimelineHandler))
 	api.GET("/timeline/recent", cache.CachePage(store, time.Minute, RecentTimelineHandler))
+	api.GET("/timetable/recent", cache.CachePage(store, time.Minute, RecentTimetableHangler))
 
 	router.Run()
 }
