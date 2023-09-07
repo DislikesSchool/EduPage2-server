@@ -7,207 +7,301 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
-	"regexp"
+	"path"
+	"reflect"
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
+var (
+	ErrorUnitialized  = errors.New("unitialized")
+	ErrorNotFound     = errors.New("not found")
+	ErrorUnauthorized = errors.New("unauthorized")
+)
+
 // EdupageClient is used to access the edupage api.
 type EdupageClient struct {
-	hc     *http.Client //TODO: remove, save only edid, hsid, phpsessid tokens
-	server string
+	Credentials Credentials
+	gsechash    string
 
-	User     *model.User
-	Timeline *model.Timeline
-	Results  *model.Results
+	user *model.User
+	//timeline  *model.Timeline
+	//results   *model.Results
+	//timetable *model.Timetable
 }
 
-// Fetch loads all possible data into the object
-func (client *EdupageClient) Fetch() error {
-	err := client.LoadUser()
+// CreateClient is used to create a client struct
+func CreateClient(credentials Credentials) (EdupageClient, error) {
+	var client EdupageClient
+	if credentials.httpClient == nil {
+		return EdupageClient{}, errors.New("http client in credentials can not be nil")
+	}
+	client.Credentials = credentials
+
+	user, err := client.fetchUser()
 	if err != nil {
-		return err
+		return EdupageClient{}, err
 	}
 
-	err = client.LoadRecentTimeline()
-	if err != nil {
-		return err
-	}
+	client.user = &user
 
-	err = client.LoadResults("2022", "RX")
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return client, nil
 }
 
-// LoadRecentTimeline loads the recent timeline data.
-// That's from today, to 30 days in the past.
-// Also updates the Timeline property in Edupage struct.
-func (client *EdupageClient) LoadRecentTimeline() error {
-	duration, err := time.ParseDuration("-720h") // 30 days
-	if err != nil {
-		return fmt.Errorf("failed to parse duration: %s", err)
-	}
-
-	start := time.Now().Add(duration)
-	return client.LoadTimeline(start, time.Now())
+// UpdateCredentials updates the credentials and allows this struct to continue
+// working after token expiry.
+func (client *EdupageClient) UpdateCredentials(credentials Credentials) {
+	client.Credentials = credentials
 }
 
-// LoadTimeline loads the timeline data from the specified date range.
-func (client *EdupageClient) LoadTimeline(datefrom, dateto time.Time) error {
-	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", client.server)
+// GetUser retrieves the user from edupage or returns the stored data.
+// If update is set to true, user data wil explicitly update
+// Return ErrorUnauthorized if an authorization error occcurs.
+func (client *EdupageClient) GetUser(update bool) (model.User, error) {
+	if client.user == nil || update {
+		user, err := client.fetchUser()
+		if err != nil {
+			return model.User{}, err
+		}
 
-	form, err := CreatePayload(map[string]string{
-		"datefrom": datefrom.Format("2006-01-02"),
-		"dateto":   dateto.Format("2006-01-02"),
-	})
-
-	if err != nil {
-		return fmt.Errorf("failed to create payload: %s", err)
-	}
-
-	response, err := client.hc.PostForm(url, form)
-	if err != nil {
-		return fmt.Errorf("failed to fetch timeline: %s", err)
-	}
-
-	if response.StatusCode == 302 {
-		// edupage is trying to redirect us, that means an authorization error
-		return ErrAuthorization
-	}
-
-	if response.StatusCode != 200 {
-		return fmt.Errorf("server returned code:%d", response.StatusCode)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %s", err)
-	}
-
-	decoded_body := make([]byte, base64.StdEncoding.DecodedLen(len(body)-4))
-
-	_, err = base64.StdEncoding.Decode(decoded_body, body[4:])
-	if err != nil {
-		return fmt.Errorf("failed to decode response body: %s", err)
-	}
-
-	decoded_body = bytes.Trim(decoded_body, "\x00")
-	timeline, err := model.ParseTimeline(decoded_body)
-	if err != nil {
-		return fmt.Errorf("failed to parse timeline json into json object: %s", err)
-	}
-
-	if client.Timeline == nil {
-		client.Timeline = &timeline
+		client.user = &user
+		return user, nil
 	} else {
-		client.Timeline.Merge(&timeline)
+		return *client.user, nil
 	}
-
-	return nil
 }
 
-// LoadUser loads the user data
-func (client *EdupageClient) LoadUser() error {
-	url := fmt.Sprintf("https://%s/user/", client.server)
-	response, err := client.hc.Get(url)
+// GetRecentTimeline retrieves last 30 days of timeline from edupage.
+// Return ErrorUnauthorized if an authorization error occcurs.
+func (client *EdupageClient) GetRecentTimeline() (model.Timeline, error) {
+	timeline, err := client.fetchTimeline(time.Now().AddDate(0, 0, -30), time.Now())
 	if err != nil {
-		return fmt.Errorf("failed to fetch timeline: %s", err)
+		return model.Timeline{}, err
 	}
 
-	if response.StatusCode == 302 {
-		// edupage is trying to redirect us, that means an authorization error
-		return ErrAuthorization
-	}
-
-	if response.StatusCode != 200 {
-		return fmt.Errorf("server returned code: %d", response.StatusCode)
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %s", err)
-	}
-
-	text := string(body)
-
-	rg, _ := regexp.Compile(`\.userhome\((.*)\);`)
-	matches := rg.FindAllStringSubmatch(text, -1)
-	if len(matches) == 0 {
-		return errors.New("userhome not found in the document body")
-	}
-
-	js := matches[0][1]
-	err = json.Unmarshal([]byte(js), &client.User)
-	if err != nil {
-		return fmt.Errorf("failed to parse user json into json object: %s", err)
-	}
-
-	return nil
+	return timeline, nil
 }
 
-// LoadResults loads the grade data from specified year and halfyear
+// GetUser retrieves the timeline in a specified time interval from edupage.
+// Return ErrorUnauthorized if an authorization error occcurs.
+func (client *EdupageClient) GetTimeline(from, to time.Time) (model.Timeline, error) {
+	tt, err := client.fetchTimeline(from, to)
+	if err != nil {
+		return model.Timeline{}, err
+	}
+	return tt, nil
+}
+
+// GetRecentResults retrieves the results from the current year from edupage.
+// Return ErrorUnauthorized if an authorization error occcurs.
+func (client *EdupageClient) GetRecentResults() (model.Results, error) {
+	year := time.Now().Format("2006")
+	halfyear := "RX" //TODO
+	return client.fetchResults(year, halfyear)
+}
+
+// GetResults retrieves the results in a specified interval from edupage.
 // Halfyears types are: P1 (first halfyear), P2 (second halfyear), RX (whole year)
-func (client *EdupageClient) LoadResults(year, halfyear string) error {
-	url := fmt.Sprintf("https://%s/znamky/?what=studentviewer&akcia=studentData&eqav=1&maxEqav=7", client.server)
-
-	form, err := CreatePayload(map[string]string{
-		"pohlad":           "podladatumu",
-		"znamky_yearid":    year,
-		"znamky_yearid_ns": "1",
-		"nadobdobie":       halfyear,
-		"rokobdobie":       fmt.Sprintf("%s::%s", year, halfyear),
-		"doRq":             "1",
-		"what":             "studentviewer",
-		"updateLastView":   "0",
-	})
-
+// Return ErrorUnauthorized if an authorization error occcurs.
+func (client *EdupageClient) GetResults(year, halfyear string) (model.Results, error) {
+	results, err := client.fetchResults(year, halfyear)
 	if err != nil {
-		return fmt.Errorf("failed to create payload: %s", err)
+		return model.Results{}, err
 	}
 
-	response, err := client.hc.PostForm(url, form)
+	return results, nil
+}
+
+// GetResults retrieves this week's timetable from edupage.
+func (client *EdupageClient) GetRecentTimetable() (model.Timetable, error) {
+	tt, err := client.fetchTimetable(time.Now(), time.Now().AddDate(0, 0, 7))
 	if err != nil {
-		return fmt.Errorf("failed to fetch grades: %s", err)
+		return model.Timetable{}, err
 	}
 
-	if response.StatusCode == 302 {
-		// edupage is trying to redirect us, that means an authorization error
-		return ErrAuthorization
-	}
+	return tt, nil
+}
 
-	if response.StatusCode != 200 {
-		return fmt.Errorf("server returned code:%d", response.StatusCode)
-	}
-
-	body, err := io.ReadAll(response.Body)
+// GetResults retrieves the timetable in the specified interval from edupage.
+// Return ErrorUnauthorized if an authorization error occcurs.
+func (client *EdupageClient) GetTimetable(from, to time.Time) (model.Timetable, error) {
+	tt, err := client.fetchTimetable(from, to)
 	if err != nil {
-		return fmt.Errorf("failed to read response body: %s", err)
+		return model.Timetable{}, err
 	}
 
-	decoded_body := make([]byte, base64.StdEncoding.DecodedLen(len(body)-4))
+	return tt, nil
+}
 
-	_, err = base64.StdEncoding.Decode(decoded_body, body[4:])
+// GetStudentID is used to retrieve the client's student ID.
+// Returns ErrorUnitialized if the user object hasn't been initialized.
+func (client *EdupageClient) GetStudentID() (string, error) {
+	if client.user == nil {
+		return "", ErrorUnitialized
+	}
+	return client.user.UserRow.StudentID, nil
+}
+
+// GetSubjectByID is used to retrieve the subject by it's specified ID.
+// Returns ErrorNotFound if the subject can't be found.
+// Returns ErrorUnitialized if the user object hasn't been initialized.
+func (client *EdupageClient) GetSubjectByID(id string) (model.Subject, error) {
+	if client.user == nil {
+		return model.Subject{}, ErrorUnitialized
+	}
+
+	if teacher, ok := client.user.DBI.Subjects[id]; ok {
+		return teacher, nil
+	}
+	return model.Subject{}, ErrorNotFound
+}
+
+// GetTeacherByID is used to retrieve the teacher by their specified ID.
+// Returns ErrorNotFound if the teacher can't be found.
+// Returns ErrorUnitialized if the user object hasn't been initialized.
+func (client *EdupageClient) GetTeacherByID(id string) (model.Teacher, error) {
+	if client.user == nil {
+		return model.Teacher{}, ErrorUnitialized
+	}
+
+	if teacher, ok := client.user.DBI.Teachers[id]; ok {
+		return teacher, nil
+	}
+	return model.Teacher{}, ErrorNotFound
+}
+
+// GetClassroomByID is used to retrieve the classroom by it's specified ID.
+// Returns ErrorNotFound if the classroom can't be found.
+// Returns ErrorUnitialized if the user object hasn't been initialized.
+func (client *EdupageClient) GetClassroomByID(id string) (model.Classroom, error) {
+	if client.user == nil {
+		return model.Classroom{}, ErrorUnitialized
+	}
+
+	if teacher, ok := client.user.DBI.Classrooms[id]; ok {
+		return teacher, nil
+	}
+	return model.Classroom{}, ErrorNotFound
+}
+
+// FetchHomeworkAttachmens obtains the homework attchments for the specified homework.
+// Returns ErrUnobtainableAttachments in case the attachments are not present.
+// Retruns map, key is the resource name and value is the resource link
+func (client *EdupageClient) FetchHomeworkAttachments(i model.Homework) (map[string]string, error) {
+	if len(i.ESuperID) == 0 || len(i.TestID) == 0 {
+		return nil, errors.New("required fields superid and testid not set")
+	}
+
+	data := map[string]string{
+		"testid":  i.TestID,
+		"superid": i.ESuperID,
+	}
+
+	payload, err := CreatePayload(data)
 	if err != nil {
-		return fmt.Errorf("failed to decode response body: %s", err)
+		return nil, fmt.Errorf("failed to create payload: %w", err)
 	}
 
-	decoded_body = bytes.Trim(decoded_body, "\x00")
-
-	results, err := model.ParseResults(decoded_body)
+	resp, err := client.Credentials.httpClient.PostForm(
+		"https://"+path.Join(client.Credentials.Server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
+		payload,
+	)
 	if err != nil {
-		return fmt.Errorf("failed to parse results: %s", err)
+		return nil, fmt.Errorf("homework request failed: %w", err)
 	}
 
-	if client.Results == nil {
-		client.Results = &results
-	} else {
-		client.Results.Merge(&results)
+	response, err := io.ReadAll(resp.Body)
+
+	if len(response) < 5 {
+		return nil, fmt.Errorf("homework request failed, bad response: %w", err)
 	}
 
-	return nil
+	response = response[4:]
+
+	decoded := make([]byte, base64.StdEncoding.DecodedLen(len(response)))
+	_, err = base64.StdEncoding.Decode(decoded, response)
+	if err != nil {
+		return nil, fmt.Errorf("homework request failed, bad response: %w", err)
+	}
+
+	decoded = bytes.Trim(decoded, "\x00")
+	var object map[string]interface{}
+	err = json.Unmarshal(decoded, &object)
+	if err != nil {
+		return nil, fmt.Errorf("homework request failed, bad response: %w", err)
+	}
+
+	attachments := make(map[string]string)
+
+	// God help those who may try to debug this.
+	if object["materialData"] == nil ||
+		(reflect.TypeOf(object["materialData"]).Kind() != reflect.Map ||
+			reflect.TypeOf(object["materialData"]).Elem().Kind() != reflect.Interface) {
+		return nil, model.ErrUnobtainableAttachments
+	}
+	materialData := object["materialData"].(map[string]interface{})
+
+	if materialData["cardsData"] == nil ||
+		(reflect.TypeOf(materialData["cardsData"]).Kind() != reflect.Map ||
+			reflect.TypeOf(materialData["cardsData"]).Elem().Kind() != reflect.Interface) {
+		return nil, model.ErrUnobtainableAttachments
+	}
+	cardsData := materialData["cardsData"].(map[string]interface{})
+
+	for _, entry := range cardsData {
+		if entry == nil ||
+			(reflect.TypeOf(entry).Kind() != reflect.Map ||
+				reflect.TypeOf(entry).Elem().Kind() != reflect.Interface) {
+			return nil, model.ErrUnobtainableAttachments
+		}
+
+		if e, ok := entry.(map[string]interface{})["content"]; !ok && reflect.TypeOf(e).Kind() != reflect.String {
+			return nil, model.ErrUnobtainableAttachments
+		}
+
+		var content map[string]interface{}
+		contentJson := entry.(map[string]interface{})["content"].(string)
+		err = json.Unmarshal([]byte(contentJson), &content)
+		if err != nil {
+			return nil, err
+		}
+
+		if content["widgets"] == nil ||
+			(reflect.TypeOf(content["widgets"]).Kind() != reflect.Slice ||
+				reflect.TypeOf(content["widgets"]).Elem().Kind() != reflect.Interface) {
+			return nil, model.ErrUnobtainableAttachments
+		}
+
+		widgets := content["widgets"].([]interface{})
+		for _, widget := range widgets {
+			if widget == nil ||
+				(reflect.TypeOf(widget).Kind() != reflect.Map ||
+					reflect.TypeOf(widget).Elem().Kind() != reflect.Interface) {
+				return nil, model.ErrUnobtainableAttachments
+			}
+			if widget.(map[string]interface{})["props"] == nil ||
+				(reflect.TypeOf(widget.(map[string]interface{})["props"]).Kind() != reflect.Map ||
+					reflect.TypeOf(widget.(map[string]interface{})["props"]).Elem().Kind() != reflect.Interface) {
+				return nil, model.ErrUnobtainableAttachments
+			}
+			props := widget.(map[string]interface{})["props"].(map[string]interface{})
+			if files, ok := props["files"]; ok {
+				for _, file := range files.([]interface{}) {
+					if file == nil ||
+						(reflect.TypeOf(file).Kind() != reflect.Map ||
+							reflect.TypeOf(file).Elem().Kind() != reflect.Interface) {
+						return nil, model.ErrUnobtainableAttachments
+					}
+					attachments[file.(map[string]interface{})["name"].(string)] = file.(map[string]interface{})["src"].(string)
+				}
+			}
+		}
+		if err != nil {
+			continue
+		}
+		continue
+	}
+
+	return attachments, nil
 }

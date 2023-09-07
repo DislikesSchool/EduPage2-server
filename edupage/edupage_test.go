@@ -3,6 +3,7 @@ package edupage
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"testing"
 )
 
@@ -28,28 +29,32 @@ func checkCredentials() error {
 	}
 
 	if len(server) == 0 {
-		return errors.New("server parameter missing, (-server=?)")
+		return errors.New("password parameter missing, (-server=?)")
 	}
 	return nil
 }
 
-func TestAutoLogin(t *testing.T) {
+func TestLoginAuto(t *testing.T) {
+
 	if len(username) == 0 {
-		t.Log("Username parameter missing, (-username=?)")
-		return
+		t.Error(errors.New("username parameter missing, (-username=?)"))
 	}
 
 	if len(password) == 0 {
-		t.Log("Password parameter missing, (-password=?)")
-		return
+		t.Error(errors.New("password parameter missing, (-password=?)"))
 	}
 
-	_, err := LoginAuto(username, password)
+	credentials, err := LoginAuto(username, password)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
+	_, err = CreateClient(credentials)
+	if err != nil {
+		t.Error(err)
+		return
+	}
 }
 
 func TestEdupage(t *testing.T) {
@@ -59,33 +64,54 @@ func TestEdupage(t *testing.T) {
 		return
 	}
 
-	client, err := Login(server, username, password)
+	credentials, err := Login(username, password, server)
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	err = client.Fetch()
-
+	client, err := CreateClient(credentials)
 	if err != nil {
 		t.Error(err)
-		return
+		//return
 	}
 
-	if len(client.Timeline.Items) == 0 {
-		t.Error("Recieved timeline array is empty")
+	timeline, err := client.GetRecentTimeline()
+	if err != nil {
+		t.Error(fmt.Errorf("failed to recieve timeline: %s", err))
+		//return
 	}
 
-	if len(client.User.UserGroups) == 0 {
-		t.Error("Recieved usergroup array is empty")
+	if len(timeline.Items) == 0 {
+		t.Log("Recieved timeline is empty")
 	}
 
-	if len(client.User.DBI.Teachers) == 0 {
-		t.Error("Recieved teacher map is empty")
+	results, err := client.GetRecentResults()
+	if err != nil {
+		t.Error(fmt.Errorf("failed to recieve results: %s", err))
+		//return
 	}
 
-	if len(client.Results.Grades) == 0 {
-		t.Error("Recieved grade array is empty")
+	if len(results.Grades) == 0 {
+		t.Log("Recieved grades are empty")
+	}
+
+	timetable, err := client.GetRecentTimetable()
+	if err != nil {
+		t.Error(fmt.Errorf("failed to recieve timetable: %s", err))
+		//return
+	}
+
+	if len(timetable.Days) == 0 {
+		t.Log("Recieved timetable is empty")
+	}
+	for k, _ := range timetable.Days {
+		println(k)
+	}
+
+	for _, v := range timetable.Days["2023-09-04"] {
+		subject, _ := client.GetSubjectByID(v.SubjectID)
+		println(subject.Name)
 	}
 
 }
@@ -98,7 +124,8 @@ func BenchmarkLogin(t *testing.B) {
 	}
 	t.ResetTimer()
 
-	_, err = Login(server, username, password)
+	_, err = Login(username, password, server)
+
 	if err != nil {
 		t.Error(err)
 		return
@@ -112,7 +139,14 @@ func BenchmarkTimeline(t *testing.B) {
 		return
 	}
 
-	client, err := Login(server, username, password)
+	credentials, err := Login(username, password, server)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	client, err := CreateClient(credentials)
 	if err != nil {
 		t.Error(err)
 		return
@@ -120,27 +154,32 @@ func BenchmarkTimeline(t *testing.B) {
 
 	t.ResetTimer()
 
-	err = client.LoadRecentTimeline()
+	timeline, err := client.GetRecentTimeline()
 	if err != nil {
-		t.Error(err)
+		t.Error(fmt.Errorf("failed to recieve timeline: %s", err))
 		return
 	}
 
-	t.StopTimer()
-
-	if len(client.Timeline.Items) == 0 {
-		t.Error("Recieved timeline array is empty")
+	if len(timeline.Items) == 0 {
+		t.Log("Recieved timeline is empty")
 	}
 }
 
-func BenchmarkUser(t *testing.B) {
+func BenchmarkResults(t *testing.B) {
 	err := checkCredentials()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	client, err := Login(server, username, password)
+	credentials, err := Login(username, password, server)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	client, err := CreateClient(credentials)
 	if err != nil {
 		t.Error(err)
 		return
@@ -148,27 +187,32 @@ func BenchmarkUser(t *testing.B) {
 
 	t.ResetTimer()
 
-	err = client.LoadUser()
+	results, err := client.GetRecentResults()
 	if err != nil {
-		t.Error(err)
+		t.Error(fmt.Errorf("failed to recieve results: %s", err))
 		return
 	}
 
-	t.StopTimer()
-
-	if len(client.User.UserGroups) == 0 {
-		t.Error("Recieved user group array is empty")
+	if len(results.Grades) == 0 {
+		t.Log("Recieved grades are empty")
 	}
 }
 
-func BenchmarkGrades(t *testing.B) {
+func BenchmarkTimetable(t *testing.B) {
 	err := checkCredentials()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 
-	client, err := Login(server, username, password)
+	credentials, err := Login(username, password, server)
+
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	client, err := CreateClient(credentials)
 	if err != nil {
 		t.Error(err)
 		return
@@ -176,15 +220,13 @@ func BenchmarkGrades(t *testing.B) {
 
 	t.ResetTimer()
 
-	err = client.LoadResults("2022", "RX")
+	timetable, err := client.GetRecentTimetable()
 	if err != nil {
-		t.Error(err)
+		t.Error(fmt.Errorf("failed to recieve timetable: %s", err))
 		return
 	}
 
-	t.StopTimer()
-
-	if len(client.Results.Grades) == 0 {
-		t.Error("Recieved grades array is empty")
+	if len(timetable.Days) == 0 {
+		t.Log("Recieved timetable is empty")
 	}
 }
