@@ -117,11 +117,12 @@ type LoginData struct {
 // @Schemes
 // @Description Logs in to your Edupage account using the provided credentials.
 // @Tags auth
-// @Accept json
 // @Accept multipart/form-data
 // @Accept x-www-form-urlencoded
-// @Param login body LoginRequestUsernamePassword false "Login using username and password"
-// @Param loginServer body LoginRequestUsernamePasswordServer false "Login using username, password and server"
+// @Consumes application/x-www-form-urlencoded
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Param server formData string false "Server"
 // @Produce json
 // @Success 200 {object} LoginSuccessResponse
 // @Failure 400 {object} LoginBadRequestResponse
@@ -129,23 +130,31 @@ type LoginData struct {
 // @Failure 500 {object} LoginInternalErrorResponse
 // @Router /login [post]
 func LoginHandler(c *gin.Context) {
-	var loginData LoginData
-	if err := c.Bind(&loginData); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	username := c.PostForm("username")
+	if username == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "username field is missing"})
 		return
 	}
 
-	if loginData.Username == "" || loginData.Password == "" {
+	password := c.PostForm("password")
+	if password == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "password field is missing"})
+		return
+	}
+
+	server := c.PostForm("server")
+
+	if username == "" || password == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Username and Password are required"})
 		return
 	}
 
 	var cred edupage.Credentials
 	var err error
-	if loginData.Server == "" {
-		cred, err = edupage.LoginAuto(loginData.Username, loginData.Password)
+	if server == "" {
+		cred, err = edupage.LoginAuto(username, password)
 	} else {
-		cred, err = edupage.Login(loginData.Server, loginData.Username, loginData.Password)
+		cred, err = edupage.Login(server, username, password)
 	}
 
 	if err != nil {
@@ -177,9 +186,7 @@ func LoginHandler(c *gin.Context) {
 	}
 
 	userID := user.UserRow.UserID
-	username := loginData.Username
-
-	token, err := generateJWT(userID, loginData.Username)
+	token, err := generateJWT(userID, username)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -1,20 +1,5 @@
 package main
 
-type LoginRequestUsernamePassword struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
-type LoginRequestToken struct {
-	Token string `json:"token" binding:"required"`
-}
-
-type LoginRequestUsernamePasswordServer struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-	Server   string `json:"server" binding:"required"`
-}
-
 type LoginSuccessResponse struct {
 	Success   bool   `json:"success" example:"true"`
 	Error     string `json:"error" example:""`
@@ -47,4 +32,12 @@ type ValidateTokenSuccessResponse struct {
 type ValidateTokenUnauthorizedResponse struct {
 	Success bool   `json:"success" example:"false"`
 	Error   string `json:"error" example:"Unauthorized"`
+}
+
+type UnauthorizedResponse struct {
+	Error string `json:"error" example:"Unauthorized"`
+}
+
+type InternalErrorResponse struct {
+	Error string `json:"error" example:"failed to create payload"`
 }

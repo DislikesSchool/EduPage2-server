@@ -3,14 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
-	"github.com/gin-contrib/cache"
-	"github.com/gin-contrib/cache/persistence"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -22,6 +19,12 @@ var clients = make(map[string]*edupage.EdupageClient)
 // @version 1.0
 // @description This is the backend for the EduPage2 app.
 // @BasePath /
+
+// @SecurityDefinition Bearer
+// @Description JWT authorization token
+// @Type apiKey
+// @In header
+// @Name Authorization
 
 func main() {
 	if err := sentry.Init(sentry.ClientOptions{
@@ -43,16 +46,17 @@ func main() {
 	api.Use(authMiddleware())
 	docs.SwaggerInfo.BasePath = "/"
 	router.Use(sentrygin.New(sentrygin.Options{}))
-	store := persistence.NewInMemoryStore(time.Minute)
 
-	router.POST("/login", cache.CachePage(store, time.Hour, LoginHandler))
-	router.GET("/validate-token", cache.CachePage(store, time.Second, ValidateTokenHandler))
+	router.POST("/login", LoginHandler)
+	router.GET("/validate-token", ValidateTokenHandler)
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
-	api.GET("/timeline", cache.CachePage(store, time.Minute, TimelineHandler))
-	api.GET("/timeline/recent", cache.CachePage(store, time.Minute, RecentTimelineHandler))
-	api.GET("/timetable", cache.CachePage(store, time.Minute, TimetableHandler))
-	api.GET("/timetable/recent", cache.CachePage(store, time.Minute, RecentTimetableHangler))
+	api.GET("/timeline", TimelineHandler)
+	api.GET("/timeline/recent", RecentTimelineHandler)
+	api.GET("/timetable", TimetableHandler)
+	api.GET("/timetable/recent", RecentTimetableHangler)
+	api.GET("/subject/:id", SubjectHandler)
+	api.GET("/teacher/:id", TeacherHandler)
 
 	router.Run()
 }

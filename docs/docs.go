@@ -15,8 +15,119 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/subject/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns the subject by ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DBI"
+                ],
+                "summary": "Get the subject by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Subject ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Subject"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.InternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/teacher/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns the teacher by ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DBI"
+                ],
+                "summary": "Get the teacher by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Teacher ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Teacher"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.InternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/timeline": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Returns the user's timeline from any date to any other date or today.",
                 "produces": [
                     "application/json"
@@ -29,7 +140,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "JWT token",
-                        "name": "token",
+                        "name": "Authorization",
                         "in": "header",
                         "required": true
                     },
@@ -57,13 +168,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.TimelineUnauthorizedResponse"
+                            "$ref": "#/definitions/main.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.TimelineInternalErrorResponse"
+                            "$ref": "#/definitions/main.InternalErrorResponse"
                         }
                     }
                 }
@@ -71,6 +182,11 @@ const docTemplate = `{
         },
         "/api/timeline/recent": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Returns the user's timeline from today to 30 days in the past.",
                 "produces": [
                     "application/json"
@@ -83,7 +199,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "JWT token",
-                        "name": "token",
+                        "name": "Authorization",
                         "in": "header",
                         "required": true
                     }
@@ -98,13 +214,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.RecentTimelineUnauthorizedResponse"
+                            "$ref": "#/definitions/main.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.RecentTimelineInternalErrorResponse"
+                            "$ref": "#/definitions/main.InternalErrorResponse"
                         }
                     }
                 }
@@ -112,6 +228,11 @@ const docTemplate = `{
         },
         "/api/timetable": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Returns the user's timetable from date specified to date specified or today.",
                 "produces": [
                     "application/json"
@@ -124,7 +245,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "JWT token",
-                        "name": "token",
+                        "name": "Authorization",
                         "in": "header",
                         "required": true
                     },
@@ -152,13 +273,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.TimetableUnauthorizedResponse"
+                            "$ref": "#/definitions/main.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.TimetableInternalErrorResponse"
+                            "$ref": "#/definitions/main.InternalErrorResponse"
                         }
                     }
                 }
@@ -166,6 +287,11 @@ const docTemplate = `{
         },
         "/api/timetable/recent": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "Returns the user's timetable from before yesterday to 7 days in the future.",
                 "produces": [
                     "application/json"
@@ -178,7 +304,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "JWT token",
-                        "name": "token",
+                        "name": "Authorization",
                         "in": "header",
                         "required": true
                     }
@@ -193,13 +319,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.TimetableUnauthorizedResponse"
+                            "$ref": "#/definitions/main.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.TimetableInternalErrorResponse"
+                            "$ref": "#/definitions/main.InternalErrorResponse"
                         }
                     }
                 }
@@ -209,7 +335,6 @@ const docTemplate = `{
             "post": {
                 "description": "Logs in to your Edupage account using the provided credentials.",
                 "consumes": [
-                    "application/json",
                     "multipart/form-data",
                     "application/x-www-form-urlencoded"
                 ],
@@ -222,20 +347,24 @@ const docTemplate = `{
                 "summary": "Login to your Edupage account",
                 "parameters": [
                     {
-                        "description": "Login using username and password",
-                        "name": "login",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/main.LoginRequestUsernamePassword"
-                        }
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
                     },
                     {
-                        "description": "Login using username, password and server",
-                        "name": "loginServer",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/main.LoginRequestUsernamePasswordServer"
-                        }
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Server",
+                        "name": "server",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -365,6 +494,15 @@ const docTemplate = `{
                 "znamky_udalostid": {}
             }
         },
+        "main.InternalErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "failed to create payload"
+                }
+            }
+        },
         "main.LoginBadRequestResponse": {
             "type": "object",
             "properties": {
@@ -388,40 +526,6 @@ const docTemplate = `{
                 "success": {
                     "type": "boolean",
                     "example": false
-                }
-            }
-        },
-        "main.LoginRequestUsernamePassword": {
-            "type": "object",
-            "required": [
-                "password",
-                "username"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "main.LoginRequestUsernamePasswordServer": {
-            "type": "object",
-            "required": [
-                "password",
-                "server",
-                "username"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "server": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         },
@@ -463,24 +567,6 @@ const docTemplate = `{
                 }
             }
         },
-        "main.RecentTimelineInternalErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "failed to create payload"
-                }
-            }
-        },
-        "main.RecentTimelineUnauthorizedResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "Unauthorized"
-                }
-            }
-        },
         "main.Timeline": {
             "type": "object",
             "properties": {
@@ -495,15 +581,6 @@ const docTemplate = `{
                     "additionalProperties": {
                         "$ref": "#/definitions/main.TimelineItemReduced"
                     }
-                }
-            }
-        },
-        "main.TimelineInternalErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "failed to create payload"
                 }
             }
         },
@@ -545,25 +622,7 @@ const docTemplate = `{
                 }
             }
         },
-        "main.TimelineUnauthorizedResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "Unauthorized"
-                }
-            }
-        },
-        "main.TimetableInternalErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "failed to create payload"
-                }
-            }
-        },
-        "main.TimetableUnauthorizedResponse": {
+        "main.UnauthorizedResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -599,6 +658,55 @@ const docTemplate = `{
                 "success": {
                     "type": "boolean",
                     "example": false
+                }
+            }
+        },
+        "model.Subject": {
+            "type": "object",
+            "properties": {
+                "cbhidden": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "short": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Teacher": {
+            "type": "object",
+            "properties": {
+                "classroomid": {
+                    "type": "string"
+                },
+                "datefrom": {
+                    "type": "string"
+                },
+                "dateto": {
+                    "type": "string"
+                },
+                "firstname": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isout": {
+                    "type": "boolean"
+                },
+                "lastname": {
+                    "type": "string"
+                },
+                "short": {
+                    "type": "string"
                 }
             }
         },
@@ -706,7 +814,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "EduPage2 API",
-	Description:      "This is the backend for the EduPage2 app.",
+	Description:      "JWT authorization token",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -6,14 +6,6 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
-type RecentTimelineUnauthorizedResponse struct {
-	Error string `json:"error" example:"Unauthorized"`
-}
-
-type RecentTimelineInternalErrorResponse struct {
-	Error string `json:"error" example:"failed to create payload"`
-}
-
 type TimelineItemReduced struct {
 	ID            string                 `json:"timelineid"`
 	Timestamp     model.Time             `json:"timestamp"`
@@ -60,12 +52,4 @@ type Timeline struct {
 type TimelineRequest struct {
 	From string `json:"from" example:"2022-01-01T00:00:00Z2022-01-01T00:00:00Z"`
 	To   string `json:"to" example:"2022-01-01T00:00:00Z" default:"time.Now()"`
-}
-
-type TimelineUnauthorizedResponse struct {
-	Error string `json:"error" example:"Unauthorized"`
-}
-
-type TimelineInternalErrorResponse struct {
-	Error string `json:"error" example:"failed to create payload"`
 }

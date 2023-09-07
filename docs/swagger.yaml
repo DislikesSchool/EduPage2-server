@@ -42,6 +42,12 @@ definitions:
         type: string
       znamky_udalostid: {}
     type: object
+  main.InternalErrorResponse:
+    properties:
+      error:
+        example: failed to create payload
+        type: string
+    type: object
   main.LoginBadRequestResponse:
     properties:
       error:
@@ -60,29 +66,6 @@ definitions:
       success:
         example: false
         type: boolean
-    type: object
-  main.LoginRequestUsernamePassword:
-    properties:
-      password:
-        type: string
-      username:
-        type: string
-    required:
-    - password
-    - username
-    type: object
-  main.LoginRequestUsernamePasswordServer:
-    properties:
-      password:
-        type: string
-      server:
-        type: string
-      username:
-        type: string
-    required:
-    - password
-    - server
-    - username
     type: object
   main.LoginSuccessResponse:
     properties:
@@ -112,18 +95,6 @@ definitions:
         example: false
         type: boolean
     type: object
-  main.RecentTimelineInternalErrorResponse:
-    properties:
-      error:
-        example: failed to create payload
-        type: string
-    type: object
-  main.RecentTimelineUnauthorizedResponse:
-    properties:
-      error:
-        example: Unauthorized
-        type: string
-    type: object
   main.Timeline:
     properties:
       homeworks:
@@ -134,12 +105,6 @@ definitions:
         additionalProperties:
           $ref: '#/definitions/main.TimelineItemReduced'
         type: object
-    type: object
-  main.TimelineInternalErrorResponse:
-    properties:
-      error:
-        example: failed to create payload
-        type: string
     type: object
   main.TimelineItemReduced:
     properties:
@@ -166,19 +131,7 @@ definitions:
       vlastnik:
         type: string
     type: object
-  main.TimelineUnauthorizedResponse:
-    properties:
-      error:
-        example: Unauthorized
-        type: string
-    type: object
-  main.TimetableInternalErrorResponse:
-    properties:
-      error:
-        example: failed to create payload
-        type: string
-    type: object
-  main.TimetableUnauthorizedResponse:
+  main.UnauthorizedResponse:
     properties:
       error:
         example: Unauthorized
@@ -204,6 +157,38 @@ definitions:
       success:
         example: false
         type: boolean
+    type: object
+  model.Subject:
+    properties:
+      cbhidden:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      short:
+        type: string
+    type: object
+  model.Teacher:
+    properties:
+      classroomid:
+        type: string
+      datefrom:
+        type: string
+      dateto:
+        type: string
+      firstname:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      isout:
+        type: boolean
+      lastname:
+        type: string
+      short:
+        type: string
     type: object
   model.TimelineItemData:
     properties:
@@ -269,10 +254,78 @@ definitions:
     type: object
 info:
   contact: {}
-  description: This is the backend for the EduPage2 app.
+  description: JWT authorization token
   title: EduPage2 API
   version: "1.0"
 paths:
+  /api/subject/{id}:
+    get:
+      description: Returns the subject by ID.
+      parameters:
+      - description: JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Subject ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Subject'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.UnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.InternalErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get the subject by ID
+      tags:
+      - DBI
+  /api/teacher/{id}:
+    get:
+      description: Returns the teacher by ID.
+      parameters:
+      - description: JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Teacher ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Teacher'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.UnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.InternalErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get the teacher by ID
+      tags:
+      - DBI
   /api/timeline:
     get:
       description: Returns the user's timeline from any date to any other date or
@@ -280,7 +333,7 @@ paths:
       parameters:
       - description: JWT token
         in: header
-        name: token
+        name: Authorization
         required: true
         type: string
       - example: 2022-01-01T00:00:00Z2022-01-01T00:00:00Z
@@ -302,11 +355,13 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.TimelineUnauthorizedResponse'
+            $ref: '#/definitions/main.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.TimelineInternalErrorResponse'
+            $ref: '#/definitions/main.InternalErrorResponse'
+      security:
+      - Bearer: []
       summary: Get the user's timeline
       tags:
       - timeline
@@ -316,7 +371,7 @@ paths:
       parameters:
       - description: JWT token
         in: header
-        name: token
+        name: Authorization
         required: true
         type: string
       produces:
@@ -329,11 +384,13 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.RecentTimelineUnauthorizedResponse'
+            $ref: '#/definitions/main.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.RecentTimelineInternalErrorResponse'
+            $ref: '#/definitions/main.InternalErrorResponse'
+      security:
+      - Bearer: []
       summary: Get the user's recent timeline
       tags:
       - timeline
@@ -344,7 +401,7 @@ paths:
       parameters:
       - description: JWT token
         in: header
-        name: token
+        name: Authorization
         required: true
         type: string
       - example: 2022-01-01T00:00:00Z2022-01-01T00:00:00Z
@@ -366,11 +423,13 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.TimetableUnauthorizedResponse'
+            $ref: '#/definitions/main.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.TimetableInternalErrorResponse'
+            $ref: '#/definitions/main.InternalErrorResponse'
+      security:
+      - Bearer: []
       summary: Get the user's  timetable
       tags:
       - timetable
@@ -381,7 +440,7 @@ paths:
       parameters:
       - description: JWT token
         in: header
-        name: token
+        name: Authorization
         required: true
         type: string
       produces:
@@ -394,32 +453,37 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.TimetableUnauthorizedResponse'
+            $ref: '#/definitions/main.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.TimetableInternalErrorResponse'
+            $ref: '#/definitions/main.InternalErrorResponse'
+      security:
+      - Bearer: []
       summary: Get the user's recent timetable
       tags:
       - timetable
   /login:
     post:
       consumes:
-      - application/json
       - multipart/form-data
       - application/x-www-form-urlencoded
       description: Logs in to your Edupage account using the provided credentials.
       parameters:
-      - description: Login using username and password
-        in: body
-        name: login
-        schema:
-          $ref: '#/definitions/main.LoginRequestUsernamePassword'
-      - description: Login using username, password and server
-        in: body
-        name: loginServer
-        schema:
-          $ref: '#/definitions/main.LoginRequestUsernamePasswordServer'
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Server
+        in: formData
+        name: server
+        type: string
       produces:
       - application/json
       responses:
