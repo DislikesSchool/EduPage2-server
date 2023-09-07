@@ -139,3 +139,29 @@ func TimetableHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, timetable)
 }
+
+// SubjectHandler godoc
+// @Summary Get the subject by ID
+// @Schemes
+// @Description Returns the subject by ID.
+// @Tags DBI
+// @Param token header string true "JWT token"
+// @Param id param string true "Subject ID"
+// @Produce json
+// @Success 200 {object} Subject
+// @Failure 401 {object} SubjectUnauthorizedResponse
+// @Failure 500 {object} SubjectInternalErrorResponse
+// @Router /api/subject/:id [get]
+func SubjectHandler(c *gin.Context) {
+	client := c.MustGet("client").(*edupage.EdupageClient)
+
+	id := c.Param("id")
+
+	subject, err := client.GetSubjectByID(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, subject)
+}
