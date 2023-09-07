@@ -115,7 +115,7 @@ func (client *EdupageClient) GetResults(year, halfyear string) (model.Results, e
 
 // GetResults retrieves this week's timetable from edupage.
 func (client *EdupageClient) GetRecentTimetable() (model.Timetable, error) {
-	tt, err := client.fetchTimetable(time.Now().AddDate(0, 0, 2), time.Now().AddDate(0, 0, 7))
+	tt, err := client.fetchTimetable(time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, 7))
 	if err != nil {
 		return model.Timetable{}, err
 	}
