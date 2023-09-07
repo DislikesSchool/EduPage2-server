@@ -71,6 +71,13 @@ func authMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		client, err := clientFromContext(c)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+		c.Set("client", client)
+
 		c.Next()
 	}
 }
@@ -184,6 +191,28 @@ func LoginHandler(c *gin.Context) {
 		"name":    user.UserRow.Firstname + " " + user.UserRow.Lastname,
 		"token":   token,
 	})
+}
+
+func clientFromContext(c *gin.Context) (*edupage.EdupageClient, error) {
+	claims, err := getClaims(c)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return &edupage.EdupageClient{}, err
+	}
+	userID := claims["userID"].(string)
+	username := claims["username"].(string)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return &edupage.EdupageClient{}, err
+	}
+
+	client, ok := clients[userID+username]
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
+		return &edupage.EdupageClient{}, err
+	}
+
+	return client, nil
 }
 
 // ValidateTokenHandler godoc

@@ -51,7 +51,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.TimelineSuccessResponse"
+                            "$ref": "#/definitions/main.Timeline"
                         }
                     },
                     "401": {
@@ -92,7 +92,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.RecentTimelineSuccessResponse"
+                            "$ref": "#/definitions/main.Timeline"
                         }
                     },
                     "401": {
@@ -105,6 +105,101 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/main.RecentTimelineInternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/timetable": {
+            "get": {
+                "description": "Returns the user's timetable from date specified to date specified or today.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "timetable"
+                ],
+                "summary": "Get the user's  timetable",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "2022-01-01T00:00:00Z2022-01-01T00:00:00Z",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "time.Now()",
+                        "example": "2022-01-01T00:00:00Z",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Timetable"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.TimetableUnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.TimetableInternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/timetable/recent": {
+            "get": {
+                "description": "Returns the user's timetable from before yesterday to 7 days in the future.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "timetable"
+                ],
+                "summary": "Get the user's recent timetable",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Timetable"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.TimetableUnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.TimetableInternalErrorResponse"
                         }
                     }
                 }
@@ -374,29 +469,6 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "failed to create payload"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": false
-                }
-            }
-        },
-        "main.RecentTimelineSuccessResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": ""
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "timeline": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/main.Timeline"
-                    }
                 }
             }
         },
@@ -406,10 +478,6 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "Unauthorized"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": false
                 }
             }
         },
@@ -436,10 +504,6 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "failed to create payload"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": false
                 }
             }
         },
@@ -481,41 +545,30 @@ const docTemplate = `{
                 }
             }
         },
-        "main.TimelineSuccessResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": ""
-                },
-                "from": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "timeline": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/main.Timeline"
-                    }
-                },
-                "to": {
-                    "type": "string"
-                }
-            }
-        },
         "main.TimelineUnauthorizedResponse": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "string",
                     "example": "Unauthorized"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": false
+                }
+            }
+        },
+        "main.TimetableInternalErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "failed to create payload"
+                }
+            }
+        },
+        "main.TimetableUnauthorizedResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Unauthorized"
                 }
             }
         },
@@ -563,6 +616,83 @@ const docTemplate = `{
             "properties": {
                 "uint8": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.Timetable": {
+            "type": "object",
+            "properties": {
+                "days": {
+                    "description": "key format is YYYY-MM-dd or 2006-01-02",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/model.TimetableItem"
+                        }
+                    }
+                }
+            }
+        },
+        "model.TimetableItem": {
+            "type": "object",
+            "properties": {
+                "classids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "classroomids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "colors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "date": {
+                    "type": "string"
+                },
+                "endtime": {
+                    "type": "string"
+                },
+                "groupnames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "igroupid": {
+                    "type": "string"
+                },
+                "starttime": {
+                    "type": "string"
+                },
+                "studentids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "subjectid": {
+                    "type": "string"
+                },
+                "teacherids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                },
+                "uniperiod": {
+                    "type": "string"
                 }
             }
         }

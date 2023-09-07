@@ -117,31 +117,12 @@ definitions:
       error:
         example: failed to create payload
         type: string
-      success:
-        example: false
-        type: boolean
-    type: object
-  main.RecentTimelineSuccessResponse:
-    properties:
-      error:
-        example: ""
-        type: string
-      success:
-        example: true
-        type: boolean
-      timeline:
-        items:
-          $ref: '#/definitions/main.Timeline'
-        type: array
     type: object
   main.RecentTimelineUnauthorizedResponse:
     properties:
       error:
         example: Unauthorized
         type: string
-      success:
-        example: false
-        type: boolean
     type: object
   main.Timeline:
     properties:
@@ -159,9 +140,6 @@ definitions:
       error:
         example: failed to create payload
         type: string
-      success:
-        example: false
-        type: boolean
     type: object
   main.TimelineItemReduced:
     properties:
@@ -188,31 +166,23 @@ definitions:
       vlastnik:
         type: string
     type: object
-  main.TimelineSuccessResponse:
-    properties:
-      error:
-        example: ""
-        type: string
-      from:
-        type: string
-      success:
-        example: true
-        type: boolean
-      timeline:
-        items:
-          $ref: '#/definitions/main.Timeline'
-        type: array
-      to:
-        type: string
-    type: object
   main.TimelineUnauthorizedResponse:
     properties:
       error:
         example: Unauthorized
         type: string
-      success:
-        example: false
-        type: boolean
+    type: object
+  main.TimetableInternalErrorResponse:
+    properties:
+      error:
+        example: failed to create payload
+        type: string
+    type: object
+  main.TimetableUnauthorizedResponse:
+    properties:
+      error:
+        example: Unauthorized
+        type: string
     type: object
   main.ValidateTokenSuccessResponse:
     properties:
@@ -246,6 +216,57 @@ definitions:
       uint8:
         type: integer
     type: object
+  model.Timetable:
+    properties:
+      days:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/model.TimetableItem'
+          type: array
+        description: key format is YYYY-MM-dd or 2006-01-02
+        type: object
+    type: object
+  model.TimetableItem:
+    properties:
+      classids:
+        items:
+          type: string
+        type: array
+      classroomids:
+        items:
+          type: string
+        type: array
+      colors:
+        items:
+          type: string
+        type: array
+      date:
+        type: string
+      endtime:
+        type: string
+      groupnames:
+        items:
+          type: string
+        type: array
+      igroupid:
+        type: string
+      starttime:
+        type: string
+      studentids:
+        items:
+          type: string
+        type: array
+      subjectid:
+        type: string
+      teacherids:
+        items:
+          type: string
+        type: array
+      type:
+        type: string
+      uniperiod:
+        type: string
+    type: object
 info:
   contact: {}
   description: This is the backend for the EduPage2 app.
@@ -277,7 +298,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.TimelineSuccessResponse'
+            $ref: '#/definitions/main.Timeline'
         "401":
           description: Unauthorized
           schema:
@@ -304,7 +325,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.RecentTimelineSuccessResponse'
+            $ref: '#/definitions/main.Timeline'
         "401":
           description: Unauthorized
           schema:
@@ -316,6 +337,71 @@ paths:
       summary: Get the user's recent timeline
       tags:
       - timeline
+  /api/timetable:
+    get:
+      description: Returns the user's timetable from date specified to date specified
+        or today.
+      parameters:
+      - description: JWT token
+        in: header
+        name: token
+        required: true
+        type: string
+      - example: 2022-01-01T00:00:00Z2022-01-01T00:00:00Z
+        in: query
+        name: from
+        type: string
+      - default: time.Now()
+        example: "2022-01-01T00:00:00Z"
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Timetable'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.TimetableUnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.TimetableInternalErrorResponse'
+      summary: Get the user's  timetable
+      tags:
+      - timetable
+  /api/timetable/recent:
+    get:
+      description: Returns the user's timetable from before yesterday to 7 days in
+        the future.
+      parameters:
+      - description: JWT token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Timetable'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.TimetableUnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.TimetableInternalErrorResponse'
+      summary: Get the user's recent timetable
+      tags:
+      - timetable
   /login:
     post:
       consumes:

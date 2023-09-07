@@ -6,20 +6,12 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
-type RecentTimelineSuccessResponse struct {
-	Success  bool       `json:"success" example:"true"`
-	Error    string     `json:"error" example:""`
-	Timeline []Timeline `json:"timeline"`
-}
-
 type RecentTimelineUnauthorizedResponse struct {
-	Success bool   `json:"success" example:"false"`
-	Error   string `json:"error" example:"Unauthorized"`
+	Error string `json:"error" example:"Unauthorized"`
 }
 
 type RecentTimelineInternalErrorResponse struct {
-	Success bool   `json:"success" example:"false"`
-	Error   string `json:"error" example:"failed to create payload"`
+	Error string `json:"error" example:"failed to create payload"`
 }
 
 type TimelineItemReduced struct {
@@ -70,20 +62,10 @@ type TimelineRequest struct {
 	To   string `json:"to" example:"2022-01-01T00:00:00Z" default:"time.Now()"`
 }
 
-type TimelineSuccessResponse struct {
-	Success  bool       `json:"success" example:"true"`
-	Error    string     `json:"error" example:""`
-	Timeline []Timeline `json:"timeline"`
-	From     string     `json:"from"`
-	To       string     `json:"to"`
-}
-
 type TimelineUnauthorizedResponse struct {
-	Success bool   `json:"success" example:"false"`
-	Error   string `json:"error" example:"Unauthorized"`
+	Error string `json:"error" example:"Unauthorized"`
 }
 
 type TimelineInternalErrorResponse struct {
-	Success bool   `json:"success" example:"false"`
-	Error   string `json:"error" example:"failed to create payload"`
+	Error string `json:"error" example:"failed to create payload"`
 }
