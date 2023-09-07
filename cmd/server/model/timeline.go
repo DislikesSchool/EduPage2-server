@@ -66,8 +66,8 @@ type Timeline struct {
 }
 
 type TimelineRequest struct {
-	From string `json:"from" example:"1620000000"`
-	To   string `json:"to" example:"1620000000" default:"time.Now().Unix()"`
+	From string `json:"from" example:"2022-01-01T00:00:00Z2022-01-01T00:00:00Z"`
+	To   string `json:"to" example:"2022-01-01T00:00:00Z" default:"time.Now()"`
 }
 
 type TimelineSuccessResponse struct {

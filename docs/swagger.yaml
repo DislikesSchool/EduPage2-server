@@ -188,16 +188,6 @@ definitions:
       vlastnik:
         type: string
     type: object
-  main.TimelineRequest:
-    properties:
-      from:
-        example: "1620000000"
-        type: string
-      to:
-        default: time.Now().Unix()
-        example: "1620000000"
-        type: string
-    type: object
   main.TimelineSuccessResponse:
     properties:
       error:
@@ -272,12 +262,15 @@ paths:
         name: token
         required: true
         type: string
-      - description: Date range
-        in: body
-        name: range
-        required: true
-        schema:
-          $ref: '#/definitions/main.TimelineRequest'
+      - example: 2022-01-01T00:00:00Z2022-01-01T00:00:00Z
+        in: query
+        name: from
+        type: string
+      - default: time.Now()
+        example: "2022-01-01T00:00:00Z"
+        in: query
+        name: to
+        type: string
       produces:
       - application/json
       responses:

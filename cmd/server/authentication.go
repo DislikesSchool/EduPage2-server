@@ -133,12 +133,12 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	var h edupage.EdupageClient
+	var cred edupage.Credentials
 	var err error
 	if loginData.Server == "" {
-		h, err = edupage.LoginAuto(loginData.Username, loginData.Password)
+		cred, err = edupage.LoginAuto(loginData.Username, loginData.Password)
 	} else {
-		h, err = edupage.Login(loginData.Server, loginData.Username, loginData.Password)
+		cred, err = edupage.Login(loginData.Server, loginData.Username, loginData.Password)
 	}
 
 	if err != nil {
@@ -149,7 +149,9 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	err = h.LoadUser()
+	var h edupage.EdupageClient
+	h, err = edupage.CreateClient(cred)
+
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error":   err.Error(),
@@ -158,7 +160,16 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	userID := h.User.UserRow.UserID
+	user, err := h.GetUser(false)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
+		return
+	}
+
+	userID := user.UserRow.UserID
 	username := loginData.Username
 
 	token, err := generateJWT(userID, loginData.Username)
@@ -170,7 +181,7 @@ func LoginHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
 		"success": true,
-		"name":    h.User.UserRow.Firstname + " " + h.User.UserRow.Lastname,
+		"name":    user.UserRow.Firstname + " " + user.UserRow.Lastname,
 		"token":   token,
 	})
 }

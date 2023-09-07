@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,13 +37,13 @@ func RecentTimelineHandler(c *gin.Context) {
 		return
 	}
 
-	err = client.LoadRecentTimeline()
+	timeline, err := client.GetRecentTimeline()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, client.Timeline)
+	c.JSON(http.StatusOK, timeline)
 }
 
 // TimelineHandler godoc
@@ -51,7 +52,7 @@ func RecentTimelineHandler(c *gin.Context) {
 // @Description Returns the user's timeline from any date to any other date or today.
 // @Tags timeline
 // @Param token header string true "JWT token"
-// @Param range body TimelineRequest true "Date range"
+// @Param range query TimelineRequest true "Date range"
 // @Produce json
 // @Success 200 {object} TimelineSuccessResponse
 // @Failure 401 {object} TimelineUnauthorizedResponse
@@ -76,11 +77,29 @@ func TimelineHandler(c *gin.Context) {
 		return
 	}
 
-	err = client.LoadRecentTimeline()
+	dateFromString := c.Query("from")
+	dateToString := c.Query("to")
+
+	var dateTo time.Time
+	var dateFrom time.Time
+
+	if dateToString == "" {
+		dateTo = time.Now()
+	} else {
+		dateTo, err = time.Parse(time.RFC3339, dateToString)
+	}
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	dateFrom, err = time.Parse(time.RFC3339, dateFromString)
+
+	timeline, err := client.GetTimeline(dateFrom, dateTo)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, client.Timeline)
+	c.JSON(http.StatusOK, timeline)
 }

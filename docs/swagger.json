@@ -27,13 +27,17 @@
                         "required": true
                     },
                     {
-                        "description": "Date range",
-                        "name": "range",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/main.TimelineRequest"
-                        }
+                        "type": "string",
+                        "example": "2022-01-01T00:00:00Z2022-01-01T00:00:00Z",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "time.Now()",
+                        "example": "2022-01-01T00:00:00Z",
+                        "name": "to",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -467,20 +471,6 @@
                 },
                 "vlastnik": {
                     "type": "string"
-                }
-            }
-        },
-        "main.TimelineRequest": {
-            "type": "object",
-            "properties": {
-                "from": {
-                    "type": "string",
-                    "example": "1620000000"
-                },
-                "to": {
-                    "type": "string",
-                    "default": "time.Now().Unix()",
-                    "example": "1620000000"
                 }
             }
         },
