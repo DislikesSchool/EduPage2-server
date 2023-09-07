@@ -43,14 +43,15 @@ func main() {
 	api.Use(authMiddleware())
 	docs.SwaggerInfo.BasePath = "/"
 	router.Use(sentrygin.New(sentrygin.Options{}))
-	store := persistence.NewInMemoryStore(time.Second)
+	store := persistence.NewInMemoryStore(time.Minute)
 
-	router.POST("/login", cache.CachePage(store, time.Second, LoginHandler))
+	router.POST("/login", cache.CachePage(store, time.Hour, LoginHandler))
 	router.GET("/validate-token", cache.CachePage(store, time.Second, ValidateTokenHandler))
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	api.GET("/timeline", cache.CachePage(store, time.Minute, TimelineHandler))
 	api.GET("/timeline/recent", cache.CachePage(store, time.Minute, RecentTimelineHandler))
+	api.GET("/timetable", cache.CachePage(store, time.Minute, TimetableHandler))
 	api.GET("/timetable/recent", cache.CachePage(store, time.Minute, RecentTimetableHangler))
 
 	router.Run()
