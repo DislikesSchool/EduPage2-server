@@ -197,3 +197,30 @@ func TeacherHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, subject)
 }
+
+// ClassroomHandler godoc
+// @Summary Get the classroom by ID
+// @Schemes
+// @Description Returns the classroom by ID.
+// @Tags DBI
+// @Param Authorization header string true "JWT token"
+// @Param id path string true "Classroom ID"
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} model.Classroom
+// @Failure 401 {object} UnauthorizedResponse
+// @Failure 500 {object} InternalErrorResponse
+// @Router /api/classroom/{id} [get]
+func ClassroomHandler(c *gin.Context) {
+	client := c.MustGet("client").(*edupage.EdupageClient)
+
+	id := c.Param("id")
+
+	subject, err := client.GetClassroomByID(id)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, subject)
+}

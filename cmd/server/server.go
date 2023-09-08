@@ -57,6 +57,7 @@ func main() {
 	api.GET("/timetable/recent", RecentTimetableHangler)
 	api.GET("/subject/:id", SubjectHandler)
 	api.GET("/teacher/:id", TeacherHandler)
+	api.GET("/classroom/:id", ClassroomHandler)
 
 	router.Run()
 }
