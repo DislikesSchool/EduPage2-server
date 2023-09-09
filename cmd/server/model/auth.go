@@ -41,3 +41,11 @@ type UnauthorizedResponse struct {
 type InternalErrorResponse struct {
 	Error string `json:"error" example:"failed to create payload"`
 }
+
+type ICanteenBadRequestResponse struct {
+	Error string `json:"error" example:"username is missing"`
+}
+
+type ICanteenInternalErrorResponse struct {
+	Error string `json:"error" example:"failed to load lunches: failed to login: Post https://example.edupage.org/login/edubarLogin.php: dial tcp: lookup example.edupage.org: no such host"`
+}

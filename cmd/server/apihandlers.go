@@ -224,3 +224,48 @@ func ClassroomHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, subject)
 }
+
+// ICanteenHandler godoc
+// @Summary Load lunches from iCanteen
+// @Schemes
+// @Description Loads the lunches from iCanteen for the next month.
+// @Tags lunches
+// @Accept multipart/form-data
+// @Accept x-www-form-urlencoded
+// @Consumes application/x-www-form-urlencoded
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Param server formData string true "Server"
+// @Produce json
+// @Success 200 {object} []edupage.ICanteenDay
+// @Failure 400 {object} ICanteenBadRequestResponse
+// @Failure 500 {object} ICanteenInternalErrorResponse
+// @Router /icanteen [post]
+func ICanteenHandler(ctx *gin.Context) {
+	var username string
+	var password string
+	var server string
+
+	if username = ctx.PostForm("username"); username == "" {
+		ctx.AbortWithStatusJSON(400, gin.H{"error": "username is missing"})
+		return
+	}
+
+	if password = ctx.PostForm("password"); password == "" {
+		ctx.AbortWithStatusJSON(400, gin.H{"error": "password is missing"})
+		return
+	}
+
+	if server = ctx.PostForm("server"); server == "" {
+		ctx.AbortWithStatusJSON(400, gin.H{"error": "server is missing"})
+		return
+	}
+
+	lunches, err := edupage.LoadLunches(username, password, server)
+	if err != nil {
+		ctx.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(200, lunches)
+}

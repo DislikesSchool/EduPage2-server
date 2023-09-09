@@ -1,5 +1,23 @@
 basePath: /
 definitions:
+  edupage.ICanteenDay:
+    properties:
+      day:
+        type: string
+      lunches:
+        items:
+          $ref: '#/definitions/edupage.ICanteenLunch'
+        type: array
+    type: object
+  edupage.ICanteenLunch:
+    properties:
+      can_order:
+        type: boolean
+      name:
+        type: string
+      ordered:
+        type: boolean
+    type: object
   main.HomeworkReduced:
     properties:
       attachements: {}
@@ -41,6 +59,19 @@ definitions:
       userid:
         type: string
       znamky_udalostid: {}
+    type: object
+  main.ICanteenBadRequestResponse:
+    properties:
+      error:
+        example: username is missing
+        type: string
+    type: object
+  main.ICanteenInternalErrorResponse:
+    properties:
+      error:
+        example: 'failed to load lunches: failed to login: Post https://example.edupage.org/login/edubarLogin.php:
+          dial tcp: lookup example.edupage.org: no such host'
+        type: string
     type: object
   main.InternalErrorResponse:
     properties:
@@ -158,6 +189,15 @@ definitions:
         example: false
         type: boolean
     type: object
+  model.Classroom:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      short:
+        type: string
+    type: object
   model.Subject:
     properties:
       cbhidden:
@@ -258,6 +298,40 @@ info:
   title: EduPage2 API
   version: "1.0"
 paths:
+  /api/classroom/{id}:
+    get:
+      description: Returns the classroom by ID.
+      parameters:
+      - description: JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Classroom ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Classroom'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.UnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.InternalErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get the classroom by ID
+      tags:
+      - DBI
   /api/subject/{id}:
     get:
       description: Returns the subject by ID.
@@ -336,7 +410,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - example: 2022-01-01T00:00:00Z2022-01-01T00:00:00Z
+      - example: "2022-01-01T00:00:00Z"
         in: query
         name: from
         type: string
@@ -404,7 +478,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - example: 2022-01-01T00:00:00Z2022-01-01T00:00:00Z
+      - example: "2022-01-01T00:00:00Z"
         in: query
         name: from
         type: string
@@ -463,6 +537,48 @@ paths:
       summary: Get the user's recent timetable
       tags:
       - timetable
+  /icanteen:
+    post:
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      description: Loads the lunches from iCanteen for the next month.
+      parameters:
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Server
+        in: formData
+        name: server
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/edupage.ICanteenDay'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.ICanteenBadRequestResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.ICanteenInternalErrorResponse'
+      summary: Load lunches from iCanteen
+      tags:
+      - lunches
   /login:
     post:
       consumes:

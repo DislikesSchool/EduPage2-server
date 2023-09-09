@@ -8,6 +8,59 @@
     },
     "basePath": "/",
     "paths": {
+        "/api/classroom/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns the classroom by ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DBI"
+                ],
+                "summary": "Get the classroom by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Classroom ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.Classroom"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.InternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/subject/{id}": {
             "get": {
                 "security": [
@@ -139,7 +192,7 @@
                     },
                     {
                         "type": "string",
-                        "example": "2022-01-01T00:00:00Z2022-01-01T00:00:00Z",
+                        "example": "2022-01-01T00:00:00Z",
                         "name": "from",
                         "in": "query"
                     },
@@ -244,7 +297,7 @@
                     },
                     {
                         "type": "string",
-                        "example": "2022-01-01T00:00:00Z2022-01-01T00:00:00Z",
+                        "example": "2022-01-01T00:00:00Z",
                         "name": "from",
                         "in": "query"
                     },
@@ -319,6 +372,68 @@
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/main.InternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/icanteen": {
+            "post": {
+                "description": "Loads the lunches from iCanteen for the next month.",
+                "consumes": [
+                    "multipart/form-data",
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "lunches"
+                ],
+                "summary": "Load lunches from iCanteen",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Server",
+                        "name": "server",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/edupage.ICanteenDay"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.ICanteenBadRequestResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.ICanteenInternalErrorResponse"
                         }
                     }
                 }
@@ -425,6 +540,34 @@
         }
     },
     "definitions": {
+        "edupage.ICanteenDay": {
+            "type": "object",
+            "properties": {
+                "day": {
+                    "type": "string"
+                },
+                "lunches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/edupage.ICanteenLunch"
+                    }
+                }
+            }
+        },
+        "edupage.ICanteenLunch": {
+            "type": "object",
+            "properties": {
+                "can_order": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ordered": {
+                    "type": "boolean"
+                }
+            }
+        },
         "main.HomeworkReduced": {
             "type": "object",
             "properties": {
@@ -485,6 +628,24 @@
                     "type": "string"
                 },
                 "znamky_udalostid": {}
+            }
+        },
+        "main.ICanteenBadRequestResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "username is missing"
+                }
+            }
+        },
+        "main.ICanteenInternalErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "failed to load lunches: failed to login: Post https://example.edupage.org/login/edubarLogin.php: dial tcp: lookup example.edupage.org: no such host"
+                }
             }
         },
         "main.InternalErrorResponse": {
@@ -651,6 +812,20 @@
                 "success": {
                     "type": "boolean",
                     "example": false
+                }
+            }
+        },
+        "model.Classroom": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "short": {
+                    "type": "string"
                 }
             }
         },
