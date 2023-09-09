@@ -242,14 +242,23 @@ func ValidateTokenHandler(c *gin.Context) {
 	username := claims["username"].(string)
 	exp := claims["exp"].(float64)
 
-	_, ok := clients[userID+username]
+	h, ok := clients[userID+username]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
+		return
+	}
+	user, err := h.GetUser(false)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
+		"name":    user.UserRow.Firstname + " " + user.UserRow.Lastname,
 		"success": true,
 		"expires": exp,
 	})
