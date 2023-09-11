@@ -1,5 +1,149 @@
 basePath: /
 definitions:
+  apimodel.CompleteTimetable:
+    properties:
+      days:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/apimodel.CompleteTimetableItem'
+          type: array
+        description: key format is YYYY-MM-dd or 2006-01-02
+        type: object
+    type: object
+  apimodel.CompleteTimetableItem:
+    properties:
+      classes:
+        items:
+          $ref: '#/definitions/model.Class'
+        type: array
+      classrooms:
+        items:
+          $ref: '#/definitions/model.Classroom'
+        type: array
+      colors:
+        items:
+          type: string
+        type: array
+      date:
+        type: string
+      endtime:
+        type: string
+      groupnames:
+        items:
+          type: string
+        type: array
+      igroupid:
+        type: string
+      starttime:
+        type: string
+      studentids:
+        items:
+          type: string
+        type: array
+      subject:
+        $ref: '#/definitions/model.Subject'
+      teachers:
+        items:
+          $ref: '#/definitions/model.Teacher'
+        type: array
+      type:
+        type: string
+      uniperiod:
+        type: string
+    type: object
+  apimodel.ICanteenBadRequestResponse:
+    properties:
+      error:
+        example: username is missing
+        type: string
+    type: object
+  apimodel.ICanteenInternalErrorResponse:
+    properties:
+      error:
+        example: 'failed to load lunches: failed to login: Post https://example.edupage.org/login/edubarLogin.php:
+          dial tcp: lookup example.edupage.org: no such host'
+        type: string
+    type: object
+  apimodel.InternalErrorResponse:
+    properties:
+      error:
+        example: failed to create payload
+        type: string
+    type: object
+  apimodel.LoginBadRequestResponse:
+    properties:
+      error:
+        example: Username and Password are required
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  apimodel.LoginInternalErrorResponse:
+    properties:
+      error:
+        example: 'failed to login: Post https://example.edupage.org/login/edubarLogin.php:
+          dial tcp: lookup example.edupage.org: no such host'
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  apimodel.LoginSuccessResponse:
+    properties:
+      error:
+        example: ""
+        type: string
+      firstname:
+        example: John
+        type: string
+      lastname:
+        example: Doe
+        type: string
+      success:
+        example: true
+        type: boolean
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM
+        type: string
+    type: object
+  apimodel.LoginUnauthorizedResponse:
+    properties:
+      error:
+        example: Unexpected response from server, make sure credentials are specified
+          correctly
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
+  apimodel.UnauthorizedResponse:
+    properties:
+      error:
+        example: Unauthorized
+        type: string
+    type: object
+  apimodel.ValidateTokenSuccessResponse:
+    properties:
+      error:
+        example: ""
+        type: string
+      expires:
+        example: "1620000000"
+        type: string
+      success:
+        example: true
+        type: boolean
+    type: object
+  apimodel.ValidateTokenUnauthorizedResponse:
+    properties:
+      error:
+        example: Unauthorized
+        type: string
+      success:
+        example: false
+        type: boolean
+    type: object
   edupage.ICanteenDay:
     properties:
       day:
@@ -18,176 +162,22 @@ definitions:
       ordered:
         type: boolean
     type: object
-  main.HomeworkReduced:
+  model.Class:
     properties:
-      attachements: {}
-      data:
-        $ref: '#/definitions/model.TimelineItemData'
-      datecreated:
+      classroomid:
         type: string
-      details:
+      grade:
         type: string
-      homeworkid:
-        type: string
-      hwkid:
+      id:
         type: string
       name:
         type: string
-      period: {}
-      pocet_done:
+      short:
         type: string
-      pocet_like:
+      teacher2id:
         type: string
-      pocet_reakcii:
+      teacherid:
         type: string
-      posledny_vysledok:
-        type: string
-      predmetid:
-        type: string
-      stav:
-        type: string
-      stavhodnotetimelinePathd:
-        type: string
-      students_hidden:
-        type: string
-      testid:
-        type: string
-      timestamp:
-        type: string
-      typ:
-        $ref: '#/definitions/model.TimelineItemType'
-      userid:
-        type: string
-      znamky_udalostid: {}
-    type: object
-  main.ICanteenBadRequestResponse:
-    properties:
-      error:
-        example: username is missing
-        type: string
-    type: object
-  main.ICanteenInternalErrorResponse:
-    properties:
-      error:
-        example: 'failed to load lunches: failed to login: Post https://example.edupage.org/login/edubarLogin.php:
-          dial tcp: lookup example.edupage.org: no such host'
-        type: string
-    type: object
-  main.InternalErrorResponse:
-    properties:
-      error:
-        example: failed to create payload
-        type: string
-    type: object
-  main.LoginBadRequestResponse:
-    properties:
-      error:
-        example: Username and Password are required
-        type: string
-      success:
-        example: false
-        type: boolean
-    type: object
-  main.LoginInternalErrorResponse:
-    properties:
-      error:
-        example: 'failed to login: Post https://example.edupage.org/login/edubarLogin.php:
-          dial tcp: lookup example.edupage.org: no such host'
-        type: string
-      success:
-        example: false
-        type: boolean
-    type: object
-  main.LoginSuccessResponse:
-    properties:
-      error:
-        example: ""
-        type: string
-      firstname:
-        example: John
-        type: string
-      lastname:
-        example: Doe
-        type: string
-      success:
-        example: true
-        type: boolean
-      token:
-        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM
-        type: string
-    type: object
-  main.LoginUnauthorizedResponse:
-    properties:
-      error:
-        example: Unexpected response from server, make sure credentials are specified
-          correctly
-        type: string
-      success:
-        example: false
-        type: boolean
-    type: object
-  main.Timeline:
-    properties:
-      homeworks:
-        additionalProperties:
-          $ref: '#/definitions/main.HomeworkReduced'
-        type: object
-      items:
-        additionalProperties:
-          $ref: '#/definitions/main.TimelineItemReduced'
-        type: object
-    type: object
-  main.TimelineItemReduced:
-    properties:
-      data:
-        $ref: '#/definitions/model.TimelineItemData'
-      poct_reakcii:
-        type: integer
-      reakcia_na:
-        type: string
-      removed:
-        type: string
-      target_user:
-        type: string
-      text:
-        type: string
-      timelineid:
-        type: string
-      timestamp:
-        type: string
-      typ:
-        $ref: '#/definitions/model.TimelineItemType'
-      user:
-        type: string
-      vlastnik:
-        type: string
-    type: object
-  main.UnauthorizedResponse:
-    properties:
-      error:
-        example: Unauthorized
-        type: string
-    type: object
-  main.ValidateTokenSuccessResponse:
-    properties:
-      error:
-        example: ""
-        type: string
-      expires:
-        example: "1620000000"
-        type: string
-      success:
-        example: true
-        type: boolean
-    type: object
-  main.ValidateTokenUnauthorizedResponse:
-    properties:
-      error:
-        example: Unauthorized
-        type: string
-      success:
-        example: false
-        type: boolean
     type: object
   model.Classroom:
     properties:
@@ -197,6 +187,77 @@ definitions:
         type: string
       short:
         type: string
+    type: object
+  model.Homework:
+    properties:
+      attachements: {}
+      autor_meno:
+        type: string
+      data:
+        $ref: '#/definitions/model.TimelineItemData'
+      datecreated:
+        type: string
+      datefrom:
+        type: string
+      datetimefrom:
+        type: string
+      datetimeto:
+        type: string
+      dateto:
+        type: string
+      details:
+        type: string
+      e_superid:
+        type: string
+      etestAnswerCards:
+        type: integer
+      etestCards:
+        type: integer
+      homeworkid:
+        type: string
+      hwkid:
+        type: string
+      missingNextLesson:
+        type: boolean
+      name:
+        type: string
+      period: {}
+      planid:
+        type: string
+      pocet_done:
+        type: string
+      pocet_like:
+        type: string
+      pocet_reakcii:
+        type: string
+      posledny_vysledok:
+        type: string
+      predmet_meno:
+        type: string
+      predmetid:
+        type: string
+      skoncil: {}
+      skupiny:
+        items:
+          type: string
+        type: array
+      stav:
+        type: string
+      stavhodnotetimelinePathd:
+        type: string
+      students_hidden:
+        type: string
+      studyTopics:
+        type: boolean
+      testid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        $ref: '#/definitions/model.TimelineItemType'
+      userid:
+        type: string
+      znamky_udalostid: {}
     type: object
   model.Subject:
     properties:
@@ -230,6 +291,60 @@ definitions:
       short:
         type: string
     type: object
+  model.Timeline:
+    properties:
+      homeworks:
+        additionalProperties:
+          $ref: '#/definitions/model.Homework'
+        type: object
+      items:
+        additionalProperties:
+          $ref: '#/definitions/model.TimelineItem'
+        type: object
+    type: object
+  model.TimelineItem:
+    properties:
+      cas_pridania:
+        type: string
+      cas_pridania_btc:
+        type: string
+      cas_udalosti:
+        type: string
+      cas_udalosti_btc:
+        type: string
+      data:
+        $ref: '#/definitions/model.TimelineItemData'
+      ineid:
+        type: string
+      poct_reakcii:
+        type: integer
+      pomocny_zaznam:
+        type: string
+      posledna_reakcia:
+        type: string
+      reakcia_na:
+        type: string
+      removed:
+        type: string
+      target_user:
+        type: string
+      text:
+        type: string
+      timelineid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        $ref: '#/definitions/model.TimelineItemType'
+      user:
+        type: string
+      user_meno:
+        type: string
+      vlastnik:
+        type: string
+      vlastnik_meno:
+        type: string
+    type: object
   model.TimelineItemData:
     properties:
       value:
@@ -240,57 +355,6 @@ definitions:
     properties:
       uint8:
         type: integer
-    type: object
-  model.Timetable:
-    properties:
-      days:
-        additionalProperties:
-          items:
-            $ref: '#/definitions/model.TimetableItem'
-          type: array
-        description: key format is YYYY-MM-dd or 2006-01-02
-        type: object
-    type: object
-  model.TimetableItem:
-    properties:
-      classids:
-        items:
-          type: string
-        type: array
-      classroomids:
-        items:
-          type: string
-        type: array
-      colors:
-        items:
-          type: string
-        type: array
-      date:
-        type: string
-      endtime:
-        type: string
-      groupnames:
-        items:
-          type: string
-        type: array
-      igroupid:
-        type: string
-      starttime:
-        type: string
-      studentids:
-        items:
-          type: string
-        type: array
-      subjectid:
-        type: string
-      teacherids:
-        items:
-          type: string
-        type: array
-      type:
-        type: string
-      uniperiod:
-        type: string
     type: object
 info:
   contact: {}
@@ -322,11 +386,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the classroom by ID
@@ -356,11 +420,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the subject by ID
@@ -390,11 +454,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the teacher by ID
@@ -425,15 +489,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Timeline'
+            $ref: '#/definitions/model.Timeline'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the user's timeline
@@ -454,15 +518,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Timeline'
+            $ref: '#/definitions/model.Timeline'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the user's recent timeline
@@ -493,15 +557,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Timetable'
+            $ref: '#/definitions/apimodel.CompleteTimetable'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the user's  timetable
@@ -523,15 +587,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Timetable'
+            $ref: '#/definitions/apimodel.CompleteTimetable'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the user's recent timetable
@@ -571,11 +635,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/main.ICanteenBadRequestResponse'
+            $ref: '#/definitions/apimodel.ICanteenBadRequestResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.ICanteenInternalErrorResponse'
+            $ref: '#/definitions/apimodel.ICanteenInternalErrorResponse'
       summary: Load lunches from iCanteen
       tags:
       - lunches
@@ -606,19 +670,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.LoginSuccessResponse'
+            $ref: '#/definitions/apimodel.LoginSuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/main.LoginBadRequestResponse'
+            $ref: '#/definitions/apimodel.LoginBadRequestResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.LoginUnauthorizedResponse'
+            $ref: '#/definitions/apimodel.LoginUnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.LoginInternalErrorResponse'
+            $ref: '#/definitions/apimodel.LoginInternalErrorResponse'
       summary: Login to your Edupage account
       tags:
       - auth
@@ -637,11 +701,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.ValidateTokenSuccessResponse'
+            $ref: '#/definitions/apimodel.ValidateTokenSuccessResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.ValidateTokenUnauthorizedResponse'
+            $ref: '#/definitions/apimodel.ValidateTokenUnauthorizedResponse'
       summary: Validate your token
       tags:
       - auth

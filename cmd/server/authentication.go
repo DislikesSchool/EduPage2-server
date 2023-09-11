@@ -124,10 +124,10 @@ type LoginData struct {
 // @Param password formData string true "Password"
 // @Param server formData string false "Server"
 // @Produce json
-// @Success 200 {object} LoginSuccessResponse
-// @Failure 400 {object} LoginBadRequestResponse
-// @Failure 401 {object} LoginUnauthorizedResponse
-// @Failure 500 {object} LoginInternalErrorResponse
+// @Success 200 {object} apimodel.LoginSuccessResponse
+// @Failure 400 {object} apimodel.LoginBadRequestResponse
+// @Failure 401 {object} apimodel.LoginUnauthorizedResponse
+// @Failure 500 {object} apimodel.LoginInternalErrorResponse
 // @Router /login [post]
 func LoginHandler(c *gin.Context) {
 	username := c.PostForm("username")
@@ -229,8 +229,8 @@ func clientFromContext(c *gin.Context) (*edupage.EdupageClient, error) {
 // @Tags auth
 // @Param token header string true "JWT token"
 // @Produce json
-// @Success 200 {object} ValidateTokenSuccessResponse
-// @Failure 401 {object} ValidateTokenUnauthorizedResponse
+// @Success 200 {object} apimodel.ValidateTokenSuccessResponse
+// @Failure 401 {object} apimodel.ValidateTokenUnauthorizedResponse
 // @Router /validate-token [get]
 func ValidateTokenHandler(c *gin.Context) {
 	claims, err := getClaims(c)

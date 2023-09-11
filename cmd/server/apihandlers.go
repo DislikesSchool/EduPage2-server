@@ -4,7 +4,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/apimodel"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
+	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,9 +18,9 @@ import (
 // @Param Authorization header string true "JWT token"
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} Timeline
-// @Failure 401 {object} UnauthorizedResponse
-// @Failure 500 {object} InternalErrorResponse
+// @Success 200 {object} model.Timeline
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/timeline/recent [get]
 func RecentTimelineHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
@@ -38,12 +40,12 @@ func RecentTimelineHandler(c *gin.Context) {
 // @Description Returns the user's timeline from any date to any other date or today.
 // @Tags timeline
 // @Param Authorization header string true "JWT token"
-// @Param range query TimelineRequest true "Date range"
+// @Param range query apimodel.TimelineRequest true "Date range"
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} Timeline
-// @Failure 401 {object} UnauthorizedResponse
-// @Failure 500 {object} InternalErrorResponse
+// @Success 200 {object} model.Timeline
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/timeline [get]
 func TimelineHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
@@ -84,9 +86,9 @@ func TimelineHandler(c *gin.Context) {
 // @Param Authorization header string true "JWT token"
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} model.Timetable
-// @Failure 401 {object} UnauthorizedResponse
-// @Failure 500 {object} InternalErrorResponse
+// @Success 200 {object} apimodel.CompleteTimetable
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/timetable/recent [get]
 func RecentTimetableHangler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
@@ -97,7 +99,55 @@ func RecentTimetableHangler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, timetable)
+	user, err := client.GetUser(false)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	completeTimetable := apimodel.CompleteTimetable{
+		Days: make(map[string][]apimodel.CompleteTimetableItem, len(timetable.Days)),
+	}
+
+	for date, items := range timetable.Days {
+		for _, item := range items {
+			completeItem := apimodel.CompleteTimetableItem{
+				Type:       item.Type,
+				Date:       item.Date,
+				Period:     item.Period,
+				StartTime:  item.StartTime,
+				EndTime:    item.EndTime,
+				Subject:    user.DBI.Subjects[item.SubjectID],
+				Classes:    make([]model.Class, len(item.ClassIDs)),
+				GroupNames: item.GroupNames,
+				IGroupID:   item.IGroupID,
+				Teachers:   make([]model.Teacher, len(item.TeacherIDs)),
+				Classrooms: make([]model.Classroom, len(item.ClassroomIDs)),
+				StudentIDs: item.StudentIDs,
+				Colors:     item.Colors,
+			}
+
+			for i, classID := range item.ClassIDs {
+				completeItem.Classes[i] = user.DBI.Classes[classID]
+			}
+
+			for i, teacherID := range item.TeacherIDs {
+				completeItem.Teachers[i] = user.DBI.Teachers[teacherID]
+			}
+
+			for i, classroomID := range item.ClassroomIDs {
+				completeItem.Classrooms[i] = user.DBI.Classrooms[classroomID]
+			}
+
+			if original, ok := completeTimetable.Days[date]; ok {
+				completeTimetable.Days[date] = append(original, completeItem)
+			} else {
+				completeTimetable.Days[date] = []apimodel.CompleteTimetableItem{completeItem}
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, completeTimetable)
 }
 
 // RecentTimetableHandler godoc
@@ -106,12 +156,12 @@ func RecentTimetableHangler(c *gin.Context) {
 // @Description Returns the user's timetable from date specified to date specified or today.
 // @Tags timetable
 // @Param Authorization header string true "JWT token"
-// @Param range query TimetableRequest true "Date range"
+// @Param range query apimodel.TimetableRequest true "Date range"
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} model.Timetable
-// @Failure 401 {object} UnauthorizedResponse
-// @Failure 500 {object} InternalErrorResponse
+// @Success 200 {object} apimodel.CompleteTimetable
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/timetable [get]
 func TimetableHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
@@ -141,7 +191,55 @@ func TimetableHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, timetable)
+	user, err := client.GetUser(false)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	completeTimetable := apimodel.CompleteTimetable{
+		Days: make(map[string][]apimodel.CompleteTimetableItem, len(timetable.Days)),
+	}
+
+	for date, items := range timetable.Days {
+		for _, item := range items {
+			completeItem := apimodel.CompleteTimetableItem{
+				Type:       item.Type,
+				Date:       item.Date,
+				Period:     item.Period,
+				StartTime:  item.StartTime,
+				EndTime:    item.EndTime,
+				Subject:    user.DBI.Subjects[item.SubjectID],
+				Classes:    make([]model.Class, len(item.ClassIDs)),
+				GroupNames: item.GroupNames,
+				IGroupID:   item.IGroupID,
+				Teachers:   make([]model.Teacher, len(item.TeacherIDs)),
+				Classrooms: make([]model.Classroom, len(item.ClassroomIDs)),
+				StudentIDs: item.StudentIDs,
+				Colors:     item.Colors,
+			}
+
+			for i, classID := range item.ClassIDs {
+				completeItem.Classes[i] = user.DBI.Classes[classID]
+			}
+
+			for i, teacherID := range item.TeacherIDs {
+				completeItem.Teachers[i] = user.DBI.Teachers[teacherID]
+			}
+
+			for i, classroomID := range item.ClassroomIDs {
+				completeItem.Classrooms[i] = user.DBI.Classrooms[classroomID]
+			}
+
+			if original, ok := completeTimetable.Days[date]; ok {
+				completeTimetable.Days[date] = append(original, completeItem)
+			} else {
+				completeTimetable.Days[date] = []apimodel.CompleteTimetableItem{completeItem}
+			}
+		}
+	}
+
+	c.JSON(http.StatusOK, completeTimetable)
 }
 
 // SubjectHandler godoc
@@ -154,8 +252,8 @@ func TimetableHandler(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} model.Subject
-// @Failure 401 {object} UnauthorizedResponse
-// @Failure 500 {object} InternalErrorResponse
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/subject/{id} [get]
 func SubjectHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
@@ -181,8 +279,8 @@ func SubjectHandler(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} model.Teacher
-// @Failure 401 {object} UnauthorizedResponse
-// @Failure 500 {object} InternalErrorResponse
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/teacher/{id} [get]
 func TeacherHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
@@ -208,8 +306,8 @@ func TeacherHandler(c *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} model.Classroom
-// @Failure 401 {object} UnauthorizedResponse
-// @Failure 500 {object} InternalErrorResponse
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/classroom/{id} [get]
 func ClassroomHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
@@ -238,8 +336,8 @@ func ClassroomHandler(c *gin.Context) {
 // @Param server formData string true "Server"
 // @Produce json
 // @Success 200 {object} []edupage.ICanteenDay
-// @Failure 400 {object} ICanteenBadRequestResponse
-// @Failure 500 {object} ICanteenInternalErrorResponse
+// @Failure 400 {object} apimodel.ICanteenBadRequestResponse
+// @Failure 500 {object} apimodel.ICanteenInternalErrorResponse
 // @Router /icanteen [post]
 func ICanteenHandler(ctx *gin.Context) {
 	var username string

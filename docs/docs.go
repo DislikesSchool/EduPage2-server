@@ -56,13 +56,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.InternalErrorResponse"
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
                         }
                     }
                 }
@@ -109,13 +109,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.InternalErrorResponse"
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
                         }
                     }
                 }
@@ -162,13 +162,13 @@ const docTemplate = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.InternalErrorResponse"
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
                         }
                     }
                 }
@@ -215,19 +215,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.Timeline"
+                            "$ref": "#/definitions/model.Timeline"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.InternalErrorResponse"
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
                         }
                     }
                 }
@@ -261,19 +261,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.Timeline"
+                            "$ref": "#/definitions/model.Timeline"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.InternalErrorResponse"
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
                         }
                     }
                 }
@@ -320,19 +320,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Timetable"
+                            "$ref": "#/definitions/apimodel.CompleteTimetable"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.InternalErrorResponse"
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
                         }
                     }
                 }
@@ -366,19 +366,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Timetable"
+                            "$ref": "#/definitions/apimodel.CompleteTimetable"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.UnauthorizedResponse"
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.InternalErrorResponse"
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
                         }
                     }
                 }
@@ -434,13 +434,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/main.ICanteenBadRequestResponse"
+                            "$ref": "#/definitions/apimodel.ICanteenBadRequestResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.ICanteenInternalErrorResponse"
+                            "$ref": "#/definitions/apimodel.ICanteenInternalErrorResponse"
                         }
                     }
                 }
@@ -486,25 +486,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.LoginSuccessResponse"
+                            "$ref": "#/definitions/apimodel.LoginSuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/main.LoginBadRequestResponse"
+                            "$ref": "#/definitions/apimodel.LoginBadRequestResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.LoginUnauthorizedResponse"
+                            "$ref": "#/definitions/apimodel.LoginUnauthorizedResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/main.LoginInternalErrorResponse"
+                            "$ref": "#/definitions/apimodel.LoginInternalErrorResponse"
                         }
                     }
                 }
@@ -533,13 +533,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/main.ValidateTokenSuccessResponse"
+                            "$ref": "#/definitions/apimodel.ValidateTokenSuccessResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/main.ValidateTokenUnauthorizedResponse"
+                            "$ref": "#/definitions/apimodel.ValidateTokenUnauthorizedResponse"
                         }
                     }
                 }
@@ -547,6 +547,213 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "apimodel.CompleteTimetable": {
+            "type": "object",
+            "properties": {
+                "days": {
+                    "description": "key format is YYYY-MM-dd or 2006-01-02",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/apimodel.CompleteTimetableItem"
+                        }
+                    }
+                }
+            }
+        },
+        "apimodel.CompleteTimetableItem": {
+            "type": "object",
+            "properties": {
+                "classes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Class"
+                    }
+                },
+                "classrooms": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Classroom"
+                    }
+                },
+                "colors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "date": {
+                    "type": "string"
+                },
+                "endtime": {
+                    "type": "string"
+                },
+                "groupnames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "igroupid": {
+                    "type": "string"
+                },
+                "starttime": {
+                    "type": "string"
+                },
+                "studentids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "subject": {
+                    "$ref": "#/definitions/model.Subject"
+                },
+                "teachers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Teacher"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                },
+                "uniperiod": {
+                    "type": "string"
+                }
+            }
+        },
+        "apimodel.ICanteenBadRequestResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "username is missing"
+                }
+            }
+        },
+        "apimodel.ICanteenInternalErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "failed to load lunches: failed to login: Post https://example.edupage.org/login/edubarLogin.php: dial tcp: lookup example.edupage.org: no such host"
+                }
+            }
+        },
+        "apimodel.InternalErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "failed to create payload"
+                }
+            }
+        },
+        "apimodel.LoginBadRequestResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Username and Password are required"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "apimodel.LoginInternalErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "failed to login: Post https://example.edupage.org/login/edubarLogin.php: dial tcp: lookup example.edupage.org: no such host"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "apimodel.LoginSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": ""
+                },
+                "firstname": {
+                    "type": "string",
+                    "example": "John"
+                },
+                "lastname": {
+                    "type": "string",
+                    "example": "Doe"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM"
+                }
+            }
+        },
+        "apimodel.LoginUnauthorizedResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Unexpected response from server, make sure credentials are specified correctly"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
+        "apimodel.UnauthorizedResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Unauthorized"
+                }
+            }
+        },
+        "apimodel.ValidateTokenSuccessResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": ""
+                },
+                "expires": {
+                    "type": "string",
+                    "example": "1620000000"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "apimodel.ValidateTokenUnauthorizedResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Unauthorized"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": false
+                }
+            }
+        },
         "edupage.ICanteenDay": {
             "type": "object",
             "properties": {
@@ -575,250 +782,29 @@ const docTemplate = `{
                 }
             }
         },
-        "main.HomeworkReduced": {
+        "model.Class": {
             "type": "object",
             "properties": {
-                "attachements": {},
-                "data": {
-                    "$ref": "#/definitions/model.TimelineItemData"
-                },
-                "datecreated": {
+                "classroomid": {
                     "type": "string"
                 },
-                "details": {
+                "grade": {
                     "type": "string"
                 },
-                "homeworkid": {
-                    "type": "string"
-                },
-                "hwkid": {
+                "id": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "period": {},
-                "pocet_done": {
+                "short": {
                     "type": "string"
                 },
-                "pocet_like": {
+                "teacher2id": {
                     "type": "string"
                 },
-                "pocet_reakcii": {
+                "teacherid": {
                     "type": "string"
-                },
-                "posledny_vysledok": {
-                    "type": "string"
-                },
-                "predmetid": {
-                    "type": "string"
-                },
-                "stav": {
-                    "type": "string"
-                },
-                "stavhodnotetimelinePathd": {
-                    "type": "string"
-                },
-                "students_hidden": {
-                    "type": "string"
-                },
-                "testid": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "type": "string"
-                },
-                "typ": {
-                    "$ref": "#/definitions/model.TimelineItemType"
-                },
-                "userid": {
-                    "type": "string"
-                },
-                "znamky_udalostid": {}
-            }
-        },
-        "main.ICanteenBadRequestResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "username is missing"
-                }
-            }
-        },
-        "main.ICanteenInternalErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "failed to load lunches: failed to login: Post https://example.edupage.org/login/edubarLogin.php: dial tcp: lookup example.edupage.org: no such host"
-                }
-            }
-        },
-        "main.InternalErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "failed to create payload"
-                }
-            }
-        },
-        "main.LoginBadRequestResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "Username and Password are required"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": false
-                }
-            }
-        },
-        "main.LoginInternalErrorResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "failed to login: Post https://example.edupage.org/login/edubarLogin.php: dial tcp: lookup example.edupage.org: no such host"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": false
-                }
-            }
-        },
-        "main.LoginSuccessResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": ""
-                },
-                "firstname": {
-                    "type": "string",
-                    "example": "John"
-                },
-                "lastname": {
-                    "type": "string",
-                    "example": "Doe"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "token": {
-                    "type": "string",
-                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM"
-                }
-            }
-        },
-        "main.LoginUnauthorizedResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "Unexpected response from server, make sure credentials are specified correctly"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": false
-                }
-            }
-        },
-        "main.Timeline": {
-            "type": "object",
-            "properties": {
-                "homeworks": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/main.HomeworkReduced"
-                    }
-                },
-                "items": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/main.TimelineItemReduced"
-                    }
-                }
-            }
-        },
-        "main.TimelineItemReduced": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/model.TimelineItemData"
-                },
-                "poct_reakcii": {
-                    "type": "integer"
-                },
-                "reakcia_na": {
-                    "type": "string"
-                },
-                "removed": {
-                    "type": "string"
-                },
-                "target_user": {
-                    "type": "string"
-                },
-                "text": {
-                    "type": "string"
-                },
-                "timelineid": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "type": "string"
-                },
-                "typ": {
-                    "$ref": "#/definitions/model.TimelineItemType"
-                },
-                "user": {
-                    "type": "string"
-                },
-                "vlastnik": {
-                    "type": "string"
-                }
-            }
-        },
-        "main.UnauthorizedResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "Unauthorized"
-                }
-            }
-        },
-        "main.ValidateTokenSuccessResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": ""
-                },
-                "expires": {
-                    "type": "string",
-                    "example": "1620000000"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": true
-                }
-            }
-        },
-        "main.ValidateTokenUnauthorizedResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "Unauthorized"
-                },
-                "success": {
-                    "type": "boolean",
-                    "example": false
                 }
             }
         },
@@ -834,6 +820,111 @@ const docTemplate = `{
                 "short": {
                     "type": "string"
                 }
+            }
+        },
+        "model.Homework": {
+            "type": "object",
+            "properties": {
+                "attachements": {},
+                "autor_meno": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/model.TimelineItemData"
+                },
+                "datecreated": {
+                    "type": "string"
+                },
+                "datefrom": {
+                    "type": "string"
+                },
+                "datetimefrom": {
+                    "type": "string"
+                },
+                "datetimeto": {
+                    "type": "string"
+                },
+                "dateto": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "e_superid": {
+                    "type": "string"
+                },
+                "etestAnswerCards": {
+                    "type": "integer"
+                },
+                "etestCards": {
+                    "type": "integer"
+                },
+                "homeworkid": {
+                    "type": "string"
+                },
+                "hwkid": {
+                    "type": "string"
+                },
+                "missingNextLesson": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "period": {},
+                "planid": {
+                    "type": "string"
+                },
+                "pocet_done": {
+                    "type": "string"
+                },
+                "pocet_like": {
+                    "type": "string"
+                },
+                "pocet_reakcii": {
+                    "type": "string"
+                },
+                "posledny_vysledok": {
+                    "type": "string"
+                },
+                "predmet_meno": {
+                    "type": "string"
+                },
+                "predmetid": {
+                    "type": "string"
+                },
+                "skoncil": {},
+                "skupiny": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "stav": {
+                    "type": "string"
+                },
+                "stavhodnotetimelinePathd": {
+                    "type": "string"
+                },
+                "students_hidden": {
+                    "type": "string"
+                },
+                "studyTopics": {
+                    "type": "boolean"
+                },
+                "testid": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "typ": {
+                    "$ref": "#/definitions/model.TimelineItemType"
+                },
+                "userid": {
+                    "type": "string"
+                },
+                "znamky_udalostid": {}
             }
         },
         "model.Subject": {
@@ -885,6 +976,88 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Timeline": {
+            "type": "object",
+            "properties": {
+                "homeworks": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/model.Homework"
+                    }
+                },
+                "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/model.TimelineItem"
+                    }
+                }
+            }
+        },
+        "model.TimelineItem": {
+            "type": "object",
+            "properties": {
+                "cas_pridania": {
+                    "type": "string"
+                },
+                "cas_pridania_btc": {
+                    "type": "string"
+                },
+                "cas_udalosti": {
+                    "type": "string"
+                },
+                "cas_udalosti_btc": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/model.TimelineItemData"
+                },
+                "ineid": {
+                    "type": "string"
+                },
+                "poct_reakcii": {
+                    "type": "integer"
+                },
+                "pomocny_zaznam": {
+                    "type": "string"
+                },
+                "posledna_reakcia": {
+                    "type": "string"
+                },
+                "reakcia_na": {
+                    "type": "string"
+                },
+                "removed": {
+                    "type": "string"
+                },
+                "target_user": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "timelineid": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "typ": {
+                    "$ref": "#/definitions/model.TimelineItemType"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "user_meno": {
+                    "type": "string"
+                },
+                "vlastnik": {
+                    "type": "string"
+                },
+                "vlastnik_meno": {
+                    "type": "string"
+                }
+            }
+        },
         "model.TimelineItemData": {
             "type": "object",
             "properties": {
@@ -899,83 +1072,6 @@ const docTemplate = `{
             "properties": {
                 "uint8": {
                     "type": "integer"
-                }
-            }
-        },
-        "model.Timetable": {
-            "type": "object",
-            "properties": {
-                "days": {
-                    "description": "key format is YYYY-MM-dd or 2006-01-02",
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/model.TimetableItem"
-                        }
-                    }
-                }
-            }
-        },
-        "model.TimetableItem": {
-            "type": "object",
-            "properties": {
-                "classids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "classroomids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "colors": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "date": {
-                    "type": "string"
-                },
-                "endtime": {
-                    "type": "string"
-                },
-                "groupnames": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "igroupid": {
-                    "type": "string"
-                },
-                "starttime": {
-                    "type": "string"
-                },
-                "studentids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "subjectid": {
-                    "type": "string"
-                },
-                "teacherids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "type": {
-                    "type": "string"
-                },
-                "uniperiod": {
-                    "type": "string"
                 }
             }
         }

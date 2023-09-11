@@ -1,4 +1,4 @@
-package main
+package apimodel
 
 type LoginSuccessResponse struct {
 	Success   bool   `json:"success" example:"true"`
