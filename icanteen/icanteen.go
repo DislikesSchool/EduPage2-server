@@ -20,7 +20,7 @@ type ICanteenDay struct {
 	Lunches []ICanteenLunch `json:"lunches"`
 }
 
-func ICanteenLoadLunches(username, password, server string) ([]ICanteenDay, error) {
+func LoadLunches(username, password, server string) ([]ICanteenDay, error) {
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{Jar: cookieJar}
 
