@@ -359,7 +359,7 @@ func ICanteenHandler(ctx *gin.Context) {
 		return
 	}
 
-	lunches, err := edupage.LoadLunches(username, password, server)
+	lunches, err := edupage.ICanteenLoadLunches(username, password, server)
 	if err != nil {
 		ctx.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		return
