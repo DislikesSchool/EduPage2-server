@@ -10,19 +10,20 @@ type Timetable struct {
 }
 
 type TimetableItem struct {
-	Type         string   `json:"type"`
-	Date         string   `json:"date"`
-	Period       string   `json:"uniperiod"`
-	StartTime    string   `json:"starttime"`
-	EndTime      string   `json:"endtime"`
-	SubjectID    string   `json:"subjectid"`
-	ClassIDs     []string `json:"classids"`
-	GroupNames   []string `json:"groupnames"`
-	IGroupID     string   `json:"igroupid"`
-	TeacherIDs   []string `json:"teacherids"`
-	ClassroomIDs []string `json:"classroomids"`
-	StudentIDs   []string `json:"studentids"`
-	Colors       []string `json:"colors"`
+	Type         string      `json:"type"`
+	Date         string      `json:"date"`
+	Period       string      `json:"uniperiod"`
+	StartTime    string      `json:"starttime"`
+	EndTime      string      `json:"endtime"`
+	SubjectID    string      `json:"subjectid"`
+	ClassIDs     []string    `json:"classids"`
+	GroupNames   []string    `json:"groupnames"`
+	IGroupID     string      `json:"igroupid"`
+	TeacherIDs   []string    `json:"teacherids"`
+	ClassroomIDs []string    `json:"classroomids"`
+	StudentIDs   []string    `json:"studentids"`
+	Colors       []string    `json:"colors"`
+	Duration     json.Number `json:"durationperiods"`
 }
 
 func (t *Timetable) Merge(src *Timetable) {
