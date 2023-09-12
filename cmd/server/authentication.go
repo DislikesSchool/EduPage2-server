@@ -124,10 +124,10 @@ type LoginData struct {
 // @Param password formData string true "Password"
 // @Param server formData string false "Server"
 // @Produce json
-// @Success 200 {object} LoginSuccessResponse
-// @Failure 400 {object} LoginBadRequestResponse
-// @Failure 401 {object} LoginUnauthorizedResponse
-// @Failure 500 {object} LoginInternalErrorResponse
+// @Success 200 {object} apimodel.LoginSuccessResponse
+// @Failure 400 {object} apimodel.LoginBadRequestResponse
+// @Failure 401 {object} apimodel.LoginUnauthorizedResponse
+// @Failure 500 {object} apimodel.LoginInternalErrorResponse
 // @Router /login [post]
 func LoginHandler(c *gin.Context) {
 	username := c.PostForm("username")
@@ -229,8 +229,8 @@ func clientFromContext(c *gin.Context) (*edupage.EdupageClient, error) {
 // @Tags auth
 // @Param token header string true "JWT token"
 // @Produce json
-// @Success 200 {object} ValidateTokenSuccessResponse
-// @Failure 401 {object} ValidateTokenUnauthorizedResponse
+// @Success 200 {object} apimodel.ValidateTokenSuccessResponse
+// @Failure 401 {object} apimodel.ValidateTokenUnauthorizedResponse
 // @Router /validate-token [get]
 func ValidateTokenHandler(c *gin.Context) {
 	claims, err := getClaims(c)
@@ -242,14 +242,23 @@ func ValidateTokenHandler(c *gin.Context) {
 	username := claims["username"].(string)
 	exp := claims["exp"].(float64)
 
-	_, ok := clients[userID+username]
+	h, ok := clients[userID+username]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
+		return
+	}
+	user, err := h.GetUser(false)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
+		"name":    user.UserRow.Firstname + " " + user.UserRow.Lastname,
 		"success": true,
 		"expires": exp,
 	})

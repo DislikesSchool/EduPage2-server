@@ -105,7 +105,7 @@ func TestEdupage(t *testing.T) {
 	if len(timetable.Days) == 0 {
 		t.Log("Recieved timetable is empty")
 	}
-	for k, _ := range timetable.Days {
+	for k := range timetable.Days {
 		println(k)
 	}
 

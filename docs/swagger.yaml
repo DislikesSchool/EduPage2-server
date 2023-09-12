@@ -1,54 +1,76 @@
 basePath: /
 definitions:
-  main.HomeworkReduced:
+  apimodel.CompleteTimetable:
     properties:
-      attachements: {}
-      data:
-        $ref: '#/definitions/model.TimelineItemData'
-      datecreated:
-        type: string
-      details:
-        type: string
-      homeworkid:
-        type: string
-      hwkid:
-        type: string
-      name:
-        type: string
-      period: {}
-      pocet_done:
-        type: string
-      pocet_like:
-        type: string
-      pocet_reakcii:
-        type: string
-      posledny_vysledok:
-        type: string
-      predmetid:
-        type: string
-      stav:
-        type: string
-      stavhodnotetimelinePathd:
-        type: string
-      students_hidden:
-        type: string
-      testid:
-        type: string
-      timestamp:
-        type: string
-      typ:
-        $ref: '#/definitions/model.TimelineItemType'
-      userid:
-        type: string
-      znamky_udalostid: {}
+      days:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/apimodel.CompleteTimetableItem'
+          type: array
+        description: key format is YYYY-MM-dd or 2006-01-02
+        type: object
     type: object
-  main.InternalErrorResponse:
+  apimodel.CompleteTimetableItem:
+    properties:
+      classes:
+        items:
+          $ref: '#/definitions/model.Class'
+        type: array
+      classrooms:
+        items:
+          $ref: '#/definitions/model.Classroom'
+        type: array
+      colors:
+        items:
+          type: string
+        type: array
+      date:
+        type: string
+      endtime:
+        type: string
+      groupnames:
+        items:
+          type: string
+        type: array
+      igroupid:
+        type: string
+      starttime:
+        type: string
+      studentids:
+        items:
+          type: string
+        type: array
+      subject:
+        $ref: '#/definitions/model.Subject'
+      teachers:
+        items:
+          $ref: '#/definitions/model.Teacher'
+        type: array
+      type:
+        type: string
+      uniperiod:
+        type: string
+    type: object
+  apimodel.ICanteenBadRequestResponse:
+    properties:
+      error:
+        example: username is missing
+        type: string
+    type: object
+  apimodel.ICanteenInternalErrorResponse:
+    properties:
+      error:
+        example: 'failed to load lunches: failed to login: Post https://example.edupage.org/login/edubarLogin.php:
+          dial tcp: lookup example.edupage.org: no such host'
+        type: string
+    type: object
+  apimodel.InternalErrorResponse:
     properties:
       error:
         example: failed to create payload
         type: string
     type: object
-  main.LoginBadRequestResponse:
+  apimodel.LoginBadRequestResponse:
     properties:
       error:
         example: Username and Password are required
@@ -57,7 +79,7 @@ definitions:
         example: false
         type: boolean
     type: object
-  main.LoginInternalErrorResponse:
+  apimodel.LoginInternalErrorResponse:
     properties:
       error:
         example: 'failed to login: Post https://example.edupage.org/login/edubarLogin.php:
@@ -67,7 +89,7 @@ definitions:
         example: false
         type: boolean
     type: object
-  main.LoginSuccessResponse:
+  apimodel.LoginSuccessResponse:
     properties:
       error:
         example: ""
@@ -85,7 +107,7 @@ definitions:
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM
         type: string
     type: object
-  main.LoginUnauthorizedResponse:
+  apimodel.LoginUnauthorizedResponse:
     properties:
       error:
         example: Unexpected response from server, make sure credentials are specified
@@ -95,49 +117,13 @@ definitions:
         example: false
         type: boolean
     type: object
-  main.Timeline:
-    properties:
-      homeworks:
-        additionalProperties:
-          $ref: '#/definitions/main.HomeworkReduced'
-        type: object
-      items:
-        additionalProperties:
-          $ref: '#/definitions/main.TimelineItemReduced'
-        type: object
-    type: object
-  main.TimelineItemReduced:
-    properties:
-      data:
-        $ref: '#/definitions/model.TimelineItemData'
-      poct_reakcii:
-        type: integer
-      reakcia_na:
-        type: string
-      removed:
-        type: string
-      target_user:
-        type: string
-      text:
-        type: string
-      timelineid:
-        type: string
-      timestamp:
-        type: string
-      typ:
-        $ref: '#/definitions/model.TimelineItemType'
-      user:
-        type: string
-      vlastnik:
-        type: string
-    type: object
-  main.UnauthorizedResponse:
+  apimodel.UnauthorizedResponse:
     properties:
       error:
         example: Unauthorized
         type: string
     type: object
-  main.ValidateTokenSuccessResponse:
+  apimodel.ValidateTokenSuccessResponse:
     properties:
       error:
         example: ""
@@ -149,7 +135,7 @@ definitions:
         example: true
         type: boolean
     type: object
-  main.ValidateTokenUnauthorizedResponse:
+  apimodel.ValidateTokenUnauthorizedResponse:
     properties:
       error:
         example: Unauthorized
@@ -157,6 +143,121 @@ definitions:
       success:
         example: false
         type: boolean
+    type: object
+  edupage.ICanteenDay:
+    properties:
+      day:
+        type: string
+      lunches:
+        items:
+          $ref: '#/definitions/edupage.ICanteenLunch'
+        type: array
+    type: object
+  edupage.ICanteenLunch:
+    properties:
+      can_order:
+        type: boolean
+      name:
+        type: string
+      ordered:
+        type: boolean
+    type: object
+  model.Class:
+    properties:
+      classroomid:
+        type: string
+      grade:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      short:
+        type: string
+      teacher2id:
+        type: string
+      teacherid:
+        type: string
+    type: object
+  model.Classroom:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      short:
+        type: string
+    type: object
+  model.Homework:
+    properties:
+      attachements: {}
+      autor_meno:
+        type: string
+      data:
+        $ref: '#/definitions/model.TimelineItemData'
+      datecreated:
+        type: string
+      datefrom:
+        type: string
+      datetimefrom:
+        type: string
+      datetimeto:
+        type: string
+      dateto:
+        type: string
+      details:
+        type: string
+      e_superid:
+        type: string
+      etestAnswerCards:
+        type: integer
+      etestCards:
+        type: integer
+      homeworkid:
+        type: string
+      hwkid:
+        type: string
+      missingNextLesson:
+        type: boolean
+      name:
+        type: string
+      period: {}
+      planid:
+        type: string
+      pocet_done:
+        type: string
+      pocet_like:
+        type: string
+      pocet_reakcii:
+        type: string
+      posledny_vysledok:
+        type: string
+      predmet_meno:
+        type: string
+      predmetid:
+        type: string
+      skoncil: {}
+      skupiny:
+        items:
+          type: string
+        type: array
+      stav:
+        type: string
+      stavhodnotetimelinePathd:
+        type: string
+      students_hidden:
+        type: string
+      studyTopics:
+        type: boolean
+      testid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        $ref: '#/definitions/model.TimelineItemType'
+      userid:
+        type: string
+      znamky_udalostid: {}
     type: object
   model.Subject:
     properties:
@@ -190,6 +291,60 @@ definitions:
       short:
         type: string
     type: object
+  model.Timeline:
+    properties:
+      homeworks:
+        additionalProperties:
+          $ref: '#/definitions/model.Homework'
+        type: object
+      items:
+        additionalProperties:
+          $ref: '#/definitions/model.TimelineItem'
+        type: object
+    type: object
+  model.TimelineItem:
+    properties:
+      cas_pridania:
+        type: string
+      cas_pridania_btc:
+        type: string
+      cas_udalosti:
+        type: string
+      cas_udalosti_btc:
+        type: string
+      data:
+        $ref: '#/definitions/model.TimelineItemData'
+      ineid:
+        type: string
+      poct_reakcii:
+        type: integer
+      pomocny_zaznam:
+        type: string
+      posledna_reakcia:
+        type: string
+      reakcia_na:
+        type: string
+      removed:
+        type: string
+      target_user:
+        type: string
+      text:
+        type: string
+      timelineid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        $ref: '#/definitions/model.TimelineItemType'
+      user:
+        type: string
+      user_meno:
+        type: string
+      vlastnik:
+        type: string
+      vlastnik_meno:
+        type: string
+    type: object
   model.TimelineItemData:
     properties:
       value:
@@ -201,63 +356,46 @@ definitions:
       uint8:
         type: integer
     type: object
-  model.Timetable:
-    properties:
-      days:
-        additionalProperties:
-          items:
-            $ref: '#/definitions/model.TimetableItem'
-          type: array
-        description: key format is YYYY-MM-dd or 2006-01-02
-        type: object
-    type: object
-  model.TimetableItem:
-    properties:
-      classids:
-        items:
-          type: string
-        type: array
-      classroomids:
-        items:
-          type: string
-        type: array
-      colors:
-        items:
-          type: string
-        type: array
-      date:
-        type: string
-      endtime:
-        type: string
-      groupnames:
-        items:
-          type: string
-        type: array
-      igroupid:
-        type: string
-      starttime:
-        type: string
-      studentids:
-        items:
-          type: string
-        type: array
-      subjectid:
-        type: string
-      teacherids:
-        items:
-          type: string
-        type: array
-      type:
-        type: string
-      uniperiod:
-        type: string
-    type: object
 info:
   contact: {}
   description: JWT authorization token
   title: EduPage2 API
   version: "1.0"
 paths:
+  /api/classroom/{id}:
+    get:
+      description: Returns the classroom by ID.
+      parameters:
+      - description: JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Classroom ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Classroom'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get the classroom by ID
+      tags:
+      - DBI
   /api/subject/{id}:
     get:
       description: Returns the subject by ID.
@@ -282,11 +420,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the subject by ID
@@ -316,11 +454,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the teacher by ID
@@ -336,7 +474,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - example: 2022-01-01T00:00:00Z2022-01-01T00:00:00Z
+      - example: "2022-01-01T00:00:00Z"
         in: query
         name: from
         type: string
@@ -351,15 +489,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Timeline'
+            $ref: '#/definitions/model.Timeline'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the user's timeline
@@ -380,15 +518,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.Timeline'
+            $ref: '#/definitions/model.Timeline'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the user's recent timeline
@@ -404,7 +542,7 @@ paths:
         name: Authorization
         required: true
         type: string
-      - example: 2022-01-01T00:00:00Z2022-01-01T00:00:00Z
+      - example: "2022-01-01T00:00:00Z"
         in: query
         name: from
         type: string
@@ -419,15 +557,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Timetable'
+            $ref: '#/definitions/apimodel.CompleteTimetable'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the user's  timetable
@@ -449,20 +587,62 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Timetable'
+            $ref: '#/definitions/apimodel.CompleteTimetable'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.UnauthorizedResponse'
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.InternalErrorResponse'
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
       security:
       - Bearer: []
       summary: Get the user's recent timetable
       tags:
       - timetable
+  /icanteen:
+    post:
+      consumes:
+      - multipart/form-data
+      - application/x-www-form-urlencoded
+      description: Loads the lunches from iCanteen for the next month.
+      parameters:
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Server
+        in: formData
+        name: server
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/edupage.ICanteenDay'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/apimodel.ICanteenBadRequestResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apimodel.ICanteenInternalErrorResponse'
+      summary: Load lunches from iCanteen
+      tags:
+      - lunches
   /login:
     post:
       consumes:
@@ -490,19 +670,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.LoginSuccessResponse'
+            $ref: '#/definitions/apimodel.LoginSuccessResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/main.LoginBadRequestResponse'
+            $ref: '#/definitions/apimodel.LoginBadRequestResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.LoginUnauthorizedResponse'
+            $ref: '#/definitions/apimodel.LoginUnauthorizedResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/main.LoginInternalErrorResponse'
+            $ref: '#/definitions/apimodel.LoginInternalErrorResponse'
       summary: Login to your Edupage account
       tags:
       - auth
@@ -521,11 +701,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/main.ValidateTokenSuccessResponse'
+            $ref: '#/definitions/apimodel.ValidateTokenSuccessResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/main.ValidateTokenUnauthorizedResponse'
+            $ref: '#/definitions/apimodel.ValidateTokenUnauthorizedResponse'
       summary: Validate your token
       tags:
       - auth
