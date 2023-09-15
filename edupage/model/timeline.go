@@ -22,9 +22,56 @@ type TimelineItemType struct {
 	uint8
 }
 
+func (n *TimelineItemType) UnmarshalJSON(b []byte) error {
+	s := string(b)
+	if s == "\"sprava\"" {
+		n.uint8 = 0
+	} else if s == "\"homework\"" {
+		n.uint8 = 1
+	} else {
+		n.uint8 = 2
+	}
+	return nil
+}
+
+func (n *TimelineItemType) MarshalJSON() ([]byte, error) {
+	if n.uint8 == 0 {
+		return []byte("sprava"), nil
+	} else if n.uint8 == 1 {
+		return []byte("homework"), nil
+	} else {
+		return nil, errors.New("invalid type")
+	}
+}
+
 // TimelineItemData contains raw timeline data
 type TimelineItemData struct {
 	Value map[string]interface{}
+}
+
+func (n *TimelineItemData) UnmarshalJSON(b []byte) error {
+	r := string(b)
+	if r == "[]" {
+		n.Value = make(map[string]interface{})
+		return nil
+	}
+	s, err := strconv.Unquote(r)
+
+	if err != nil {
+		fix := []byte("{\"data\":" + r + "}") // weird fix, TODO: not do it this way?
+		var temp map[string]interface{}
+		_ = json.Unmarshal(fix, &temp)
+		_ = json.Unmarshal([]byte(temp["data"].(string)), &n.Value)
+	} else {
+		if err := json.Unmarshal([]byte(s), &n.Value); err != nil {
+			n.Value = make(map[string]interface{})
+		}
+	}
+	return nil
+}
+
+func (n *TimelineItemData) MarshalJSON() ([]byte, error) {
+	return json.Marshal(n.Value)
 }
 
 type TimelineItem struct {
@@ -48,6 +95,35 @@ type TimelineItem struct {
 	Removed         json.Number      `json:"removed"`
 	TimeAddedBTC    Time             `json:"cas_pridania_btc"`
 	LastReactionBTC Time             `json:"cas_udalosti_btc"`
+}
+
+func (i *TimelineItem) GetAttachments() (map[string]string, error) {
+	if i.Type == ItemTypeMessage {
+		var attachments = make(map[string]string)
+		data := i.Data
+		if val, ok := data.Value["attachements"]; ok { // It's misspelled in the JSON payload
+			if reflect.TypeOf(val).Kind() == reflect.Map {
+				a := val.(map[string]interface{})
+				for k, v := range a {
+					attachments[v.(string)] = k
+				}
+			}
+		}
+		return attachments, nil
+	}
+	return nil, ErrUnobtainableAttachments
+}
+
+func (i *TimelineItem) IsHomeworkWithAttachments() bool {
+	if i.Type == ItemTypeHomework {
+		if superid, ok := i.Data.Value["superid"]; ok && superid != nil && reflect.TypeOf(superid).Kind() == reflect.String {
+			if etc, ok := i.Data.Value["etestCards"]; ok && etc != nil && etc.(float64) == 1 {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 type Homework struct {
@@ -94,6 +170,15 @@ type Timeline struct {
 	Items     map[string]TimelineItem
 }
 
+func (t *Timeline) GetHomeworkFromTimeline(superid string) (Homework, error) {
+	for _, homework := range t.Homeworks {
+		if homework.ESuperID == superid {
+			return homework, nil
+		}
+	}
+	return Homework{}, errors.New("homework not found")
+}
+
 func (t *Timeline) Merge(src *Timeline) {
 	maps.Copy(t.Homeworks, src.Homeworks)
 	maps.Copy(t.Items, src.Items)
@@ -126,89 +211,4 @@ func ParseTimeline(data []byte) (Timeline, error) {
 	}
 
 	return timeline, nil
-}
-
-func (t *Timeline) GetHomeworkFromTimeline(superid string) (Homework, error) {
-	for _, homework := range t.Homeworks {
-		if homework.ESuperID == superid {
-			return homework, nil
-		}
-	}
-	return Homework{}, errors.New("homework not found")
-}
-
-func (i *TimelineItem) IsHomeworkWithAttachments() bool {
-	if i.Type == ItemTypeHomework {
-		if superid, ok := i.Data.Value["superid"]; ok && superid != nil && reflect.TypeOf(superid).Kind() == reflect.String {
-			if etc, ok := i.Data.Value["etestCards"]; ok && etc != nil && etc.(float64) == 1 {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-func (i *TimelineItem) GetAttachments() (map[string]string, error) {
-	if i.Type == ItemTypeMessage {
-		var attachments = make(map[string]string)
-		data := i.Data
-		if val, ok := data.Value["attachements"]; ok { // It's misspelled in the JSON payload
-			if reflect.TypeOf(val).Kind() == reflect.Map {
-				a := val.(map[string]interface{})
-				for k, v := range a {
-					attachments[v.(string)] = k
-				}
-			}
-		}
-		return attachments, nil
-	}
-	return nil, ErrUnobtainableAttachments
-}
-
-func (n *TimelineItemType) UnmarshalJSON(b []byte) error {
-	s := string(b)
-	if s == "\"sprava\"" {
-		n.uint8 = 0
-	} else if s == "\"homework\"" {
-		n.uint8 = 1
-	} else {
-		n.uint8 = 2
-	}
-	return nil
-}
-
-func (n *TimelineItemType) MarshalJSON() ([]byte, error) {
-	if n.uint8 == 0 {
-		return []byte("sprava"), nil
-	} else if n.uint8 == 1 {
-		return []byte("homework"), nil
-	} else {
-		return nil, errors.New("invalid type")
-	}
-}
-
-func (n *TimelineItemData) UnmarshalJSON(b []byte) error {
-	r := string(b)
-	if r == "[]" {
-		n.Value = make(map[string]interface{})
-		return nil
-	}
-	s, err := strconv.Unquote(r)
-
-	if err != nil {
-		fix := []byte("{\"data\":" + r + "}") // weird fix, TODO: not do it this way?
-		var temp map[string]interface{}
-		_ = json.Unmarshal(fix, &temp)
-		_ = json.Unmarshal([]byte(temp["data"].(string)), &n.Value)
-	} else {
-		if err := json.Unmarshal([]byte(s), &n.Value); err != nil {
-			n.Value = make(map[string]interface{})
-		}
-	}
-	return nil
-}
-
-func (n *TimelineItemData) MarshalJSON() ([]byte, error) {
-	return json.Marshal(n.Value)
 }
