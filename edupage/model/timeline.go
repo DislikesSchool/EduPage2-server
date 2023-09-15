@@ -178,6 +178,16 @@ func (n *TimelineItemType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (n *TimelineItemType) MarshalJSON() ([]byte, error) {
+	if n.uint8 == 0 {
+		return []byte("sprava"), nil
+	} else if n.uint8 == 1 {
+		return []byte("homework"), nil
+	} else {
+		return nil, errors.New("invalid type")
+	}
+}
+
 func (n *TimelineItemData) UnmarshalJSON(b []byte) error {
 	r := string(b)
 	if r == "[]" {
