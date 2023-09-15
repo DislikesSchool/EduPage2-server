@@ -7,6 +7,7 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/cmd/server/apimodel"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
+	"github.com/DislikesSchool/EduPage2-server/icanteen"
 	"github.com/gin-gonic/gin"
 )
 
@@ -335,7 +336,7 @@ func ClassroomHandler(c *gin.Context) {
 // @Param password formData string true "Password"
 // @Param server formData string true "Server"
 // @Produce json
-// @Success 200 {object} []edupage.ICanteenDay
+// @Success 200 {object} []icanteen.ICanteenDay
 // @Failure 400 {object} apimodel.ICanteenBadRequestResponse
 // @Failure 500 {object} apimodel.ICanteenInternalErrorResponse
 // @Router /icanteen [post]
@@ -359,7 +360,7 @@ func ICanteenHandler(ctx *gin.Context) {
 		return
 	}
 
-	lunches, err := edupage.ICanteenLoadLunches(username, password, server)
+	lunches, err := icanteen.LoadLunches(username, password, server)
 	if err != nil {
 		ctx.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 		return
