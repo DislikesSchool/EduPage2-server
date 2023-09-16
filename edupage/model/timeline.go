@@ -34,7 +34,7 @@ func (n *TimelineItemType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (n *TimelineItemType) MarshalJSON() ([]byte, error) {
+func (n TimelineItemType) MarshalJSON() ([]byte, error) {
 	if n.uint8 == 0 {
 		return []byte("sprava"), nil
 	} else if n.uint8 == 1 {
