@@ -21,7 +21,7 @@ type MenuItem struct {
 	MeatOrigin    map[string]bool      `json:"povodMasa"`
 }
 
-type Ticket struct {
+type CanteenDay struct {
 	AvailableFrom           string                   `json:"vydaj_od"`
 	AvailableTo             string                   `json:"vydaj_do"`
 	FoodTypes               json.Number              `json:"drugov_jedal"`
@@ -56,6 +56,74 @@ type Ticket struct {
 	RateTo   string `json:"rate_do"`
 }
 
+type AllCreditInfo struct {
+}
+
+type BoarderRow struct {
+	ID            string      `json:"stravnikid"`
+	Edupage       string      `json:"edupage"`
+	Type          string      `json:"typ"`
+	AgendaID      string      `json:"agendaid"`
+	Name          string      `json:"meno"`
+	Surname       string      `json:"priezvisko"`
+	Subname       interface{} `json:"subname"`
+	Class         string      `json:"trieda"`
+	Chips         string      `json:"cipy"`
+	Credits       string      `json:"kredit"`
+	Backup        interface{} `json:"zaloha"`
+	AllCreditInfo string      `json:"allKreditInfo"`
+	HardMode      bool        `json:"hardMode"`
+	BoarderCount  json.Number `json:"pocetStravnikov"`
+	Note          interface{} `json:"poznamka"`
+	Alergens      interface{} `json:"alergeny"`
+	Histamin      json.Number `json:"histamin"`
+	Birthdate     string      `json:"birthdate"`
+	DateTo        string      `json:"dateto"`
+	AgeGroup      json.Number `json:"vekova_skupina"`
+	Active        json.Number `json:"active"`
+	Visible       json.Number `json:"visible"`
+	DeletedByUser json.Number `json:"deletedByUser"`
+	Status        string      `json:"stav"`
+	RowChanged    string      `json:"row_changed"`
+	User          string      `json:"user"`
+	FullName      string      `json:"fullName"`
+}
+
+func (b *BoarderRow) GetAllCreditInfo() AllCreditInfo {
+	var r AllCreditInfo
+	UnmarshalNestedString(b.AllCreditInfo, &r)
+	return r
+}
+
+type Info struct {
+	Credit             float64     `json:"kredit"`
+	CreditBackup       interface{} `json:"zalohaKredit"`
+	FirstMinusDate     string      `json:"prvyMinusDate"`
+	LastOkDate         string      `json:"poslednyOkDate"`
+	InterruptDay       interface{} `json:"prerusDen"`
+	HasInterruptObject interface{} `json:"maPreruseneObj"`
+	BoarderID          string      `json:"stravnikid"`
+	Info2              struct {
+		Credit    float64       `json:"kredit"`
+		PomCredit string        `json:"pomKredit"`
+		DayCount  int           `json:"pocetDni"`
+		DebugDays []interface{} `json:"debugDni"`
+		Done      bool          `json:"done"`
+	} `json:"poslednyOkDate"`
+	HistaminShow string `json:"showOnlyAffected"`
+	Alergens     map[json.Number]struct {
+		ID      int    `json:"id"`
+		Tag     string `json:"ozn"`
+		Name    string `json:"nazov"`
+		Visible bool   `json:"visible"`
+	} `json:"alergenyIDS"`
+	BoarderRow BoarderRow `json:"strRow"`
+}
+
 type Canteen struct {
-	Tickets map[string]Ticket
+	Days map[string]CanteenDay
+}
+
+func ParseCanteen(data []byte) (Canteen, error) {
+
 }

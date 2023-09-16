@@ -5,7 +5,6 @@ import (
 	"errors"
 	"maps"
 	"reflect"
-	"strconv"
 )
 
 var (
@@ -16,36 +15,6 @@ var (
 	ItemTypeMessage  = "sprava"
 	ItemTypeHomework = "homework"
 )
-
-// TimelineItemData contains raw timeline data
-type TimelineItemData struct {
-	Value map[string]interface{}
-}
-
-func (n *TimelineItemData) UnmarshalJSON(b []byte) error {
-	r := string(b)
-	if r == "[]" {
-		n.Value = make(map[string]interface{})
-		return nil
-	}
-	s, err := strconv.Unquote(r)
-
-	if err != nil {
-		fix := []byte("{\"data\":" + r + "}") // weird fix, TODO: not do it this way?
-		var temp map[string]interface{}
-		_ = json.Unmarshal(fix, &temp)
-		_ = json.Unmarshal([]byte(temp["data"].(string)), &n.Value)
-	} else {
-		if err := json.Unmarshal([]byte(s), &n.Value); err != nil {
-			n.Value = make(map[string]interface{})
-		}
-	}
-	return nil
-}
-
-func (n *TimelineItemData) MarshalJSON() ([]byte, error) {
-	return json.Marshal(n.Value)
-}
 
 type TimelineItem struct {
 	ID              string           `json:"timelineid"`
@@ -59,7 +28,7 @@ type TimelineItem struct {
 	Text            string           `json:"text"`
 	TimeAdded       Time             `json:"cas_pridania"`
 	TimeEvent       Time             `json:"cas_udalosti"`
-	Data            TimelineItemData `json:"data"`
+	Data            StringJsonObject `json:"data"`
 	Owner           string           `json:"vlastnik"`
 	OwnerName       string           `json:"vlastnik_meno"`
 	ReactionCount   int              `json:"poct_reakcii"`
@@ -128,7 +97,7 @@ type Homework struct {
 	StudyTopics       bool             `json:"studyTopics"`
 	GradeEventID      interface{}      `json:"znamky_udalostid"`
 	StudentsHidden    string           `json:"students_hidden"`
-	Data              TimelineItemData `json:"data"`
+	Data              StringJsonObject `json:"data"`
 	EvaluationStatus  string           `json:"stavhodnotetimelinePathd"`
 	Ended             interface{}      `json:"skoncil"`
 	MissingNextLesson bool             `json:"missingNextLesson"`
