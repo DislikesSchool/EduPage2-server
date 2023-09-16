@@ -13,36 +13,9 @@ var (
 )
 
 var (
-	ItemTypeMessage  = TimelineItemType{0}
-	ItemTypeHomework = TimelineItemType{1}
-	ItemTypeInvalid  = TimelineItemType{2}
+	ItemTypeMessage  = "sprava"
+	ItemTypeHomework = "homework"
 )
-
-type TimelineItemType struct {
-	uint8
-}
-
-func (n *TimelineItemType) UnmarshalJSON(b []byte) error {
-	s := string(b)
-	if s == "\"sprava\"" {
-		n.uint8 = 0
-	} else if s == "\"homework\"" {
-		n.uint8 = 1
-	} else {
-		n.uint8 = 2
-	}
-	return nil
-}
-
-func (n TimelineItemType) MarshalJSON() ([]byte, error) {
-	if n.uint8 == 0 {
-		return []byte("sprava"), nil
-	} else if n.uint8 == 1 {
-		return []byte("homework"), nil
-	} else {
-		return nil, errors.New("invalid type")
-	}
-}
 
 // TimelineItemData contains raw timeline data
 type TimelineItemData struct {
@@ -78,7 +51,7 @@ type TimelineItem struct {
 	ID              string           `json:"timelineid"`
 	Timestamp       Time             `json:"timestamp"`
 	ReactionTo      string           `json:"reakcia_na"`
-	Type            TimelineItemType `json:"typ"`
+	Type            string           `json:"typ"`
 	User            string           `json:"user"`
 	TargetUser      string           `json:"target_user"`
 	UserName        string           `json:"user_meno"`
@@ -143,7 +116,7 @@ type Homework struct {
 	Period            interface{}      `json:"period"`
 	Timestamp         string           `json:"timestamp"`
 	TestID            string           `json:"testid"`
-	Type              TimelineItemType `json:"typ"`
+	Type              string           `json:"typ"`
 	LikeCount         json.Number      `json:"pocet_like"`
 	ReactionCount     json.Number      `json:"pocet_reakcii"`
 	DoneCount         json.Number      `json:"pocet_done"`
