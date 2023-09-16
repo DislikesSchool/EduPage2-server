@@ -919,7 +919,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "typ": {
-                    "$ref": "#/definitions/model.TimelineItemType"
+                    "type": "string"
                 },
                 "userid": {
                     "type": "string"
@@ -1042,7 +1042,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "typ": {
-                    "$ref": "#/definitions/model.TimelineItemType"
+                    "type": "string"
                 },
                 "user": {
                     "type": "string"
@@ -1064,14 +1064,6 @@ const docTemplate = `{
                 "value": {
                     "type": "object",
                     "additionalProperties": true
-                }
-            }
-        },
-        "model.TimelineItemType": {
-            "type": "object",
-            "properties": {
-                "uint8": {
-                    "type": "integer"
                 }
             }
         }

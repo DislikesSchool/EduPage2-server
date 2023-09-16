@@ -254,7 +254,7 @@ definitions:
       timestamp:
         type: string
       typ:
-        $ref: '#/definitions/model.TimelineItemType'
+        type: string
       userid:
         type: string
       znamky_udalostid: {}
@@ -335,7 +335,7 @@ definitions:
       timestamp:
         type: string
       typ:
-        $ref: '#/definitions/model.TimelineItemType'
+        type: string
       user:
         type: string
       user_meno:
@@ -350,11 +350,6 @@ definitions:
       value:
         additionalProperties: true
         type: object
-    type: object
-  model.TimelineItemType:
-    properties:
-      uint8:
-        type: integer
     type: object
 info:
   contact: {}

@@ -10,7 +10,7 @@ type TimelineItemReduced struct {
 	ID            string                 `json:"timelineid"`
 	Timestamp     model.Time             `json:"timestamp"`
 	ReactionTo    string                 `json:"reakcia_na"`
-	Type          model.TimelineItemType `json:"typ"`
+	Type          string                 `json:"typ"`
 	User          string                 `json:"user"`
 	TargetUser    string                 `json:"target_user"`
 	Text          string                 `json:"text"`
@@ -31,7 +31,7 @@ type HomeworkReduced struct {
 	Period           interface{}            `json:"period"`
 	Timestamp        string                 `json:"timestamp"`
 	TestID           string                 `json:"testid"`
-	Type             model.TimelineItemType `json:"typ"`
+	Type             string                 `json:"typ"`
 	LikeCount        json.Number            `json:"pocet_like"`
 	ReactionCount    json.Number            `json:"pocet_reakcii"`
 	DoneCount        json.Number            `json:"pocet_done"`
