@@ -144,16 +144,16 @@ definitions:
         example: false
         type: boolean
     type: object
-  edupage.ICanteenDay:
+  icanteen.ICanteenDay:
     properties:
       day:
         type: string
       lunches:
         items:
-          $ref: '#/definitions/edupage.ICanteenLunch'
+          $ref: '#/definitions/icanteen.ICanteenLunch'
         type: array
     type: object
-  edupage.ICanteenLunch:
+  icanteen.ICanteenLunch:
     properties:
       can_order:
         type: boolean
@@ -630,7 +630,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/edupage.ICanteenDay'
+              $ref: '#/definitions/icanteen.ICanteenDay'
             type: array
         "400":
           description: Bad Request

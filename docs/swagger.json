@@ -420,7 +420,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/edupage.ICanteenDay"
+                                "$ref": "#/definitions/icanteen.ICanteenDay"
                             }
                         }
                     },
@@ -747,7 +747,7 @@
                 }
             }
         },
-        "edupage.ICanteenDay": {
+        "icanteen.ICanteenDay": {
             "type": "object",
             "properties": {
                 "day": {
@@ -756,12 +756,12 @@
                 "lunches": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/edupage.ICanteenLunch"
+                        "$ref": "#/definitions/icanteen.ICanteenLunch"
                     }
                 }
             }
         },
-        "edupage.ICanteenLunch": {
+        "icanteen.ICanteenLunch": {
             "type": "object",
             "properties": {
                 "can_order": {

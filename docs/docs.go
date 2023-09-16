@@ -427,7 +427,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/edupage.ICanteenDay"
+                                "$ref": "#/definitions/icanteen.ICanteenDay"
                             }
                         }
                     },
@@ -754,7 +754,7 @@ const docTemplate = `{
                 }
             }
         },
-        "edupage.ICanteenDay": {
+        "icanteen.ICanteenDay": {
             "type": "object",
             "properties": {
                 "day": {
@@ -763,12 +763,12 @@ const docTemplate = `{
                 "lunches": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/edupage.ICanteenLunch"
+                        "$ref": "#/definitions/icanteen.ICanteenLunch"
                     }
                 }
             }
         },
-        "edupage.ICanteenLunch": {
+        "icanteen.ICanteenLunch": {
             "type": "object",
             "properties": {
                 "can_order": {
