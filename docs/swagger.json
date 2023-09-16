@@ -912,7 +912,7 @@
                     "type": "string"
                 },
                 "typ": {
-                    "$ref": "#/definitions/model.TimelineItemType"
+                    "type": "string"
                 },
                 "userid": {
                     "type": "string"
@@ -1035,7 +1035,7 @@
                     "type": "string"
                 },
                 "typ": {
-                    "$ref": "#/definitions/model.TimelineItemType"
+                    "type": "string"
                 },
                 "user": {
                     "type": "string"
@@ -1057,14 +1057,6 @@
                 "value": {
                     "type": "object",
                     "additionalProperties": true
-                }
-            }
-        },
-        "model.TimelineItemType": {
-            "type": "object",
-            "properties": {
-                "uint8": {
-                    "type": "integer"
                 }
             }
         }
