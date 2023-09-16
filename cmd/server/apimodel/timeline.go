@@ -14,7 +14,7 @@ type TimelineItemReduced struct {
 	User          string                 `json:"user"`
 	TargetUser    string                 `json:"target_user"`
 	Text          string                 `json:"text"`
-	Data          model.TimelineItemData `json:"data"`
+	Data          model.StringJsonObject `json:"data"`
 	Owner         string                 `json:"vlastnik"`
 	ReactionCount int                    `json:"poct_reakcii"`
 	Removed       json.Number            `json:"removed"`
