@@ -39,7 +39,7 @@ type HomeworkReduced struct {
 	LastResult       string                 `json:"posledny_vysledok"`
 	GradeEventID     interface{}            `json:"znamky_udalostid"`
 	StudentsHidden   string                 `json:"students_hidden"`
-	Data             model.TimelineItemData `json:"data"`
+	Data             model.StringJsonObject `json:"data"`
 	EvaluationStatus string                 `json:"stavhodnotetimelinePathd"`
 	Attachments      interface{}            `json:"attachements"`
 }
