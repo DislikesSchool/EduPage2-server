@@ -830,7 +830,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/model.TimelineItemData"
+                    "$ref": "#/definitions/model.StringJsonObject"
                 },
                 "datecreated": {
                     "type": "string"
@@ -927,6 +927,15 @@ const docTemplate = `{
                 "znamky_udalostid": {}
             }
         },
+        "model.StringJsonObject": {
+            "type": "object",
+            "properties": {
+                "value": {
+                    "type": "object",
+                    "additionalProperties": true
+                }
+            }
+        },
         "model.Subject": {
             "type": "object",
             "properties": {
@@ -1009,7 +1018,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "data": {
-                    "$ref": "#/definitions/model.TimelineItemData"
+                    "$ref": "#/definitions/model.StringJsonObject"
                 },
                 "ineid": {
                     "type": "string"
@@ -1055,15 +1064,6 @@ const docTemplate = `{
                 },
                 "vlastnik_meno": {
                     "type": "string"
-                }
-            }
-        },
-        "model.TimelineItemData": {
-            "type": "object",
-            "properties": {
-                "value": {
-                    "type": "object",
-                    "additionalProperties": true
                 }
             }
         }

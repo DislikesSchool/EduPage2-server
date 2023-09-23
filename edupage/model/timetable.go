@@ -2,7 +2,8 @@ package model
 
 import (
 	"encoding/json"
-	"maps"
+
+	"golang.org/x/exp/maps"
 )
 
 type Timetable struct {

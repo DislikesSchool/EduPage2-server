@@ -1,0 +1,12 @@
+# Spacefile Docs: https://go.deta.dev/docs/spacefile/v0
+v: 0
+micros:
+  - name: EduPage2-server
+    src: ./
+    engine: custom
+    primary: true
+    commands:
+      - go build ./cmd/server
+    include:
+      - server
+    run: ./server
