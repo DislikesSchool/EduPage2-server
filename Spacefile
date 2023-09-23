@@ -5,6 +5,7 @@ micros:
     src: ./
     engine: custom
     primary: true
+    public: true
     commands:
       - go build ./cmd/server
     include:
