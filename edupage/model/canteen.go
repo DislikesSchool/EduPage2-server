@@ -125,5 +125,5 @@ type Canteen struct {
 }
 
 func ParseCanteen(data []byte) (Canteen, error) {
-
+	return Canteen{}, nil
 }
