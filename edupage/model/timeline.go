@@ -3,8 +3,9 @@ package model
 import (
 	"encoding/json"
 	"errors"
-	"maps"
 	"reflect"
+
+	"golang.org/x/exp/maps"
 )
 
 var (

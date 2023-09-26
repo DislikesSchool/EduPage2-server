@@ -194,7 +194,7 @@ definitions:
       autor_meno:
         type: string
       data:
-        $ref: '#/definitions/model.TimelineItemData'
+        $ref: '#/definitions/model.StringJsonObject'
       datecreated:
         type: string
       datefrom:
@@ -259,6 +259,12 @@ definitions:
         type: string
       znamky_udalostid: {}
     type: object
+  model.StringJsonObject:
+    properties:
+      value:
+        additionalProperties: true
+        type: object
+    type: object
   model.Subject:
     properties:
       cbhidden:
@@ -313,7 +319,7 @@ definitions:
       cas_udalosti_btc:
         type: string
       data:
-        $ref: '#/definitions/model.TimelineItemData'
+        $ref: '#/definitions/model.StringJsonObject'
       ineid:
         type: string
       poct_reakcii:
@@ -344,12 +350,6 @@ definitions:
         type: string
       vlastnik_meno:
         type: string
-    type: object
-  model.TimelineItemData:
-    properties:
-      value:
-        additionalProperties: true
-        type: object
     type: object
 info:
   contact: {}
