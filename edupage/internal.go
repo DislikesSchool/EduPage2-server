@@ -213,11 +213,54 @@ func (client *EdupageClient) fetchTimetable(datefrom, dateto time.Time) (model.T
 	return tt, nil
 }
 
+func (client *EdupageClient) fetchCanteen(date time.Time) (model.Canteen, error) {
+	if client.Credentials.httpClient == nil {
+		return model.Canteen{}, errors.New("invalid credentials")
+	}
+	u := fmt.Sprintf("https://%s/menu/?date=%s", client.Credentials.Server, date.Format("20060102"))
+
+	response, err := client.Credentials.httpClient.Get(u)
+	if err != nil {
+		return model.Canteen{}, ErrorUnauthorized // most likely case
+	}
+
+	if response.StatusCode != 200 {
+		return model.Canteen{}, fmt.Errorf("server returned code: %d", response.StatusCode)
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return model.Canteen{}, fmt.Errorf("failed to read response body: %s", err)
+	}
+
+	data, err := findEdupageData(body)
+	if err != nil {
+		return model.Canteen{}, fmt.Errorf("failed to parse json: %s", err)
+	}
+
+	canteen, err := model.ParseCanteen([]byte(data))
+	if err != nil {
+		return model.Canteen{}, fmt.Errorf("failed to parse json: %s", err)
+	}
+
+	return canteen, nil
+}
+
 func findGSCEHash(body []byte) (string, error) {
 	rg, _ := regexp.Compile(`ASC\.gsechash="(.*)";`)
 	matches := rg.FindAllStringSubmatch(string(body), -1)
 	if len(matches) == 0 {
 		return "", errors.New("gsechash not found in the document body")
+	}
+
+	return matches[0][1], nil
+}
+
+func findEdupageData(body []byte) (string, error) {
+	rg, _ := regexp.Compile(`edupageData: (\{.*\}),`)
+	matches := rg.FindAllStringSubmatch(string(body), -1)
+	if len(matches) == 0 {
+		return "", errors.New("edupageData not found in the document body")
 	}
 
 	return matches[0][1], nil

@@ -1,6 +1,9 @@
 package model
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type TicketRow struct {
 	Histamin    int                  `json:"histamin"`
@@ -121,9 +124,43 @@ type Info struct {
 }
 
 type Canteen struct {
+	Info Info
 	Days map[string]CanteenDay
 }
 
 func ParseCanteen(data []byte) (Canteen, error) {
+	var response map[string]interface{}
+
+	err := json.Unmarshal(data, &response)
+	if err != nil {
+		return Canteen{}, fmt.Errorf("failed to parse canteen data: %s", err.Error())
+	}
+
+	edupage := response["csssnina"].(map[string]interface{})
+	novyListok := edupage["novyListok"].(map[string]interface{})
+	var info Info
+	days := make(map[string]CanteenDay, len(novyListok)-1)
+	for k, v := range novyListok {
+		if k == "addInfo" {
+			b, _ := json.Marshal(v)
+			json.Unmarshal(b, &info)
+		} else {
+			var day CanteenDay
+			b, _ := json.Marshal(v.(map[string]interface{})["2"])
+			json.Unmarshal(b, &day)
+			days[k] = day
+		}
+	}
+
 	return Canteen{}, nil
+}
+
+func keys[K comparable, V any](data map[K]V) []K {
+	var keys = make([]K, len(data))
+
+	for k, _ := range data {
+		keys = append(keys, k)
+	}
+
+	return keys
 }

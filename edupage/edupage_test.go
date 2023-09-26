@@ -105,15 +105,16 @@ func TestEdupage(t *testing.T) {
 	if len(timetable.Days) == 0 {
 		t.Log("Recieved timetable is empty")
 	}
-	for k := range timetable.Days {
-		println(k)
+
+	canteen, err := client.GetRecentCanteen()
+	if err != nil {
+		t.Error(fmt.Errorf("failed to recieve canteen: %s", err))
+		//return
 	}
 
-	for _, v := range timetable.Days["2023-09-04"] {
-		subject, _ := client.GetSubjectByID(v.SubjectID)
-		println(subject.Name)
+	for k, v := range canteen.Days {
+		fmt.Printf("[%s] - %s\n", k, v.Name)
 	}
-
 }
 
 func BenchmarkLogin(t *testing.B) {
