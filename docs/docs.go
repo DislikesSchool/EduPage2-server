@@ -68,6 +68,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/periods": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns the school's periods.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DBI"
+                ],
+                "summary": "Get the school's periods",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "$ref": "#/definitions/model.Period"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/subject/{id}": {
             "get": {
                 "security": [
@@ -925,6 +974,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "znamky_udalostid": {}
+            }
+        },
+        "model.Period": {
+            "type": "object",
+            "properties": {
+                "endtime": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "short": {
+                    "type": "string"
+                },
+                "starttime": {
+                    "type": "string"
+                }
             }
         },
         "model.StringJsonObject": {

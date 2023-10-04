@@ -368,3 +368,27 @@ func ICanteenHandler(ctx *gin.Context) {
 
 	ctx.JSON(200, lunches)
 }
+
+// PeriodsHandler godoc
+// @Summary Get the school's periods
+// @Schemes
+// @Description Returns the school's periods.
+// @Tags DBI
+// @Param Authorization header string true "JWT token"
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} map[string]model.Period
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
+// @Router /api/periods [get]
+func PeriodsHandler(c *gin.Context) {
+	client := c.MustGet("client").(*edupage.EdupageClient)
+
+	user, err := client.GetUser(false)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, user.DBI.Periods)
+}

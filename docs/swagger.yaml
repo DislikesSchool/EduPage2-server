@@ -259,6 +259,19 @@ definitions:
         type: string
       znamky_udalostid: {}
     type: object
+  model.Period:
+    properties:
+      endtime:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      short:
+        type: string
+      starttime:
+        type: string
+    type: object
   model.StringJsonObject:
     properties:
       value:
@@ -389,6 +402,37 @@ paths:
       security:
       - Bearer: []
       summary: Get the classroom by ID
+      tags:
+      - DBI
+  /api/periods:
+    get:
+      description: Returns the school's periods.
+      parameters:
+      - description: JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              $ref: '#/definitions/model.Period'
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get the school's periods
       tags:
       - DBI
   /api/subject/{id}:
