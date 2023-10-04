@@ -255,7 +255,7 @@ func (dbi *DBI) UnmarshalJSON(data []byte) error {
 		dbi.SubstitutionTypes = adbi.SubstitutionTypes
 		dbi.Teachers = adbi.Teachers
 		dbi.IsStudentAdult = adbi.IsStudentAdult
-
+		return nil
 	}
 
 	dbi.AbsentTypes = fdbi.AbsentTypes
