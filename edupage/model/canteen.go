@@ -34,8 +34,8 @@ type CanteenDay struct {
 	VisibleMenus            map[json.Number]bool     `json:"visibleMenus"`
 	ChoosableMenus          map[json.Number]bool     `json:"choosableMenus"`
 	UnsubscribeOnlyWholeDay bool                     `json:"odhlasIbaCelyDen"`
-	OrderFrom               string                   `json:"prihlas_od"`
-	OrderUntil              string                   `json:"prihlas_do"`
+	OrderableUntil          string                   `json:"prihlas_do"`
+	CancelableUntil         string                   `json:"odhlas_do"`
 	ChangeTo                string                   `json:"zmen_do"`
 	Edupage                 string                   `json:"edupage"`
 	IsSemiChoosable         string                   `json:"isSemiChoosable"`
@@ -152,15 +152,8 @@ func ParseCanteen(data []byte) (Canteen, error) {
 		}
 	}
 
-	return Canteen{}, nil
-}
-
-func keys[K comparable, V any](data map[K]V) []K {
-	var keys = make([]K, len(data))
-
-	for k, _ := range data {
-		keys = append(keys, k)
-	}
-
-	return keys
+	return Canteen{
+		Days: days,
+		Info: info,
+	}, nil
 }

@@ -20,33 +20,29 @@ type Menu struct {
 }
 
 type Day struct {
-	Date          time.Time
-	AvailableFrom time.Time
-	AvailableTo   time.Time
-	Ordered       bool
-	OrderFrom     time.Time
-	OrderUntil    time.Time
-	Menus         []Menu
+	Date            time.Time
+	AvailableFrom   time.Time
+	AvailableTo     time.Time
+	Ordered         bool
+	OrderableUntil  time.Time
+	CancelableUntil time.Time
+	Menus           []Menu
 }
 
 func (m *Day) IsAvailable(t time.Time) bool {
-	if t.Before(m.AvailableFrom) {
+	if t.After(m.AvailableFrom) && t.Before(m.AvailableTo) {
+		return true
+	} else {
 		return false
 	}
-
-	if t.After(m.AvailableTo) {
-		return false
-	}
-
-	return true
 }
 
 func (m *Day) CanOrder(t time.Time) bool {
-	if t.Before(m.OrderFrom) {
+	if t.Before(m.OrderableUntil) {
 		return false
 	}
 
-	if t.After(m.OrderUntil) {
+	if t.After(m.CancelableUntil) {
 		return false
 	}
 
@@ -77,12 +73,12 @@ func CreateDay(date string, day model.CanteenDay) (Day, error) {
 		return Day{}, err
 	}
 
-	order_from, err := time.Parse("2006-01-02 15:04", day.OrderFrom)
+	orderable, err := time.Parse("2006-01-02 15:04", day.OrderableUntil)
 	if err != nil {
 		return Day{}, err
 	}
 
-	order_until, err := time.Parse("2006-01-02 15:04", day.OrderUntil)
+	cancelable, err := time.Parse("2006-01-02 15:04", day.CancelableUntil)
 	if err != nil {
 		return Day{}, err
 	}
@@ -90,7 +86,7 @@ func CreateDay(date string, day model.CanteenDay) (Day, error) {
 	var meals []Meal = make([]Meal, len(day.Rows))
 	for index, row := range day.Rows {
 		alergens := make([]int, len(row.AlergenIDs))
-		for k, _ := range row.AlergenIDs {
+		for k := range row.AlergenIDs {
 			n, _ := k.Int64()
 			alergens = append(alergens, int(n))
 		}
@@ -105,13 +101,13 @@ func CreateDay(date string, day model.CanteenDay) (Day, error) {
 	}
 
 	return Day{
-		Date:          dt,
-		AvailableFrom: from,
-		AvailableTo:   to,
-		Ordered:       day.Evidence.Status == "A",
-		OrderFrom:     order_from,
-		OrderUntil:    order_until,
-		Menus:         []Menu{{Meals: meals}},
+		Date:            dt,
+		AvailableFrom:   from,
+		AvailableTo:     to,
+		Ordered:         day.Evidence.Status == "A",
+		OrderableUntil:  orderable,
+		CancelableUntil: cancelable,
+		Menus:           []Menu{{Meals: meals}},
 	}, nil
 }
 
@@ -148,12 +144,14 @@ type Canteen struct {
 	Days map[string]Day
 }
 
-func (c *Canteen) CreateCanteen(m model.Canteen) (Canteen, error) {
+func CreateCanteen(m model.Canteen) (Canteen, error) {
 	days := map[string]Day{}
 	for date, day := range m.Days {
-		menu, err := CreateDay(date, day)
+		day, err := CreateDay(date, day)
 		if err == nil {
-			days[date] = menu
+			days[date] = day
+		} else {
+			return Canteen{}, err
 		}
 	}
 
