@@ -202,11 +202,7 @@ func LoginAuto(username, password string) (Credentials, error) {
 
 	//Error handling
 	if len(authResponse.Users) == 0 {
-		if authResponse.NeedEdupage {
-			return Credentials{}, errors.New("failed to login: Incorrect username. (If you are sure that the username is correct, try providing 'edupage' option)")
-		} else {
-			return Credentials{}, errors.New("failed to login: Incorrect password. (If you are sure that the password is correct, try providing 'edupage' option)")
-		}
+		return Credentials{}, errors.New("failed to login: Incorrect password. (If you are sure that the password is correct, try providing 'edupage' option)")
 	}
 
 	//Process response
