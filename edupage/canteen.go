@@ -16,16 +16,20 @@ type Meal struct {
 }
 
 type Menu struct {
+	Meals []Meal
+}
+
+type Day struct {
 	Date          time.Time
 	AvailableFrom time.Time
 	AvailableTo   time.Time
 	Ordered       bool
 	OrderFrom     time.Time
 	OrderUntil    time.Time
-	Meals         []Meal
+	Menus         []Menu
 }
 
-func (m *Menu) IsAvailable(t time.Time) bool {
+func (m *Day) IsAvailable(t time.Time) bool {
 	if t.Before(m.AvailableFrom) {
 		return false
 	}
@@ -37,7 +41,7 @@ func (m *Menu) IsAvailable(t time.Time) bool {
 	return true
 }
 
-func (m *Menu) CanOrder(t time.Time) bool {
+func (m *Day) CanOrder(t time.Time) bool {
 	if t.Before(m.OrderFrom) {
 		return false
 	}
@@ -49,38 +53,38 @@ func (m *Menu) CanOrder(t time.Time) bool {
 	return true
 }
 
-func (m *Menu) Cancel() {
-
+func (m *Day) Cancel() {
+	//TODO
 }
 
-func (m *Menu) Order() {
-
+func (m *Day) Order() {
+	//TODO
 }
 
-func CreateMenu(date string, day model.CanteenDay) (Menu, error) {
+func CreateDay(date string, day model.CanteenDay) (Day, error) {
 	from, err := parseCanteenDate(date, day.AvailableFrom)
 	if err != nil {
-		return Menu{}, err
+		return Day{}, err
 	}
 
 	to, err := parseCanteenDate(date, day.AvailableTo)
 	if err != nil {
-		return Menu{}, err
+		return Day{}, err
 	}
 
 	dt, err := time.Parse("2006-01-02", date)
 	if err != nil {
-		return Menu{}, err
+		return Day{}, err
 	}
 
 	order_from, err := time.Parse("2006-01-02 15:04", day.OrderFrom)
 	if err != nil {
-		return Menu{}, err
+		return Day{}, err
 	}
 
 	order_until, err := time.Parse("2006-01-02 15:04", day.OrderUntil)
 	if err != nil {
-		return Menu{}, err
+		return Day{}, err
 	}
 
 	var meals []Meal = make([]Meal, len(day.Rows))
@@ -100,14 +104,14 @@ func CreateMenu(date string, day model.CanteenDay) (Menu, error) {
 		}
 	}
 
-	return Menu{
+	return Day{
 		Date:          dt,
 		AvailableFrom: from,
 		AvailableTo:   to,
 		Ordered:       day.Evidence.Status == "A",
 		OrderFrom:     order_from,
 		OrderUntil:    order_until,
-		Meals:         meals,
+		Menus:         []Menu{{Meals: meals}},
 	}, nil
 }
 
@@ -141,15 +145,29 @@ func parseCanteenDate(date, hm string) (time.Time, error) {
 
 // Represents the canteen, contains menu information, and additional information
 type Canteen struct {
-	Menus map[string]Menu
+	Days map[string]Day
+}
+
+func (c *Canteen) CreateCanteen(m model.Canteen) (Canteen, error) {
+	days := map[string]Day{}
+	for date, day := range m.Days {
+		menu, err := CreateDay(date, day)
+		if err == nil {
+			days[date] = menu
+		}
+	}
+
+	return Canteen{
+		Days: days,
+	}, nil
 }
 
 // Obtain the menu for a specified day.
 // Returns menu, or false bool, indicating that no menu for that day was found.
-func (c *Canteen) GetMenuByDay(time time.Time) (Menu, bool) {
-	if menu, exists := c.Menus[time.Format("2006-01-02")]; exists {
+func (c *Canteen) GetMenuByDay(time time.Time) (Day, bool) {
+	if menu, exists := c.Days[time.Format("2006-01-02")]; exists {
 		return menu, true
 	} else {
-		return Menu{}, false
+		return Day{}, false
 	}
 }
