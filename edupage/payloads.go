@@ -13,6 +13,17 @@ type MessagePayload struct {
 	Typ          string
 }
 
+type CanteenPayload struct {
+	BoarderID   string
+	Edupage     string
+	BoarderUser string
+	Date        string // YYYY-mm-dd
+	FIDS        map[string]string
+	View        string
+	Permission  string
+	Action      string
+}
+
 func CreateMessage(receiver, text, attachments string) MessagePayload {
 	return MessagePayload{
 		SelectedUser: receiver,

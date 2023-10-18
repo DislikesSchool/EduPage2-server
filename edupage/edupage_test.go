@@ -112,8 +112,9 @@ func TestEdupage(t *testing.T) {
 		//return
 	}
 
-	for k, v := range canteen.Days {
-		fmt.Printf("[%s] - %s\n", k, v.Name)
+	_, err = CreateCanteen(canteen)
+	if err != nil {
+		t.Error(fmt.Errorf("failed to create canteen model: %s", err))
 	}
 }
 
