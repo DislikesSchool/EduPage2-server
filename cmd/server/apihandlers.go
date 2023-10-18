@@ -392,3 +392,32 @@ func PeriodsHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user.DBI.Periods)
 }
+
+// TimelineItemHandler godoc
+// @Summary Get the timeline item by ID
+// @Schemes
+// @Description Returns the timeline item by ID.
+// @Tags timeline
+// @Param Authorization header string true "JWT token"
+// @Param id path string true "Timeline item ID"
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} model.Timeline
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
+// @Router /api/timelineitem/{id} [get]
+func TimelineItemHandler(c *gin.Context) {
+	client := c.MustGet("client").(*edupage.EdupageClient)
+
+	id := c.Param("id")
+
+	timeline, err := client.GetRecentTimeline()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	timelineItem := timeline.Items[id]
+
+	c.JSON(http.StatusOK, timelineItem)
+}

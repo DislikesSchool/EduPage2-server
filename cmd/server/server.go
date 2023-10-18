@@ -59,6 +59,7 @@ func main() {
 	api.GET("/teacher/:id", TeacherHandler)
 	api.GET("/classroom/:id", ClassroomHandler)
 	api.GET("/periods", PeriodsHandler)
+	api.GET("/timelineitem/:id", TimelineItemHandler)
 
 	router.POST("/icanteen", ICanteenHandler)
 
