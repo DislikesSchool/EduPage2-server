@@ -34,8 +34,8 @@ type CanteenDay struct {
 	VisibleMenus            map[json.Number]bool     `json:"visibleMenus"`
 	ChoosableMenus          map[json.Number]bool     `json:"choosableMenus"`
 	UnsubscribeOnlyWholeDay bool                     `json:"odhlasIbaCelyDen"`
-	SubscribeFrom           string                   `json:"prihlas_od"`
-	SubscribeTo             string                   `json:"prihlas_do"`
+	OrderFrom               string                   `json:"prihlas_od"`
+	OrderUntil              string                   `json:"prihlas_do"`
 	ChangeTo                string                   `json:"zmen_do"`
 	Edupage                 string                   `json:"edupage"`
 	IsSemiChoosable         string                   `json:"isSemiChoosable"`
