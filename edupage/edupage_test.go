@@ -112,10 +112,10 @@ func TestEdupage(t *testing.T) {
 		//return
 	}
 
-	_, err = CreateCanteen(canteen)
-	if err != nil {
-		t.Error(fmt.Errorf("failed to create canteen model: %s", err))
+	if len(canteen.Days) == 0 {
+		t.Log("Recieved canteen is empty")
 	}
+
 }
 
 func BenchmarkLogin(t *testing.B) {

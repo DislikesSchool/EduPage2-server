@@ -134,24 +134,24 @@ func (client *EdupageClient) GetTimetable(from, to time.Time) (model.Timetable, 
 	return tt, nil
 }
 
-// GetCanteen retrieves the whole week's canteen menu from the specified day.
+// GetCanteen retrieves the whole week's canteen from the specified day.
 // Return ErrorUnauthorized if an authorization error occcurs.
-func (client *EdupageClient) GetCanteen(date time.Time) (model.Canteen, error) {
-	canteen, err := client.fetchCanteen(date)
+func (client *EdupageClient) GetCanteen(date time.Time) (Canteen, error) {
+	model, err := client.fetchCanteen(date)
 	if err != nil {
-		return model.Canteen{}, err
+		return Canteen{}, err
+	}
+	canteen, err := CreateCanteen(model)
+	if err != nil {
+		return Canteen{}, err
 	}
 	return canteen, nil
 }
 
 // GetCanteen retrieves the current week's canteen menu.
 // Return ErrorUnauthorized if an authorization error occcurs.
-func (client *EdupageClient) GetRecentCanteen() (model.Canteen, error) {
-	canteen, err := client.fetchCanteen(time.Now().Local())
-	if err != nil {
-		return model.Canteen{}, err
-	}
-	return canteen, nil
+func (client *EdupageClient) GetRecentCanteen() (Canteen, error) {
+	return client.GetCanteen(time.Now().Local())
 }
 
 // GetStudentID is used to retrieve the client's student ID.

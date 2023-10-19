@@ -29,6 +29,7 @@ type Day struct {
 	Menus           []Menu
 }
 
+// IsAvailable checks if the meal is currently available for consuming/pickup
 func (m *Day) IsAvailable(t time.Time) bool {
 	if t.After(m.AvailableFrom) && t.Before(m.AvailableTo) {
 		return true
@@ -37,6 +38,7 @@ func (m *Day) IsAvailable(t time.Time) bool {
 	}
 }
 
+// CanOrder checks if current day's meal can still be ordered/unordered
 func (m *Day) CanOrder(t time.Time) bool {
 	if t.Before(m.OrderableUntil) {
 		return false
@@ -57,6 +59,24 @@ func (m *Day) Order() {
 	//TODO
 }
 
+// Represents the canteen, contains menu information, and additional information
+type Canteen struct {
+	Days map[string]Day
+}
+
+// Obtain the menu for a specified day.
+// Returns menu, or false bool, indicating that no menu for that day was found.
+func (c *Canteen) GetMenuByDay(time time.Time) (Day, bool) {
+	if menu, exists := c.Days[time.Format("2006-01-02")]; exists {
+		return menu, true
+	} else {
+		return Day{}, false
+	}
+}
+
+// Global
+
+// CreateDay creates a Day object from model.CanteenDay
 func CreateDay(date string, day model.CanteenDay) (Day, error) {
 	from, err := parseCanteenDate(date, day.AvailableFrom)
 	if err != nil {
@@ -111,21 +131,7 @@ func CreateDay(date string, day model.CanteenDay) (Day, error) {
 	}, nil
 }
 
-// Represents the canteen, contains menu information, and additional information
-type Canteen struct {
-	Days map[string]Day
-}
-
-// Obtain the menu for a specified day.
-// Returns menu, or false bool, indicating that no menu for that day was found.
-func (c *Canteen) GetMenuByDay(time time.Time) (Day, bool) {
-	if menu, exists := c.Days[time.Format("2006-01-02")]; exists {
-		return menu, true
-	} else {
-		return Day{}, false
-	}
-}
-
+// CreateCanteen creates Canteen object from model.Canteen
 func CreateCanteen(m model.Canteen) (Canteen, error) {
 	days := map[string]Day{}
 	for date, day := range m.Days {
@@ -145,6 +151,7 @@ func CreateCanteen(m model.Canteen) (Canteen, error) {
 // PRIVATE
 
 func parseCanteenDate(date, hm string) (time.Time, error) {
+	//TODO: maybe regex?
 	split := strings.Split(hm, ":")
 
 	hour, err := strconv.Atoi(split[0])
