@@ -419,5 +419,27 @@ func TimelineItemHandler(c *gin.Context) {
 
 	timelineItem := timeline.Items[id]
 
-	c.JSON(http.StatusOK, timelineItem)
+	c.JSON(http.StatusOK, apimodel.TimelineItemWithOrigin{
+		ID:              timelineItem.ID,
+		Timestamp:       timelineItem.Timestamp,
+		ReactionTo:      timelineItem.ReactionTo,
+		Type:            timelineItem.Type,
+		User:            timelineItem.User,
+		TargetUser:      timelineItem.TargetUser,
+		UserName:        timelineItem.UserName,
+		OtherID:         timelineItem.OtherID,
+		Text:            timelineItem.Text,
+		TimeAdded:       timelineItem.TimeAdded,
+		TimeEvent:       timelineItem.TimeEvent,
+		Data:            timelineItem.Data,
+		Owner:           timelineItem.Owner,
+		OwnerName:       timelineItem.OwnerName,
+		ReactionCount:   timelineItem.ReactionCount,
+		LastReaction:    timelineItem.LastReaction,
+		PomocnyZaznam:   timelineItem.PomocnyZaznam,
+		Removed:         timelineItem.Removed,
+		TimeAddedBTC:    timelineItem.TimeAddedBTC,
+		LastReactionBTC: timelineItem.LastReactionBTC,
+		OriginServer:    client.Credentials.Server,
+	})
 }
