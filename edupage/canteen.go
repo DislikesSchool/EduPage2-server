@@ -111,6 +111,39 @@ func CreateDay(date string, day model.CanteenDay) (Day, error) {
 	}, nil
 }
 
+// Represents the canteen, contains menu information, and additional information
+type Canteen struct {
+	Days map[string]Day
+}
+
+// Obtain the menu for a specified day.
+// Returns menu, or false bool, indicating that no menu for that day was found.
+func (c *Canteen) GetMenuByDay(time time.Time) (Day, bool) {
+	if menu, exists := c.Days[time.Format("2006-01-02")]; exists {
+		return menu, true
+	} else {
+		return Day{}, false
+	}
+}
+
+func CreateCanteen(m model.Canteen) (Canteen, error) {
+	days := map[string]Day{}
+	for date, day := range m.Days {
+		day, err := CreateDay(date, day)
+		if err == nil {
+			days[date] = day
+		} else {
+			return Canteen{}, err
+		}
+	}
+
+	return Canteen{
+		Days: days,
+	}, nil
+}
+
+// PRIVATE
+
 func parseCanteenDate(date, hm string) (time.Time, error) {
 	split := strings.Split(hm, ":")
 
@@ -137,35 +170,4 @@ func parseCanteenDate(date, hm string) (time.Time, error) {
 		0,
 		0,
 		time.Now().UTC().Location()), nil
-}
-
-// Represents the canteen, contains menu information, and additional information
-type Canteen struct {
-	Days map[string]Day
-}
-
-func CreateCanteen(m model.Canteen) (Canteen, error) {
-	days := map[string]Day{}
-	for date, day := range m.Days {
-		day, err := CreateDay(date, day)
-		if err == nil {
-			days[date] = day
-		} else {
-			return Canteen{}, err
-		}
-	}
-
-	return Canteen{
-		Days: days,
-	}, nil
-}
-
-// Obtain the menu for a specified day.
-// Returns menu, or false bool, indicating that no menu for that day was found.
-func (c *Canteen) GetMenuByDay(time time.Time) (Day, bool) {
-	if menu, exists := c.Days[time.Format("2006-01-02")]; exists {
-		return menu, true
-	} else {
-		return Day{}, false
-	}
 }
