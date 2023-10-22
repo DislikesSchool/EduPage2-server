@@ -14,21 +14,17 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
-func (client *EdupageClient) fetchTimeline(datefrom, dateto time.Time) (model.Timeline, error) {
+func (client *EdupageClient) fetchTimelineModel(datefrom, dateto time.Time) (model.Timeline, error) {
 	if client.Credentials.httpClient == nil {
 		return model.Timeline{}, errors.New("invalid credentials")
 	}
 
 	url := fmt.Sprintf("https://%s/timeline/?akcia=getData", client.Credentials.Server)
 
-	form, err := CreatePayload(map[string]string{
+	form := CreatePayload(map[string]string{
 		"datefrom": datefrom.Format("2006-01-02"),
 		"dateto":   dateto.Format("2006-01-02"),
 	})
-
-	if err != nil {
-		return model.Timeline{}, fmt.Errorf("failed to create payload: %s", err)
-	}
 
 	response, err := client.Credentials.httpClient.PostForm(url, form)
 	if err != nil {
@@ -60,7 +56,7 @@ func (client *EdupageClient) fetchTimeline(datefrom, dateto time.Time) (model.Ti
 	return timeline, nil
 }
 
-func (client *EdupageClient) fetchUser() (model.User, error) {
+func (client *EdupageClient) fetchUserModel() (model.User, error) {
 	if client.Credentials.httpClient == nil {
 		return model.User{}, errors.New("invalid credentials")
 	}
@@ -101,14 +97,14 @@ func (client *EdupageClient) fetchUser() (model.User, error) {
 	return user, nil
 }
 
-func (client *EdupageClient) fetchResults(year, halfyear string) (model.Results, error) {
+func (client *EdupageClient) fetchResultsModel(year, halfyear string) (model.Results, error) {
 	if client.Credentials.httpClient == nil {
 		return model.Results{}, errors.New("invalid credentials")
 	}
 
 	url := fmt.Sprintf("https://%s/znamky/?what=studentviewer&akcia=studentData&eqav=1&maxEqav=7", client.Credentials.Server)
 
-	form, err := CreatePayload(map[string]string{
+	form := CreatePayload(map[string]string{
 		"pohlad":           "podladatumu",
 		"znamky_yearid":    year,
 		"znamky_yearid_ns": "1",
@@ -118,10 +114,6 @@ func (client *EdupageClient) fetchResults(year, halfyear string) (model.Results,
 		"what":             "studentviewer",
 		"updateLastView":   "0",
 	})
-
-	if err != nil {
-		return model.Results{}, fmt.Errorf("failed to create payload: %s", err)
-	}
 
 	response, err := client.Credentials.httpClient.PostForm(url, form)
 	if err != nil {
@@ -154,7 +146,7 @@ func (client *EdupageClient) fetchResults(year, halfyear string) (model.Results,
 	return results, nil
 }
 
-func (client *EdupageClient) fetchTimetable(datefrom, dateto time.Time) (model.Timetable, error) {
+func (client *EdupageClient) fetchTimetableModel(datefrom, dateto time.Time) (model.Timetable, error) {
 	if client.Credentials.httpClient == nil {
 		return model.Timetable{}, errors.New("invalid credentials")
 	}
@@ -213,7 +205,7 @@ func (client *EdupageClient) fetchTimetable(datefrom, dateto time.Time) (model.T
 	return tt, nil
 }
 
-func (client *EdupageClient) fetchCanteen(date time.Time) (model.Canteen, error) {
+func (client *EdupageClient) fetchCanteenModel(date time.Time) (model.Canteen, error) {
 	if client.Credentials.httpClient == nil {
 		return model.Canteen{}, errors.New("invalid credentials")
 	}

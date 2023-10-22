@@ -14,14 +14,14 @@ type MessagePayload struct {
 }
 
 type CanteenPayload struct {
-	BoarderID   string
-	Edupage     string
-	BoarderUser string
-	Date        string // YYYY-mm-dd
-	FIDS        map[string]string
-	View        string
-	Permission  string
-	Action      string
+	BoarderID   string            `json:"stravnikid"`
+	Edupage     string            `json:"edupage"`
+	BoarderUser string            `json:"stravnikUser,omitempty"`
+	Date        string            `json:"mysqlDate"` // YYYY-mm-dd
+	FIDS        map[string]string `json:"jids"`
+	View        string            `json:"view"`
+	Permission  string            `json:"pravo"`
+	Action      string            `json:"akcia"`
 }
 
 func CreateMessage(receiver, text, attachments string) MessagePayload {
@@ -33,7 +33,7 @@ func CreateMessage(receiver, text, attachments string) MessagePayload {
 	}
 }
 
-func CreatePayload(data map[string]string) (url.Values, error) {
+func CreatePayload(data map[string]string) url.Values {
 	payload_values := url.Values{}
 	for key, val := range data {
 		payload_values.Add(key, val)
@@ -52,5 +52,5 @@ func CreatePayload(data map[string]string) (url.Values, error) {
 	values.Add("eqacs", base64.URLEncoding.EncodeToString(hasher.Sum(nil)))
 
 	values.Add("eqaz", "1")
-	return values, nil
+	return values
 }

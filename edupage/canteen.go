@@ -30,7 +30,7 @@ type Day struct {
 }
 
 // IsAvailable checks if the meal is currently available for consuming/pickup
-func (m *Day) IsAvailable(t time.Time) bool {
+func (m Day) IsAvailable(t time.Time) bool {
 	if t.After(m.AvailableFrom) && t.Before(m.AvailableTo) {
 		return true
 	} else {
@@ -38,35 +38,15 @@ func (m *Day) IsAvailable(t time.Time) bool {
 	}
 }
 
-// CanOrder checks if current day's meal can still be ordered/unordered
-func (m *Day) CanOrder(t time.Time) bool {
-	if t.Before(m.OrderableUntil) {
-		return false
-	}
-
-	if t.After(m.CancelableUntil) {
-		return false
-	}
-
-	return true
-}
-
-func (m *Day) Cancel() {
-	//TODO
-}
-
-func (m *Day) Order() {
-	//TODO
-}
-
 // Represents the canteen, contains menu information, and additional information
 type Canteen struct {
-	Days map[string]Day
+	model model.Canteen
+	Days  map[string]Day
 }
 
 // Obtain the menu for a specified day.
 // Returns menu, or false bool, indicating that no menu for that day was found.
-func (c *Canteen) GetMenuByDay(time time.Time) (Day, bool) {
+func (c Canteen) GetMenuByDay(time time.Time) (Day, bool) {
 	if menu, exists := c.Days[time.Format("2006-01-02")]; exists {
 		return menu, true
 	} else {
@@ -144,7 +124,8 @@ func CreateCanteen(m model.Canteen) (Canteen, error) {
 	}
 
 	return Canteen{
-		Days: days,
+		model: m,
+		Days:  days,
 	}, nil
 }
 

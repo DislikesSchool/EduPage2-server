@@ -115,7 +115,6 @@ func TestEdupage(t *testing.T) {
 	if len(canteen.Days) == 0 {
 		t.Log("Recieved canteen is empty")
 	}
-
 }
 
 func BenchmarkLogin(t *testing.B) {

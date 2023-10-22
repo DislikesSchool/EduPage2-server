@@ -112,7 +112,7 @@ type Info struct {
 		DayCount  int           `json:"pocetDni"`
 		DebugDays []interface{} `json:"debugDni"`
 		Done      bool          `json:"done"`
-	} `json:"poslednyOkDate"`
+	} `json:"info2"`
 	HistaminShow string `json:"showOnlyAffected"`
 	Alergens     map[json.Number]struct {
 		ID      int    `json:"id"`

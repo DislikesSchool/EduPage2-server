@@ -18,6 +18,7 @@ var (
 	ErrorUnitialized  = errors.New("unitialized")
 	ErrorNotFound     = errors.New("not found")
 	ErrorUnauthorized = errors.New("unauthorized")
+	ErrorUnchangeable = errors.New("can not make changes at this time")
 )
 
 // EdupageClient is used to access the edupage api.
@@ -25,28 +26,29 @@ type EdupageClient struct {
 	Credentials Credentials
 	gsechash    string
 
-	user *model.User
+	user    *model.User
+	canteen *Canteen
 	//timeline  *model.Timeline
 	//results   *model.Results
 	//timetable *model.Timetable
 }
 
 // CreateClient is used to create a client struct
-func CreateClient(credentials Credentials) (EdupageClient, error) {
+func CreateClient(credentials Credentials) (*EdupageClient, error) {
 	var client EdupageClient
 	if credentials.httpClient == nil {
-		return EdupageClient{}, errors.New("http client in credentials can not be nil")
+		return nil, errors.New("http client in credentials can not be nil")
 	}
 	client.Credentials = credentials
 
-	user, err := client.fetchUser()
+	user, err := client.fetchUserModel()
 	if err != nil {
-		return EdupageClient{}, err
+		return nil, err
 	}
 
 	client.user = &user
 
-	return client, nil
+	return &client, nil
 }
 
 // UpdateCredentials updates the credentials and allows this struct to continue
@@ -60,7 +62,7 @@ func (client *EdupageClient) UpdateCredentials(credentials Credentials) {
 // Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetUser(update bool) (model.User, error) {
 	if client.user == nil || update {
-		user, err := client.fetchUser()
+		user, err := client.fetchUserModel()
 		if err != nil {
 			return model.User{}, err
 		}
@@ -75,7 +77,7 @@ func (client *EdupageClient) GetUser(update bool) (model.User, error) {
 // GetRecentTimeline retrieves last 30 days of timeline from edupage.
 // Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetRecentTimeline() (model.Timeline, error) {
-	timeline, err := client.fetchTimeline(time.Now().AddDate(0, 0, -30), time.Now())
+	timeline, err := client.fetchTimelineModel(time.Now().AddDate(0, 0, -30), time.Now())
 	if err != nil {
 		return model.Timeline{}, err
 	}
@@ -86,7 +88,7 @@ func (client *EdupageClient) GetRecentTimeline() (model.Timeline, error) {
 // GetUser retrieves the timeline in a specified time interval from edupage.
 // Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetTimeline(from, to time.Time) (model.Timeline, error) {
-	tt, err := client.fetchTimeline(from, to)
+	tt, err := client.fetchTimelineModel(from, to)
 	if err != nil {
 		return model.Timeline{}, err
 	}
@@ -98,14 +100,14 @@ func (client *EdupageClient) GetTimeline(from, to time.Time) (model.Timeline, er
 func (client *EdupageClient) GetRecentResults() (model.Results, error) {
 	year := time.Now().Format("2006")
 	halfyear := "RX" //TODO
-	return client.fetchResults(year, halfyear)
+	return client.fetchResultsModel(year, halfyear)
 }
 
 // GetResults retrieves the results in a specified interval from edupage.
 // Halfyears types are: P1 (first halfyear), P2 (second halfyear), RX (whole year)
 // Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetResults(year, halfyear string) (model.Results, error) {
-	results, err := client.fetchResults(year, halfyear)
+	results, err := client.fetchResultsModel(year, halfyear)
 	if err != nil {
 		return model.Results{}, err
 	}
@@ -115,7 +117,7 @@ func (client *EdupageClient) GetResults(year, halfyear string) (model.Results, e
 
 // GetResults retrieves this week's timetable from edupage.
 func (client *EdupageClient) GetRecentTimetable() (model.Timetable, error) {
-	tt, err := client.fetchTimetable(time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, 7))
+	tt, err := client.fetchTimetableModel(time.Now().AddDate(0, 0, -2), time.Now().AddDate(0, 0, 7))
 	if err != nil {
 		return model.Timetable{}, err
 	}
@@ -126,7 +128,7 @@ func (client *EdupageClient) GetRecentTimetable() (model.Timetable, error) {
 // GetResults retrieves the timetable in the specified interval from edupage.
 // Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetTimetable(from, to time.Time) (model.Timetable, error) {
-	tt, err := client.fetchTimetable(from, to)
+	tt, err := client.fetchTimetableModel(from, to)
 	if err != nil {
 		return model.Timetable{}, err
 	}
@@ -137,7 +139,7 @@ func (client *EdupageClient) GetTimetable(from, to time.Time) (model.Timetable, 
 // GetCanteen retrieves the whole week's canteen from the specified day.
 // Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetCanteen(date time.Time) (Canteen, error) {
-	model, err := client.fetchCanteen(date)
+	model, err := client.fetchCanteenModel(date)
 	if err != nil {
 		return Canteen{}, err
 	}
@@ -145,13 +147,20 @@ func (client *EdupageClient) GetCanteen(date time.Time) (Canteen, error) {
 	if err != nil {
 		return Canteen{}, err
 	}
+	client.canteen = &canteen
 	return canteen, nil
 }
 
 // GetCanteen retrieves the current week's canteen menu.
 // Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetRecentCanteen() (Canteen, error) {
-	return client.GetCanteen(time.Now().Local())
+	day := time.Now().Weekday()
+	if day == time.Saturday {
+		return client.GetCanteen(time.Now().AddDate(0, 0, 2))
+	} else if day == time.Sunday {
+		return client.GetCanteen(time.Now().AddDate(0, 0, 1))
+	}
+	return client.GetCanteen(time.Now())
 }
 
 // GetStudentID is used to retrieve the client's student ID.
@@ -218,10 +227,7 @@ func (client *EdupageClient) FetchHomeworkAttachments(i model.Homework) (map[str
 		"superid": i.ESuperID,
 	}
 
-	payload, err := CreatePayload(data)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create payload: %w", err)
-	}
+	payload := CreatePayload(data)
 
 	resp, err := client.Credentials.httpClient.PostForm(
 		"https://"+path.Join(client.Credentials.Server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
@@ -324,4 +330,87 @@ func (client *EdupageClient) FetchHomeworkAttachments(i model.Homework) (map[str
 	}
 
 	return attachments, nil
+}
+
+// ChangeOrderStatus changed order status of a meal for the specified day
+// Return ErrorUnathorized, ErrorUnitialized, ErrorUnchangeable
+func (e *EdupageClient) ChangeOrderStatus(day Day, order bool) error {
+	if e.Credentials.httpClient == nil {
+		return ErrorUnitialized
+	}
+
+	if !order && time.Now().After(day.CancelableUntil) {
+		return ErrorUnchangeable
+	}
+
+	if order && time.Now().After(day.OrderableUntil) {
+		return ErrorUnchangeable
+	}
+
+	var fids map[string]string
+	var action string
+
+	if order {
+		fids = map[string]string{"2": "A"}
+		action = "prihlas_do"
+	} else {
+		fids = map[string]string{"2": "AX"}
+		action = "odhlas_do"
+	}
+
+	jedlaStravnika, _ := json.Marshal(CanteenPayload{
+		BoarderID:   e.canteen.model.Info.BoarderID,
+		BoarderUser: e.user.UserRow.UserID,
+		Date:        day.Date.Format(model.TimeFormatYearMonthDay),
+		FIDS:        fids, //TODO may be wrong
+		View:        "pc_listok",
+		Permission:  "Student",
+		Action:      action,
+	})
+
+	payload := CreatePayload(map[string]string{
+		"akcia":          "ulozJedlaStravnika",
+		"jedlaStravnika": string(jedlaStravnika),
+	})
+
+	response, err := e.Credentials.httpClient.PostForm(fmt.Sprintf("https://%s/menu/", e.Credentials.Server), payload)
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode != 200 {
+		return errors.New("invalid response code")
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %s", err)
+	}
+
+	decoded_body := make([]byte, base64.StdEncoding.DecodedLen(len(body)-4))
+
+	_, err = base64.StdEncoding.Decode(decoded_body, body[4:])
+	if err != nil {
+		return fmt.Errorf("failed to decode response body: %s", err)
+	}
+
+	decoded_body = bytes.Trim(decoded_body, "\x00")
+
+	var parsed map[string]interface{}
+	err = json.Unmarshal(decoded_body, &parsed)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal response body: %s", err)
+	}
+
+	if parsed["status"] != nil {
+		if reflect.TypeOf(parsed["status"]).Kind() != reflect.String {
+			return errors.New("invalid response")
+		}
+
+		if parsed["status"].(string) == "insufficient_privileges" {
+			return ErrorUnauthorized
+		}
+	}
+
+	return nil
 }
