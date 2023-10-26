@@ -165,7 +165,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	var h edupage.EdupageClient
+	var h *edupage.EdupageClient
 	h, err = edupage.CreateClient(cred)
 
 	if err != nil {
@@ -191,7 +191,7 @@ func LoginHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	clients[userID+username] = &h
+	clients[userID+username] = h
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
 		"success": true,
