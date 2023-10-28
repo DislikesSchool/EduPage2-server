@@ -63,8 +63,8 @@ func main() {
 
 	router.POST("/icanteen", ICanteenHandler)
 
-	router.GET("/test", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "test"})
+	router.HEAD("/test", func(c *gin.Context) {
+		c.Status(200)
 	})
 
 	router.Run()
