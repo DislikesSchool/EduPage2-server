@@ -63,7 +63,7 @@ func main() {
 
 	router.POST("/icanteen", ICanteenHandler)
 
-	router.HEAD("/test", func(c *gin.Context) {
+	router.GET("/test", func(c *gin.Context) {
 		c.Status(200)
 	})
 
