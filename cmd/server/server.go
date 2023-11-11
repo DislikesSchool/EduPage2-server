@@ -9,8 +9,11 @@ import (
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
+	"github.com/newrelic/go-agent/v3/newrelic"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	nrgin "github.com/newrelic/go-agent/v3/integrations/nrgin"
 )
 
 var clients = make(map[string]*edupage.EdupageClient)
@@ -35,6 +38,15 @@ func main() {
 		fmt.Printf("Sentry initialization failed: %v", err)
 	}
 
+	app, err := newrelic.NewApplication(
+		newrelic.ConfigAppName("EduPage2-server"),
+		newrelic.ConfigLicense("eu01xx4155dca9b59d668e2cc9fc4e98FFFFNRAL"),
+		newrelic.ConfigAppLogForwardingEnabled(true),
+	)
+	if err != nil {
+		fmt.Println("NewRelic initialization failed:", err)
+	}
+
 	key := os.Getenv("JWT_SECRET_KEY")
 	if key == "" && gin.Mode() == gin.ReleaseMode {
 		fmt.Println("\033[0;31mERROR\033[0m: No JWT_SECRET_KEY environment variable found. Use the JWT_SECRET_KEY environment variable to set the secret key.")
@@ -42,6 +54,7 @@ func main() {
 	}
 
 	router := gin.Default()
+	router.Use(nrgin.Middleware(app))
 	api := router.Group("/api")
 	api.Use(authMiddleware())
 	docs.SwaggerInfo.BasePath = "/"
