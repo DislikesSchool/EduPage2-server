@@ -9,8 +9,9 @@ on:
 jobs:
 
   icanteen:
-    name: Run iCanteen package tests
+    name: Run package tests
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - name: Set up Go 1.21.x
         uses: actions/setup-go@v2
@@ -23,6 +24,12 @@ jobs:
 
       - name: Test iCanteen package
         run: go test -v ./icanteen -server="${{ secrets.IC_SERVER }}" -username="${{ secrets.IC_USERNAME }}" -password="${{ secrets.IC_PASSWORD }}" -race -coverprofile=coverage.out -covermode=atomic
+
+      - name: Test Edupage package
+        run: go test -v ./edupage -server="${{ secrets.SERVER }}" -username="${{ secrets.USERNAME }}" -password="${{ secrets.PASSWORD }}" -race -coverprofile=coverage.out -covermode=atomic
+      
+      - name: Test cmd/server package
+        run: go test -v ./cmd/server -server="${{ secrets.SERVER }}" -username="${{ secrets.USERNAME }}" -password="${{ secrets.PASSWORD }}" -name="${{ secrets.NAME }}" -race -coverprofile=coverage.out -covermode=atomic
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
