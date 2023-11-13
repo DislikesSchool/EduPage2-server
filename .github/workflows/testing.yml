@@ -22,15 +22,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Test iCanteen package
-        run: go test -v ./icanteen -server="${{ secrets.IC_SERVER }}" -username="${{ secrets.IC_USERNAME }}" -password="${{ secrets.IC_PASSWORD }}" -race -coverprofile=coverage.out -covermode=atomic
-
-      - name: Test Edupage package
-        if: ${{ success() || failure() }}
-        run: go test -v ./edupage -server="${{ secrets.SERVER }}" -username="${{ secrets.USERNAME }}" -password="${{ secrets.PASSWORD }}" -race -coverprofile=coverage.out -covermode=atomic
-      
-      - name: Test cmd/server package
-        if: ${{ success() || failure() }}
-        run: go test -v ./cmd/server -server="${{ secrets.SERVER }}" -username="${{ secrets.USERNAME }}" -password="${{ secrets.PASSWORD }}" -name="${{ secrets.NAME }}" -race -coverprofile=coverage.out -covermode=atomic
+        run: go test -v -coverpkg=./... -server="${{ secrets.SERVER }}" -username="${{ secrets.USERNAME }}" -password="${{ secrets.PASSWORD }}" -ic_server="${{ secrets.IC_SERVER }}" -ic_username="${{ secrets.IC_USERNAME }}" -ic_password="${{ secrets.IC_PASSWORD }}" -race -coverprofile=coverage.out -covermode=atomic ./...
       
       - name: Upload coverage to Codecov
         if: ${{ success() || failure() }}

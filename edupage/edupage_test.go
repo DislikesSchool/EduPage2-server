@@ -8,15 +8,23 @@ import (
 )
 
 var (
-	username string
-	password string
-	server   string
+	username    string
+	password    string
+	server      string
+	name        string
+	ic_username string
+	ic_password string
+	ic_server   string
 )
 
 func init() {
-	flag.StringVar(&username, "username", "", "Edupage user name")
-	flag.StringVar(&password, "password", "", "Edupage user password")
-	flag.StringVar(&server, "server", "", "Edupage user server")
+	flag.StringVar(&username, "username", "", "Edupage username")
+	flag.StringVar(&password, "password", "", "Edupage password")
+	flag.StringVar(&server, "server", "", "Edupage server")
+	flag.StringVar(&name, "name", "", "Name of the user (firstname lastname)")
+	flag.StringVar(&ic_username, "ic_username", "", "iCanteen username")
+	flag.StringVar(&ic_password, "ic_password", "", "iCanteen password")
+	flag.StringVar(&ic_server, "ic_server", "", "iCanteen server")
 }
 
 func checkCredentials() error {

@@ -13,10 +13,13 @@ import (
 )
 
 var (
-	username string
-	password string
-	server   string
-	name     string
+	username    string
+	password    string
+	server      string
+	name        string
+	ic_username string
+	ic_password string
+	ic_server   string
 )
 
 func init() {
@@ -24,6 +27,9 @@ func init() {
 	flag.StringVar(&password, "password", "", "Edupage password")
 	flag.StringVar(&server, "server", "", "Edupage server")
 	flag.StringVar(&name, "name", "", "Name of the user (firstname lastname)")
+	flag.StringVar(&ic_username, "ic_username", "", "iCanteen username")
+	flag.StringVar(&ic_password, "ic_password", "", "iCanteen password")
+	flag.StringVar(&ic_server, "ic_server", "", "iCanteen server")
 }
 
 func TestLoginAuto(t *testing.T) {
