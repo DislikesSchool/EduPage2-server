@@ -20,11 +20,45 @@ type ICanteenDay struct {
 	Lunches []ICanteenLunch `json:"lunches"`
 }
 
+func NormalizeServerURL(server string) (string, error) {
+	// Add protocol if missing
+	if !strings.HasPrefix(server, "http://") && !strings.HasPrefix(server, "https://") {
+		server = "https://" + server
+	}
+
+	// Remove /login if present
+	if strings.HasSuffix(server, "/login") {
+		server = strings.TrimSuffix(server, "/login")
+	}
+
+	// Remove trailing slash if present
+	if strings.HasSuffix(server, "/") {
+		server = strings.TrimSuffix(server, "/")
+	}
+
+	// Validate the URL
+	_, err := url.ParseRequestURI(server)
+	if err != nil {
+		return "", err
+	}
+
+	return server, nil
+}
+
 func LoadLunches(username, password, server string) ([]ICanteenDay, error) {
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{Jar: cookieJar}
 
+	server, err := NormalizeServerURL(server)
+	if err != nil {
+		return nil, err
+	}
+
 	loginURL := server + "/login"
+	parsedURL, err := url.Parse(loginURL)
+	if err != nil {
+		return nil, err
+	}
 	resp, err := client.Get(loginURL)
 	if err != nil {
 		return nil, err
@@ -50,7 +84,7 @@ func LoadLunches(username, password, server string) ([]ICanteenDay, error) {
 		"Cache-Control":   "max-age=0",
 		"Connection":      "keep-alive",
 		"Content-Type":    "application/x-www-form-urlencoded",
-		"Host":            "stravovani.sspbrno.cz",
+		"Host":            parsedURL.Host,
 		"Origin":          server,
 		"Referer":         server + "/login",
 	}
