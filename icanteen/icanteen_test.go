@@ -25,7 +25,7 @@ func init() {
 	flag.StringVar(&ic_server, "ic_server", "", "iCanteen server")
 }
 
-func TestGetLunches(t *testing.T) {
+func TestGetLunchesMissingHttps(t *testing.T) {
 	lunches, err := LoadLunches(ic_username, ic_password, ic_server)
 	if err != nil {
 		t.Fatalf("Failed to get lunches: %s", err)
@@ -33,5 +33,34 @@ func TestGetLunches(t *testing.T) {
 
 	if len(lunches) == 0 {
 		t.Fatalf("No lunches found")
+	}
+}
+
+func TestGetLunchesTrailingLogin(t *testing.T) {
+	lunches, err := LoadLunches(ic_username, ic_password, ic_server+"/login")
+	if err != nil {
+		t.Fatalf("Failed to get lunches: %s", err)
+	}
+
+	if len(lunches) == 0 {
+		t.Fatalf("No lunches found")
+	}
+}
+
+func TestGetLunchesTrailingSlash(t *testing.T) {
+	lunches, err := LoadLunches(ic_username, ic_password, ic_server+"/")
+	if err != nil {
+		t.Fatalf("Failed to get lunches: %s", err)
+	}
+
+	if len(lunches) == 0 {
+		t.Fatalf("No lunches found")
+	}
+}
+
+func TestGetLunchesInvalidURL(t *testing.T) {
+	_, err := LoadLunches(ic_username, ic_password, "https:////there@shoudl..be@@an//error")
+	if err == nil {
+		t.Fatal("Expected error, got nil")
 	}
 }

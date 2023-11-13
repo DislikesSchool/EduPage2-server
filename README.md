@@ -1,4 +1,5 @@
 # EduPage2 - server
+[![codecov](https://codecov.io/gh/DislikesSchool/EduPage2-server/graph/badge.svg?token=BXliJAEhQz)](https://codecov.io/gh/DislikesSchool/EduPage2-server)
 ## What is this?
 This repository will house the code for the backend server of EduPage2. This server's code is currently undergoing a complete rewrite from js to golang.
 
