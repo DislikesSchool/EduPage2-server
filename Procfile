@@ -1,1 +1,1 @@
-web: EduPage2-server/cmd/server
+web: ./cmd/server
