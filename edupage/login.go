@@ -169,19 +169,19 @@ func LoginAuto(username, password string) (Credentials, error) {
 		"m":             {username},
 		"h":             {password},
 		"edupage":       {""},
-		"plgc":          {""},
+		"plgc":          {},
 		"ajheslo":       {"1"},
 		"hasujheslo":    {"1"},
 		"ajportal":      {"1"},
 		"ajportallogin": {"1"},
 		"mobileLogin":   {"1"},
-		"version":       {""},
+		"version":       {"2020.0.18"},
 		"fromEdupage":   {""},
-		"device_name":   {""},
-		"device_id":     {""},
+		"device_name":   {},
+		"device_id":     {},
 		"device_key":    {""},
-		"os":            {""},
-		"murl":          {""},
+		"os":            {},
+		"murl":          {},
 		"edid":          {""},
 	}
 
@@ -192,13 +192,17 @@ func LoginAuto(username, password string) (Credentials, error) {
 	if err != nil {
 		return Credentials{}, err
 	}
-	defer resp.Body.Close()
+
+	fmt.Println("Posted to /mauth")
 
 	var authResponse mAuthResponse
 	err = json.NewDecoder(resp.Body).Decode(&authResponse)
 	if err != nil {
 		return Credentials{}, err
 	}
+
+	resp.Body.Close()
+	fmt.Println("Body read and closed")
 
 	//Error handling
 	if len(authResponse.Users) == 0 {
