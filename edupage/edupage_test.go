@@ -52,7 +52,7 @@ func TestLoginAuto(t *testing.T) {
 		t.Error(errors.New("password parameter missing, (-password=?)"))
 	}
 
-	credentials, err := LoginAuto(username, password)
+	credentials, err := Login(username, password, "login1")
 	if err != nil {
 		t.Error(err)
 		return

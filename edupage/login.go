@@ -1,15 +1,15 @@
 package edupage
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"path"
+	"strings"
 
+	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/publicsuffix"
 )
 
@@ -24,9 +24,20 @@ var (
 	loginPath     = "login/edubarLogin.php"
 )
 
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+
 type Credentials struct {
-	Server     string
-	httpClient *http.Client
+	Server       string
+	PasswordHash string
+	httpClient   *http.Client
 }
 
 type mAppData struct {
@@ -117,8 +128,10 @@ func Login(username, password, server string) (Credentials, error) {
 	}
 
 	client := &http.Client{
-		CheckRedirect: noRedirect,
-		Jar:           jar,
+		Jar: jar,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return ErrRedirect
+		},
 	}
 
 	u := fmt.Sprintf("https://%s", path.Join(Server, loginPath))
@@ -129,119 +142,33 @@ func Login(username, password, server string) (Credentials, error) {
 
 	rs, err := client.PostForm(u, d)
 
-	if err != nil && rs != nil {
+	if rs != nil && err != nil {
 		if rs.StatusCode == 302 {
 			if rs.Header.Get("Location") != "/user/" {
-				return Credentials{}, ErrAuthorization
-			} else if rs.Header.Get("Location") == "/user/" {
+				loc := rs.Header.Get("Location")
+				parsed, err := url.Parse(loc)
+				if err != nil {
+					return Credentials{}, err
+				}
+
+				sp := strings.Split(parsed.Hostname(), ".")
+				sub := sp[0]
+
+				return Login(username, password, sub)
+			} else {
 				var credentials Credentials
 				credentials.Server = Server
+				credentials.PasswordHash, err = HashPassword(password)
+				if err != nil {
+					return Credentials{}, err
+				}
 				credentials.httpClient = client
 
 				return credentials, nil
 			}
 		} else {
-			return Credentials{}, fmt.Errorf("failed to login: %s", err)
+			return Credentials{}, err
 		}
 	}
-
-	return Credentials{}, errors.New("unexpected response from server, make sure credentials are specified correctly")
-}
-
-func LoginAuto(username, password string) (Credentials, error) {
-	if len(username) == 0 || len(password) == 0 {
-		return Credentials{}, errors.New("invalid credentials")
-	}
-
-	var credentials Credentials
-
-	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
-	if err != nil {
-		return Credentials{}, err
-	}
-
-	client := &http.Client{
-		CheckRedirect: noRedirect,
-		Jar:           jar,
-	}
-
-	payload := url.Values{
-		"m":             {username},
-		"h":             {password},
-		"edupage":       {""},
-		"plgc":          {},
-		"ajheslo":       {"1"},
-		"hasujheslo":    {"1"},
-		"ajportal":      {"1"},
-		"ajportallogin": {"1"},
-		"mobileLogin":   {"1"},
-		"version":       {"2020.0.18"},
-		"fromEdupage":   {""},
-		"device_name":   {},
-		"device_id":     {},
-		"device_key":    {""},
-		"os":            {},
-		"murl":          {},
-		"edid":          {""},
-	}
-
-	loginServer := "login1"
-	skip2Fa := true
-
-	resp, err := http.PostForm(fmt.Sprintf("https://%s.edupage.org/login/mauth", loginServer), payload)
-	if err != nil {
-		return Credentials{}, err
-	}
-
-	fmt.Println("Posted to /mauth")
-
-	var authResponse mAuthResponse
-	err = json.NewDecoder(resp.Body).Decode(&authResponse)
-	if err != nil {
-		return Credentials{}, err
-	}
-
-	resp.Body.Close()
-	fmt.Println("Body read and closed")
-
-	//Error handling
-	if len(authResponse.Users) == 0 {
-		return Credentials{}, errors.New("failed to login: Incorrect password. (If you are sure that the password is correct, try providing 'edupage' option)")
-	}
-
-	//Process response
-	if len(authResponse.Users) == 1 {
-		if authResponse.Users[0].Need2fa != nil && !skip2Fa {
-			if authResponse.T2FASec != "" {
-				log.Printf("[Login] 2FA code is invalid\n")
-				return Credentials{}, errors.New("invalid 2FA code")
-			} else {
-				log.Printf("[Login] 2FA was requested by the Edupage\n")
-				return Credentials{}, nil
-			}
-		}
-	} else {
-		return Credentials{}, errors.New("multiple users found. Please, pass the selected user as 'user' option to login options")
-	}
-
-	origin := authResponse.Users[0].Edupage
-	credentials.Server = origin + "." + edupageDomain
-	u, err := url.Parse(fmt.Sprintf("https://%s/login/edubarLogin.php", credentials.Server))
-	if err != nil {
-		return Credentials{}, err
-	}
-	cookies := resp.Cookies()
-	for _, cookie := range cookies {
-		if cookie.Name == "PHPSESSID" {
-			cookie.Value = authResponse.Users[0].Esid
-		}
-	}
-
-	client.Jar.SetCookies(u, cookies)
-	credentials.httpClient = client
-	return credentials, nil
-}
-
-func noRedirect(_ *http.Request, _ []*http.Request) error {
-	return ErrRedirect
+	return Credentials{}, err
 }

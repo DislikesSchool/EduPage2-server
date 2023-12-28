@@ -21,11 +21,11 @@ func getSecretKey() []byte {
 	return []byte(key)
 }
 
-func generateJWT(userID string, username string) (string, error) {
-	expirationTime := time.Now().Add(time.Hour)
+func generateJWT(server string, username string) (string, error) {
+	expirationTime := time.Now().Add(time.Hour * 6)
 
 	claims := jwt.MapClaims{
-		"userID":   userID,
+		"server":   server,
 		"username": username,
 		"exp":      expirationTime.Unix(),
 	}
@@ -152,10 +152,44 @@ func LoginHandler(c *gin.Context) {
 	var cred edupage.Credentials
 	var err error
 	if server == "" {
-		cred, err = edupage.LoginAuto(username, password)
-	} else {
-		cred, err = edupage.Login(server, username, password)
+		server = "login1"
 	}
+
+	u := clients[server+username]
+
+	if u != nil {
+		passwordCorrect := edupage.CheckPasswordHash(password, u.Credentials.PasswordHash)
+		if passwordCorrect {
+			user, err := u.GetUser(false)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"error":   err.Error(),
+					"success": false,
+				})
+				return
+			}
+			token, err := generateJWT(server, username)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"error":   "",
+				"success": true,
+				"name":    user.UserRow.Firstname + " " + user.UserRow.Lastname,
+				"token":   token,
+			})
+			return
+		} else {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error":   "",
+				"success": false,
+			})
+			return
+		}
+	}
+
+	cred, err = edupage.Login(username, password, server)
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
@@ -185,13 +219,12 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	userID := user.UserRow.UserID
-	token, err := generateJWT(userID, username)
+	token, err := generateJWT(server, username)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	clients[userID+username] = h
+	clients[server+username] = h
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
 		"success": true,
@@ -206,14 +239,14 @@ func clientFromContext(c *gin.Context) (*edupage.EdupageClient, error) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return &edupage.EdupageClient{}, err
 	}
-	userID := claims["userID"].(string)
+	server := claims["server"].(string)
 	username := claims["username"].(string)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return &edupage.EdupageClient{}, err
 	}
 
-	client, ok := clients[userID+username]
+	client, ok := clients[server+username]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
 		return &edupage.EdupageClient{}, err
@@ -238,11 +271,11 @@ func ValidateTokenHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	userID := claims["userID"].(string)
+	server := claims["server"].(string)
 	username := claims["username"].(string)
 	exp := claims["exp"].(float64)
 
-	h, ok := clients[userID+username]
+	h, ok := clients[server+username]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
 		return

@@ -69,6 +69,10 @@ func TimelineHandler(c *gin.Context) {
 	}
 
 	dateFrom, err = time.Parse(time.RFC3339, dateFromString)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	timeline, err := client.GetTimeline(dateFrom, dateTo)
 	if err != nil {
@@ -185,6 +189,10 @@ func TimetableHandler(c *gin.Context) {
 	}
 
 	dateFrom, err = time.Parse(time.RFC3339, dateFromString)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
 	timetable, err := client.GetTimetable(dateFrom, dateTo)
 	if err != nil {
