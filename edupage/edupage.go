@@ -51,6 +51,10 @@ func CreateClient(credentials Credentials) (*EdupageClient, error) {
 	return &client, nil
 }
 
+func (client *EdupageClient) PingSession() {
+	
+}
+
 // UpdateCredentials updates the credentials and allows this struct to continue
 // working after token expiry.
 func (client *EdupageClient) UpdateCredentials(credentials Credentials) {
