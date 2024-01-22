@@ -224,7 +224,19 @@ func LoginHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
 	clients[server+username] = h
+	cr.AddFunc("@every 10m", func() {
+		fmt.Println("Pinging", username, server)
+		success, err := h.PingSession()
+		if err != nil {
+			fmt.Println("session ping failed")
+			clients[server+username] = nil
+		} else if !success {
+			fmt.Println("session ping failed")
+			clients[server+username] = nil
+		}
+	})
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
 		"success": true,

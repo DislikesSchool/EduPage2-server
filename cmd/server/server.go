@@ -10,6 +10,7 @@ import (
 	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/newrelic/go-agent/v3/newrelic"
+	"github.com/robfig/cron/v3"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -17,6 +18,8 @@ import (
 )
 
 var clients = make(map[string]*edupage.EdupageClient)
+
+var cr *cron.Cron
 
 // @title EduPage2 API
 // @version 1.0
@@ -52,6 +55,8 @@ func main() {
 		fmt.Println("\033[0;31mERROR\033[0m: No JWT_SECRET_KEY environment variable found. Use the JWT_SECRET_KEY environment variable to set the secret key.")
 		panic("No JWT_SECRET_KEY environment variable found")
 	}
+
+	cr = cron.New()
 
 	router := gin.Default()
 	router.Use(nrgin.Middleware(app))
