@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"path"
 	"reflect"
 	"time"
@@ -51,8 +52,48 @@ func CreateClient(credentials Credentials) (*EdupageClient, error) {
 	return &client, nil
 }
 
-func (client *EdupageClient) PingSession() {
-	
+type PortalPingResponse struct {
+	Status string `json:"status"`
+}
+
+func (client *EdupageClient) PingSession() (bool, error) {
+	if client.Credentials.httpClient == nil {
+		return false, errors.New("invalid credentials")
+	}
+
+	u := fmt.Sprintf("https://%s/login/eauth?portalping", client.Credentials.Server)
+
+	response, err := client.Credentials.httpClient.Post(u, "application/x-www-form-urlencoded", bytes.NewBuffer([]byte("gpids=")))
+	if err != nil {
+		return false, ErrorUnauthorized
+	}
+
+	defer response.Body.Close()
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return false, err
+	}
+
+	bodyStr := string(body)
+
+	if bodyStr == "OK" {
+		return true, nil
+	} else if bodyStr == "notlogged" {
+		return false, nil
+	} else {
+		var resp PortalPingResponse
+		err := json.Unmarshal(body, &resp)
+		if err != nil {
+			return false, err
+		}
+
+		if resp.Status == "notlogged" {
+			return false, nil
+		} else {
+			return true, nil
+		}
+	}
 }
 
 // UpdateCredentials updates the credentials and allows this struct to continue
