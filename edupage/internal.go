@@ -164,7 +164,7 @@ func (client *EdupageClient) fetchTimetableModel(datefrom, dateto time.Time) (mo
 		"__args": []map[string]interface{}{
 			nil,
 			{
-				"year":                 year,
+				"year":                 year - 1,
 				"datefrom":             datefrom.Format(model.TimeFormatYearMonthDay),
 				"dateto":               dateto.Format(model.TimeFormatYearMonthDay),
 				"table":                "students",
@@ -188,6 +188,8 @@ func (client *EdupageClient) fetchTimetableModel(datefrom, dateto time.Time) (mo
 		return model.Timetable{}, ErrorUnauthorized // most likely case
 	}
 
+	fmt.Println(response)
+
 	if response.StatusCode != 200 {
 		return model.Timetable{}, fmt.Errorf("server returned code: %d", response.StatusCode)
 	}
@@ -196,6 +198,7 @@ func (client *EdupageClient) fetchTimetableModel(datefrom, dateto time.Time) (mo
 	if err != nil {
 		return model.Timetable{}, fmt.Errorf("failed to read response body: %s", err)
 	}
+	fmt.Println(string(body))
 
 	tt, err := model.ParseTimetable(body)
 	if err != nil {
