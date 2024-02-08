@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
@@ -158,13 +157,16 @@ func (client *EdupageClient) fetchTimetableModel(datefrom, dateto time.Time) (mo
 		return model.Timetable{}, errors.New("failed to create request, user is not initialized")
 	}
 
-	year, _ := strconv.Atoi(datefrom.Format("2006"))
+	year, currentMonth, _ := datefrom.Date()
+	if currentMonth < 9 {
+		year--
+	}
 
 	request := map[string]interface{}{
 		"__args": []map[string]interface{}{
 			nil,
 			{
-				"year":                 year - 1,
+				"year":                 year,
 				"datefrom":             datefrom.Format(model.TimeFormatYearMonthDay),
 				"dateto":               dateto.Format(model.TimeFormatYearMonthDay),
 				"table":                "students",
@@ -188,8 +190,6 @@ func (client *EdupageClient) fetchTimetableModel(datefrom, dateto time.Time) (mo
 		return model.Timetable{}, ErrorUnauthorized // most likely case
 	}
 
-	fmt.Println(response)
-
 	if response.StatusCode != 200 {
 		return model.Timetable{}, fmt.Errorf("server returned code: %d", response.StatusCode)
 	}
@@ -198,7 +198,6 @@ func (client *EdupageClient) fetchTimetableModel(datefrom, dateto time.Time) (mo
 	if err != nil {
 		return model.Timetable{}, fmt.Errorf("failed to read response body: %s", err)
 	}
-	fmt.Println(string(body))
 
 	tt, err := model.ParseTimetable(body)
 	if err != nil {
