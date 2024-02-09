@@ -86,4 +86,5 @@ func main() {
 	})
 
 	router.Run()
+	cr.Start()
 }
