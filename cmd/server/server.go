@@ -85,6 +85,6 @@ func main() {
 		c.Status(200)
 	})
 
-	router.Run()
 	cr.Start()
+	router.Run()
 }
