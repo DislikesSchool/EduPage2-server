@@ -95,7 +95,7 @@ type Homework struct {
 	Groups            []string         `json:"skupiny"`
 	ETestCards        int              `json:"etestCards"`
 	ETestAnswerCards  int              `json:"etestAnswerCards"`
-	StudyTopics       json.Number      `json:"studyTopics"`
+	StudyTopics       interface{}      `json:"studyTopics"`
 	GradeEventID      interface{}      `json:"znamky_udalostid"`
 	StudentsHidden    string           `json:"students_hidden"`
 	Data              StringJsonObject `json:"data"`
