@@ -7,8 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
+	"net/http"
+	"net/url"
 	"path"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
@@ -93,6 +97,151 @@ func (client *EdupageClient) PingSession() (bool, error) {
 			return true, nil
 		}
 	}
+}
+
+type PollOption struct {
+	Text string `json:"text"`
+	ID   string `json:"id,omitempty"`
+}
+
+type PollOptions struct {
+	Options  []PollOption `json:"options"`
+	Multiple bool         `json:"multiple,omitempty"`
+}
+
+type Attachment struct {
+	// TODO
+}
+
+type MessageOptions struct {
+	Text                string       `json:"text"`
+	Important           bool         `json:"important,omitempty"`
+	Parents             bool         `json:"parents,omitempty"`
+	AllowReplies        bool         `json:"allowReplies,omitempty"`
+	RepliesToAuthorOnly bool         `json:"repliesToAuthorOnly,omitempty"`
+	Attachments         []Attachment `json:"attachments,omitempty"`
+	Poll                *PollOptions `json:"poll,omitempty"`
+}
+
+func (client *EdupageClient) SendMessage(recipients []string, options MessageOptions) error {
+	if client.Credentials.httpClient == nil {
+		return errors.New("invalid credentials")
+	}
+
+	u := fmt.Sprintf("https://%s/timeline/?akcia=createItem", client.Credentials.Server)
+
+	hasPoll := options.Poll != nil && options.Poll.Options != nil
+
+	// Convert attachments to JSON
+	attachmentsJson := make([]string, len(options.Attachments))
+	for i, attachment := range options.Attachments {
+		jsonAttachment, err := json.Marshal(attachment)
+		if err != nil {
+			return fmt.Errorf("failed to marshal attachment: %s", err)
+		}
+		attachmentsJson[i] = string(jsonAttachment)
+	}
+
+	// Prepare data for the API request
+	data := map[string]interface{}{
+		"attachments":          strings.Join(attachmentsJson, ","),
+		"receipt":              "0",
+		"repliesDisabled":      "0",
+		"repliesToAllDisabled": "0",
+		"selectedUser":         client.getUserString(options.Parents),
+		"text":                 options.Text,
+		"typ":                  "sprava",
+	}
+
+	if options.Important {
+		data["receipt"] = "1"
+	}
+
+	if !options.AllowReplies {
+		data["repliesDisabled"] = "1"
+		data["repliesToAllDisabled"] = "1"
+	}
+
+	if options.RepliesToAuthorOnly {
+		data["repliesToAllDisabled"] = "1"
+	}
+
+	if hasPoll {
+		answers := make([]map[string]string, len(options.Poll.Options))
+		for i, option := range options.Poll.Options {
+			id := option.ID
+			if id == "" {
+				id = fmt.Sprintf("%x", rand.Int31())[2:]
+			}
+			answers[i] = map[string]string{
+				"text": option.Text,
+				"id":   id,
+			}
+		}
+		votingParams := map[string]interface{}{
+			"answers":  answers,
+			"multiple": false,
+		}
+		data["votingParams"], _ = json.Marshal(votingParams)
+	}
+
+	// Convert the data map to URL values
+	values := url.Values{}
+	for key, value := range data {
+		values.Set(key, fmt.Sprintf("%v", value))
+	}
+
+	// Create a new HTTP request
+	req, err := http.NewRequest("POST", u, strings.NewReader(values.Encode()))
+	if err != nil {
+		return fmt.Errorf("failed to create new HTTP request: %s", err)
+	}
+
+	// Set the headers
+	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	req.Header.Set("Referer", fmt.Sprintf("https://%s.edupage.org/", client.Credentials.Server))
+
+	resp, err := client.Credentials.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	// Check the status of the HTTP response
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("received invalid status from the server '%d'", resp.StatusCode)
+	}
+
+	// Parse the HTTP response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %s", err)
+	}
+
+	var res struct {
+		Status  string        `json:"status"`
+		Changes []interface{} `json:"changes"`
+	}
+	err = json.Unmarshal(body, &res)
+	if err != nil {
+		return fmt.Errorf("failed to parse response body: %s", err)
+	}
+
+	// Check the changes in the response
+	if len(res.Changes) == 0 {
+		return fmt.Errorf("failed to send message (no changes made) (%v)", res.Changes)
+	}
+
+	if len(res.Changes) > 1 {
+		fmt.Printf("[Message] Multiple changes after posting single message %v\n", res.Changes)
+	}
+
+	// Print the first change in the response
+	fmt.Printf("Message: %v\n", res.Changes[0])
+
+	return nil
 }
 
 // UpdateCredentials updates the credentials and allows this struct to continue

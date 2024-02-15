@@ -13,6 +13,14 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
+func (u *EdupageClient) getUserString(parents bool) string {
+	if parents {
+		re := regexp.MustCompile(`([a-z])([0-9])`)
+		return re.ReplaceAllString(u.user.UserRow.UserID, "${1}Only${2}")
+	}
+	return u.user.UserRow.UserID
+}
+
 func (client *EdupageClient) fetchTimelineModel(datefrom, dateto time.Time) (model.Timeline, error) {
 	if client.Credentials.httpClient == nil {
 		return model.Timeline{}, errors.New("invalid credentials")
