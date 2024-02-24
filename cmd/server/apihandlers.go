@@ -509,6 +509,36 @@ func TimelineItemHandler(c *gin.Context) {
 
 	timelineItem := timeline.Items[id]
 
+	var replies []apimodel.TimelineItemWithOrigin
+	for _, msg := range timeline.Items {
+		if msg.ReactionTo == timelineItem.ID {
+			replies = append(replies, apimodel.TimelineItemWithOrigin{
+				ID:              msg.ID,
+				Timestamp:       msg.Timestamp,
+				ReactionTo:      msg.ReactionTo,
+				Type:            msg.Type,
+				User:            msg.User,
+				TargetUser:      msg.TargetUser,
+				UserName:        msg.UserName,
+				OtherID:         msg.OtherID,
+				Text:            msg.Text,
+				TimeAdded:       msg.TimeAdded,
+				TimeEvent:       msg.TimeEvent,
+				Data:            msg.Data,
+				Owner:           msg.Owner,
+				OwnerName:       msg.OwnerName,
+				ReactionCount:   msg.ReactionCount,
+				LastReaction:    msg.LastReaction,
+				PomocnyZaznam:   msg.PomocnyZaznam,
+				Removed:         msg.Removed,
+				TimeAddedBTC:    msg.TimeAddedBTC,
+				LastReactionBTC: msg.LastReactionBTC,
+				OriginServer:    client.Credentials.Server,
+			})
+		}
+
+	}
+
 	c.JSON(http.StatusOK, apimodel.TimelineItemWithOrigin{
 		ID:              timelineItem.ID,
 		Timestamp:       timelineItem.Timestamp,
@@ -531,5 +561,6 @@ func TimelineItemHandler(c *gin.Context) {
 		TimeAddedBTC:    timelineItem.TimeAddedBTC,
 		LastReactionBTC: timelineItem.LastReactionBTC,
 		OriginServer:    client.Credentials.Server,
+		Replies:         replies,
 	})
 }
