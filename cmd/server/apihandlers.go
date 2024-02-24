@@ -500,7 +500,7 @@ func TimelineItemHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
 
 	id := c.Param("id")
-	date := c.Param("date")
+	date := c.Query("date")
 
 	var timeline model.Timeline
 	var err error
