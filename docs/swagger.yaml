@@ -51,6 +51,48 @@ definitions:
       uniperiod:
         type: string
     type: object
+  apimodel.HomeworkReduced:
+    properties:
+      attachements: {}
+      data:
+        $ref: '#/definitions/model.StringJsonObject'
+      datecreated:
+        type: string
+      details:
+        type: string
+      homeworkid:
+        type: string
+      hwkid:
+        type: string
+      name:
+        type: string
+      period: {}
+      pocet_done:
+        type: integer
+      pocet_like:
+        type: integer
+      pocet_reakcii:
+        type: integer
+      posledny_vysledok:
+        type: string
+      predmetid:
+        type: integer
+      stav:
+        type: string
+      stavhodnotetimelinePathd:
+        type: string
+      students_hidden:
+        type: string
+      testid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        type: string
+      userid:
+        type: string
+      znamky_udalostid: {}
+    type: object
   apimodel.ICanteenBadRequestResponse:
     properties:
       error:
@@ -117,6 +159,102 @@ definitions:
         example: false
         type: boolean
     type: object
+  apimodel.Recipient:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  apimodel.SendMessageRequest:
+    properties:
+      message:
+        $ref: '#/definitions/edupage.MessageOptions'
+      recipient:
+        type: string
+    type: object
+  apimodel.Timeline:
+    properties:
+      homeworks:
+        additionalProperties:
+          $ref: '#/definitions/apimodel.HomeworkReduced'
+        type: object
+      items:
+        additionalProperties:
+          $ref: '#/definitions/apimodel.TimelineItemReduced'
+        type: object
+    type: object
+  apimodel.TimelineItemReduced:
+    properties:
+      data:
+        $ref: '#/definitions/model.StringJsonObject'
+      poct_reakcii:
+        type: integer
+      reakcia_na:
+        type: string
+      removed:
+        type: integer
+      target_user:
+        type: string
+      text:
+        type: string
+      timelineid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        type: string
+      user:
+        type: string
+      vlastnik:
+        type: string
+    type: object
+  apimodel.TimelineItemWithOrigin:
+    properties:
+      cas_pridania:
+        type: string
+      cas_pridania_btc:
+        type: string
+      cas_udalosti:
+        type: string
+      cas_udalosti_btc:
+        type: string
+      data:
+        $ref: '#/definitions/model.StringJsonObject'
+      ineid:
+        type: string
+      origin_server:
+        type: string
+      poct_reakcii:
+        type: integer
+      pomocny_zaznam:
+        type: string
+      posledna_reakcia:
+        type: string
+      reakcia_na:
+        type: string
+      removed: {}
+      target_user:
+        type: string
+      text:
+        type: string
+      timelineid:
+        type: string
+      timestamp:
+        type: string
+      typ:
+        type: string
+      user:
+        type: string
+      user_meno:
+        type: string
+      vlastnik:
+        type: string
+      vlastnik_meno:
+        type: string
+    type: object
   apimodel.UnauthorizedResponse:
     properties:
       error:
@@ -143,6 +281,43 @@ definitions:
       success:
         example: false
         type: boolean
+    type: object
+  edupage.Attachment:
+    type: object
+  edupage.MessageOptions:
+    properties:
+      allowReplies:
+        type: boolean
+      attachments:
+        items:
+          $ref: '#/definitions/edupage.Attachment'
+        type: array
+      important:
+        type: boolean
+      parents:
+        type: boolean
+      poll:
+        $ref: '#/definitions/edupage.PollOptions'
+      repliesToAuthorOnly:
+        type: boolean
+      text:
+        type: string
+    type: object
+  edupage.PollOption:
+    properties:
+      id:
+        type: string
+      text:
+        type: string
+    type: object
+  edupage.PollOptions:
+    properties:
+      multiple:
+        type: boolean
+      options:
+        items:
+          $ref: '#/definitions/edupage.PollOption'
+        type: array
     type: object
   icanteen.ICanteenDay:
     properties:
@@ -187,77 +362,6 @@ definitions:
         type: string
       short:
         type: string
-    type: object
-  model.Homework:
-    properties:
-      attachements: {}
-      autor_meno:
-        type: string
-      data:
-        $ref: '#/definitions/model.StringJsonObject'
-      datecreated:
-        type: string
-      datefrom:
-        type: string
-      datetimefrom:
-        type: string
-      datetimeto:
-        type: string
-      dateto:
-        type: string
-      details:
-        type: string
-      e_superid:
-        type: string
-      etestAnswerCards:
-        type: integer
-      etestCards:
-        type: integer
-      homeworkid:
-        type: string
-      hwkid:
-        type: string
-      missingNextLesson:
-        type: boolean
-      name:
-        type: string
-      period: {}
-      planid:
-        type: string
-      pocet_done:
-        type: string
-      pocet_like:
-        type: string
-      pocet_reakcii:
-        type: string
-      posledny_vysledok:
-        type: string
-      predmet_meno:
-        type: string
-      predmetid:
-        type: string
-      skoncil: {}
-      skupiny:
-        items:
-          type: string
-        type: array
-      stav:
-        type: string
-      stavhodnotetimelinePathd:
-        type: string
-      students_hidden:
-        type: string
-      studyTopics:
-        type: boolean
-      testid:
-        type: string
-      timestamp:
-        type: string
-      typ:
-        type: string
-      userid:
-        type: string
-      znamky_udalostid: {}
     type: object
   model.Period:
     properties:
@@ -310,60 +414,6 @@ definitions:
       short:
         type: string
     type: object
-  model.Timeline:
-    properties:
-      homeworks:
-        additionalProperties:
-          $ref: '#/definitions/model.Homework'
-        type: object
-      items:
-        additionalProperties:
-          $ref: '#/definitions/model.TimelineItem'
-        type: object
-    type: object
-  model.TimelineItem:
-    properties:
-      cas_pridania:
-        type: string
-      cas_pridania_btc:
-        type: string
-      cas_udalosti:
-        type: string
-      cas_udalosti_btc:
-        type: string
-      data:
-        $ref: '#/definitions/model.StringJsonObject'
-      ineid:
-        type: string
-      poct_reakcii:
-        type: integer
-      pomocny_zaznam:
-        type: string
-      posledna_reakcia:
-        type: string
-      reakcia_na:
-        type: string
-      removed:
-        type: string
-      target_user:
-        type: string
-      text:
-        type: string
-      timelineid:
-        type: string
-      timestamp:
-        type: string
-      typ:
-        type: string
-      user:
-        type: string
-      user_meno:
-        type: string
-      vlastnik:
-        type: string
-      vlastnik_meno:
-        type: string
-    type: object
 info:
   contact: {}
   description: JWT authorization token
@@ -404,6 +454,39 @@ paths:
       summary: Get the classroom by ID
       tags:
       - DBI
+  /api/message:
+    post:
+      description: Sends a message to a recipient.
+      parameters:
+      - description: JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Message
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/apimodel.SendMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
+      security:
+      - Bearer: []
+      summary: Send a message
+      tags:
+      - messages
   /api/periods:
     get:
       description: Returns the school's periods.
@@ -435,6 +518,37 @@ paths:
       summary: Get the school's periods
       tags:
       - DBI
+  /api/recipients:
+    get:
+      description: Returns the possible recipients for messages.
+      parameters:
+      - description: JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/apimodel.Recipient'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get recipients
+      tags:
+      - messages
   /api/subject/{id}:
     get:
       description: Returns the subject by ID.
@@ -528,7 +642,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Timeline'
+            $ref: '#/definitions/apimodel.Timeline'
         "401":
           description: Unauthorized
           schema:
@@ -557,7 +671,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.Timeline'
+            $ref: '#/definitions/apimodel.Timeline'
         "401":
           description: Unauthorized
           schema:
@@ -569,6 +683,40 @@ paths:
       security:
       - Bearer: []
       summary: Get the user's recent timeline
+      tags:
+      - timeline
+  /api/timelineitem/{id}:
+    get:
+      description: Returns the timeline item by ID.
+      parameters:
+      - description: JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Timeline item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apimodel.TimelineItemWithOrigin'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get the timeline item by ID
       tags:
       - timeline
   /api/timetable:

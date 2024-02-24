@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 // @Param Authorization header string true "JWT token"
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} model.Timeline
+// @Success 200 {object} apimodel.Timeline
 // @Failure 401 {object} apimodel.UnauthorizedResponse
 // @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/timeline/recent [get]
@@ -44,7 +45,7 @@ func RecentTimelineHandler(c *gin.Context) {
 // @Param range query apimodel.TimelineRequest true "Date range"
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} model.Timeline
+// @Success 200 {object} apimodel.Timeline
 // @Failure 401 {object} apimodel.UnauthorizedResponse
 // @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/timeline [get]
@@ -251,6 +252,87 @@ func TimetableHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, completeTimetable)
 }
 
+// RecipientsHandler godoc
+// @Summary Get recipients
+// @Schemes
+// @Description Returns the possible recipients for messages.
+// @Tags messages
+// @Param Authorization header string true "JWT token"
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} []apimodel.Recipient
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
+// @Router /api/recipients [get]
+func RecipientsHandler(c *gin.Context) {
+	client := c.MustGet("client").(*edupage.EdupageClient)
+
+	user, err := client.GetUser(false)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	students := user.DBI.Students
+	teachers := user.DBI.Teachers
+
+	recipients := make([]apimodel.Recipient, len(students)+len(teachers))
+
+	i := 0
+	for _, student := range students {
+		recipients[i] = apimodel.Recipient{
+			ID:   student.ID,
+			Type: "student",
+			Name: student.Firstname + " " + student.Lastname,
+		}
+		i++
+	}
+
+	for _, teacher := range teachers {
+		recipients[i] = apimodel.Recipient{
+			ID:   teacher.ID,
+			Type: "teacher",
+			Name: teacher.Firstname + " " + teacher.Lastname,
+		}
+		i++
+	}
+
+	c.JSON(http.StatusOK, recipients)
+}
+
+// SendMessageHandler godoc
+// @Summary Send a message
+// @Schemes
+// @Description Sends a message to a recipient.
+// @Tags messages
+// @Param Authorization header string true "JWT token"
+// @Param message body apimodel.SendMessageRequest true "Message"
+// @Produce json
+// @Security Bearer
+// @Success 200
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
+// @Router /api/message [post]
+func SendMessageHandler(c *gin.Context) {
+	client := c.MustGet("client").(*edupage.EdupageClient)
+
+	recipient := c.PostForm("recipient")
+	optsJson := c.PostForm("message")
+
+	var opts edupage.MessageOptions
+	if err := json.Unmarshal([]byte(optsJson), &opts); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := client.SendMessage(recipient, opts); err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
 // SubjectHandler godoc
 // @Summary Get the subject by ID
 // @Schemes
@@ -410,7 +492,7 @@ func PeriodsHandler(c *gin.Context) {
 // @Param id path string true "Timeline item ID"
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} model.Timeline
+// @Success 200 {object} apimodel.TimelineItemWithOrigin
 // @Failure 401 {object} apimodel.UnauthorizedResponse
 // @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/timelineitem/{id} [get]

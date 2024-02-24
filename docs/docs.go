@@ -68,6 +68,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/message": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Sends a message to a recipient.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Send a message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Message",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.SendMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/periods": {
             "get": {
                 "security": [
@@ -99,6 +151,55 @@ const docTemplate = `{
                             "type": "object",
                             "additionalProperties": {
                                 "$ref": "#/definitions/model.Period"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/recipients": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns the possible recipients for messages.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Get recipients",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/apimodel.Recipient"
                             }
                         }
                     },
@@ -264,7 +365,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Timeline"
+                            "$ref": "#/definitions/apimodel.Timeline"
                         }
                     },
                     "401": {
@@ -310,7 +411,60 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/model.Timeline"
+                            "$ref": "#/definitions/apimodel.Timeline"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/timelineitem/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns the timeline item by ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "timeline"
+                ],
+                "summary": "Get the timeline item by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Timeline item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.TimelineItemWithOrigin"
                         }
                     },
                     "401": {
@@ -673,6 +827,68 @@ const docTemplate = `{
                 }
             }
         },
+        "apimodel.HomeworkReduced": {
+            "type": "object",
+            "properties": {
+                "attachements": {},
+                "data": {
+                    "$ref": "#/definitions/model.StringJsonObject"
+                },
+                "datecreated": {
+                    "type": "string"
+                },
+                "details": {
+                    "type": "string"
+                },
+                "homeworkid": {
+                    "type": "string"
+                },
+                "hwkid": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "period": {},
+                "pocet_done": {
+                    "type": "integer"
+                },
+                "pocet_like": {
+                    "type": "integer"
+                },
+                "pocet_reakcii": {
+                    "type": "integer"
+                },
+                "posledny_vysledok": {
+                    "type": "string"
+                },
+                "predmetid": {
+                    "type": "integer"
+                },
+                "stav": {
+                    "type": "string"
+                },
+                "stavhodnotetimelinePathd": {
+                    "type": "string"
+                },
+                "students_hidden": {
+                    "type": "string"
+                },
+                "testid": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "typ": {
+                    "type": "string"
+                },
+                "userid": {
+                    "type": "string"
+                },
+                "znamky_udalostid": {}
+            }
+        },
         "apimodel.ICanteenBadRequestResponse": {
             "type": "object",
             "properties": {
@@ -764,6 +980,152 @@ const docTemplate = `{
                 }
             }
         },
+        "apimodel.Recipient": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "apimodel.SendMessageRequest": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "$ref": "#/definitions/edupage.MessageOptions"
+                },
+                "recipient": {
+                    "type": "string"
+                }
+            }
+        },
+        "apimodel.Timeline": {
+            "type": "object",
+            "properties": {
+                "homeworks": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/apimodel.HomeworkReduced"
+                    }
+                },
+                "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/apimodel.TimelineItemReduced"
+                    }
+                }
+            }
+        },
+        "apimodel.TimelineItemReduced": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/model.StringJsonObject"
+                },
+                "poct_reakcii": {
+                    "type": "integer"
+                },
+                "reakcia_na": {
+                    "type": "string"
+                },
+                "removed": {
+                    "type": "integer"
+                },
+                "target_user": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "timelineid": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "typ": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "vlastnik": {
+                    "type": "string"
+                }
+            }
+        },
+        "apimodel.TimelineItemWithOrigin": {
+            "type": "object",
+            "properties": {
+                "cas_pridania": {
+                    "type": "string"
+                },
+                "cas_pridania_btc": {
+                    "type": "string"
+                },
+                "cas_udalosti": {
+                    "type": "string"
+                },
+                "cas_udalosti_btc": {
+                    "type": "string"
+                },
+                "data": {
+                    "$ref": "#/definitions/model.StringJsonObject"
+                },
+                "ineid": {
+                    "type": "string"
+                },
+                "origin_server": {
+                    "type": "string"
+                },
+                "poct_reakcii": {
+                    "type": "integer"
+                },
+                "pomocny_zaznam": {
+                    "type": "string"
+                },
+                "posledna_reakcia": {
+                    "type": "string"
+                },
+                "reakcia_na": {
+                    "type": "string"
+                },
+                "removed": {},
+                "target_user": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "timelineid": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "typ": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                },
+                "user_meno": {
+                    "type": "string"
+                },
+                "vlastnik": {
+                    "type": "string"
+                },
+                "vlastnik_meno": {
+                    "type": "string"
+                }
+            }
+        },
         "apimodel.UnauthorizedResponse": {
             "type": "object",
             "properties": {
@@ -800,6 +1162,63 @@ const docTemplate = `{
                 "success": {
                     "type": "boolean",
                     "example": false
+                }
+            }
+        },
+        "edupage.Attachment": {
+            "type": "object"
+        },
+        "edupage.MessageOptions": {
+            "type": "object",
+            "properties": {
+                "allowReplies": {
+                    "type": "boolean"
+                },
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/edupage.Attachment"
+                    }
+                },
+                "important": {
+                    "type": "boolean"
+                },
+                "parents": {
+                    "type": "boolean"
+                },
+                "poll": {
+                    "$ref": "#/definitions/edupage.PollOptions"
+                },
+                "repliesToAuthorOnly": {
+                    "type": "boolean"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "edupage.PollOption": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "edupage.PollOptions": {
+            "type": "object",
+            "properties": {
+                "multiple": {
+                    "type": "boolean"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/edupage.PollOption"
+                    }
                 }
             }
         },
@@ -869,111 +1288,6 @@ const docTemplate = `{
                 "short": {
                     "type": "string"
                 }
-            }
-        },
-        "model.Homework": {
-            "type": "object",
-            "properties": {
-                "attachements": {},
-                "autor_meno": {
-                    "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/model.StringJsonObject"
-                },
-                "datecreated": {
-                    "type": "string"
-                },
-                "datefrom": {
-                    "type": "string"
-                },
-                "datetimefrom": {
-                    "type": "string"
-                },
-                "datetimeto": {
-                    "type": "string"
-                },
-                "dateto": {
-                    "type": "string"
-                },
-                "details": {
-                    "type": "string"
-                },
-                "e_superid": {
-                    "type": "string"
-                },
-                "etestAnswerCards": {
-                    "type": "integer"
-                },
-                "etestCards": {
-                    "type": "integer"
-                },
-                "homeworkid": {
-                    "type": "string"
-                },
-                "hwkid": {
-                    "type": "string"
-                },
-                "missingNextLesson": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "period": {},
-                "planid": {
-                    "type": "string"
-                },
-                "pocet_done": {
-                    "type": "string"
-                },
-                "pocet_like": {
-                    "type": "string"
-                },
-                "pocet_reakcii": {
-                    "type": "string"
-                },
-                "posledny_vysledok": {
-                    "type": "string"
-                },
-                "predmet_meno": {
-                    "type": "string"
-                },
-                "predmetid": {
-                    "type": "string"
-                },
-                "skoncil": {},
-                "skupiny": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "stav": {
-                    "type": "string"
-                },
-                "stavhodnotetimelinePathd": {
-                    "type": "string"
-                },
-                "students_hidden": {
-                    "type": "string"
-                },
-                "studyTopics": {
-                    "type": "boolean"
-                },
-                "testid": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "type": "string"
-                },
-                "typ": {
-                    "type": "string"
-                },
-                "userid": {
-                    "type": "string"
-                },
-                "znamky_udalostid": {}
             }
         },
         "model.Period": {
@@ -1050,88 +1364,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "short": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.Timeline": {
-            "type": "object",
-            "properties": {
-                "homeworks": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/model.Homework"
-                    }
-                },
-                "items": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/model.TimelineItem"
-                    }
-                }
-            }
-        },
-        "model.TimelineItem": {
-            "type": "object",
-            "properties": {
-                "cas_pridania": {
-                    "type": "string"
-                },
-                "cas_pridania_btc": {
-                    "type": "string"
-                },
-                "cas_udalosti": {
-                    "type": "string"
-                },
-                "cas_udalosti_btc": {
-                    "type": "string"
-                },
-                "data": {
-                    "$ref": "#/definitions/model.StringJsonObject"
-                },
-                "ineid": {
-                    "type": "string"
-                },
-                "poct_reakcii": {
-                    "type": "integer"
-                },
-                "pomocny_zaznam": {
-                    "type": "string"
-                },
-                "posledna_reakcia": {
-                    "type": "string"
-                },
-                "reakcia_na": {
-                    "type": "string"
-                },
-                "removed": {
-                    "type": "string"
-                },
-                "target_user": {
-                    "type": "string"
-                },
-                "text": {
-                    "type": "string"
-                },
-                "timelineid": {
-                    "type": "string"
-                },
-                "timestamp": {
-                    "type": "string"
-                },
-                "typ": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                },
-                "user_meno": {
-                    "type": "string"
-                },
-                "vlastnik": {
-                    "type": "string"
-                },
-                "vlastnik_meno": {
                     "type": "string"
                 }
             }

@@ -119,11 +119,11 @@ type MessageOptions struct {
 	Parents             bool         `json:"parents,omitempty"`
 	AllowReplies        bool         `json:"allowReplies,omitempty"`
 	RepliesToAuthorOnly bool         `json:"repliesToAuthorOnly,omitempty"`
-	Attachments         []Attachment `json:"attachments,omitempty"`
+	Attachments         []string     `json:"attachments,omitempty"`
 	Poll                *PollOptions `json:"poll,omitempty"`
 }
 
-func (client *EdupageClient) SendMessage(recipients []string, options MessageOptions) error {
+func (client *EdupageClient) SendMessage(recipient string, options MessageOptions) error {
 	if client.Credentials.httpClient == nil {
 		return errors.New("invalid credentials")
 	}
@@ -148,7 +148,7 @@ func (client *EdupageClient) SendMessage(recipients []string, options MessageOpt
 		"receipt":              "0",
 		"repliesDisabled":      "0",
 		"repliesToAllDisabled": "0",
-		"selectedUser":         client.getUserString(options.Parents),
+		"selectedUser":         recipient,
 		"text":                 options.Text,
 		"typ":                  "sprava",
 	}
@@ -188,7 +188,7 @@ func (client *EdupageClient) SendMessage(recipients []string, options MessageOpt
 	// Convert the data map to URL values
 	values := url.Values{}
 	for key, value := range data {
-		values.Set(key, fmt.Sprintf("%v", value))
+		values.Set(key, fmt.Sprintf("%s", value))
 	}
 
 	// Create a new HTTP request

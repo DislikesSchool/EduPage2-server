@@ -1,8 +1,6 @@
 package apimodel
 
 import (
-	"encoding/json"
-
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 )
 
@@ -17,7 +15,7 @@ type TimelineItemReduced struct {
 	Data          model.StringJsonObject `json:"data"`
 	Owner         string                 `json:"vlastnik"`
 	ReactionCount int                    `json:"poct_reakcii"`
-	Removed       json.Number            `json:"removed"`
+	Removed       int                    `json:"removed"`
 }
 
 type TimelineItemWithOrigin struct {
@@ -38,7 +36,7 @@ type TimelineItemWithOrigin struct {
 	ReactionCount   int                    `json:"poct_reakcii"`
 	LastReaction    string                 `json:"posledna_reakcia"`
 	PomocnyZaznam   string                 `json:"pomocny_zaznam"`
-	Removed         json.Number            `json:"removed"`
+	Removed         any                    `json:"removed"`
 	TimeAddedBTC    model.Time             `json:"cas_pridania_btc"`
 	LastReactionBTC model.Time             `json:"cas_udalosti_btc"`
 	OriginServer    string                 `json:"origin_server"`
@@ -48,7 +46,7 @@ type HomeworkReduced struct {
 	ID               string                 `json:"hwkid"`
 	HomeworkID       string                 `json:"homeworkid"`
 	UserID           string                 `json:"userid"`
-	LessonID         json.Number            `json:"predmetid"`
+	LessonID         int                    `json:"predmetid"`
 	Name             string                 `json:"name"`
 	Details          string                 `json:"details"`
 	DateCreated      string                 `json:"datecreated"`
@@ -56,9 +54,9 @@ type HomeworkReduced struct {
 	Timestamp        string                 `json:"timestamp"`
 	TestID           string                 `json:"testid"`
 	Type             string                 `json:"typ"`
-	LikeCount        json.Number            `json:"pocet_like"`
-	ReactionCount    json.Number            `json:"pocet_reakcii"`
-	DoneCount        json.Number            `json:"pocet_done"`
+	LikeCount        int                    `json:"pocet_like"`
+	ReactionCount    int                    `json:"pocet_reakcii"`
+	DoneCount        int                    `json:"pocet_done"`
 	State            string                 `json:"stav"`
 	LastResult       string                 `json:"posledny_vysledok"`
 	GradeEventID     interface{}            `json:"znamky_udalostid"`
