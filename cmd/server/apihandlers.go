@@ -500,11 +500,29 @@ func TimelineItemHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
 
 	id := c.Param("id")
+	date := c.Param("date")
 
-	timeline, err := client.GetRecentTimeline()
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	var timeline model.Timeline
+	var err error
+
+	if date != "" {
+		dateTime, err := time.Parse(time.RFC3339, date)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		timeline, err = client.GetTimeline(dateTime, dateTime)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		timeline, err = client.GetRecentTimeline()
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	timelineItem := timeline.Items[id]
