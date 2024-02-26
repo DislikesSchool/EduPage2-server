@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"strings"
 	"time"
 )
@@ -22,5 +23,5 @@ func (n *Time) UnmarshalJSON(b []byte) error {
 }
 
 func (n *Time) MarshalJSON() ([]byte, error) {
-	return []byte(n.Time.Format(TimeFormat)), nil
+	return json.Marshal(n.Time.Format(TimeFormat))
 }
