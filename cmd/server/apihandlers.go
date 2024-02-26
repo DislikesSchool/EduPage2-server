@@ -512,7 +512,7 @@ func TimelineItemHandler(c *gin.Context) {
 			return
 		}
 
-		timeline, err = client.GetTimeline(dateTime, dateTime)
+		timeline, err = client.GetTimeline(dateTime, time.Now())
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
