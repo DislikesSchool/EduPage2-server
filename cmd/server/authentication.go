@@ -253,10 +253,6 @@ func clientFromContext(c *gin.Context) (*edupage.EdupageClient, error) {
 	}
 	server := claims["server"].(string)
 	username := claims["username"].(string)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return &edupage.EdupageClient{}, err
-	}
 
 	client, ok := clients[server+username]
 	if !ok {
