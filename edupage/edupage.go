@@ -117,10 +117,28 @@ type MessageOptions struct {
 	Text                string       `json:"text"`
 	Important           bool         `json:"important,omitempty"`
 	Parents             bool         `json:"parents,omitempty"`
-	AllowReplies        bool         `json:"allowReplies,omitempty"`
+	AllowReplies        *bool        `json:"allowReplies,omitempty"`
 	RepliesToAuthorOnly bool         `json:"repliesToAuthorOnly,omitempty"`
 	Attachments         []string     `json:"attachments,omitempty"`
 	Poll                *PollOptions `json:"poll,omitempty"`
+}
+
+func (m *MessageOptions) UnmarshalJSON(data []byte) error {
+	type Alias MessageOptions
+	aux := &struct {
+		AllowReplies *bool `json:"allowReplies"`
+		*Alias
+	}{
+		Alias: (*Alias)(m),
+	}
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+	if aux.AllowReplies == nil {
+		m.AllowReplies = new(bool)
+		*m.AllowReplies = true
+	}
+	return nil
 }
 
 func (client *EdupageClient) SendMessage(recipient string, options MessageOptions) error {
@@ -157,7 +175,7 @@ func (client *EdupageClient) SendMessage(recipient string, options MessageOption
 		data["receipt"] = "1"
 	}
 
-	if !options.AllowReplies {
+	if !*options.AllowReplies {
 		data["repliesDisabled"] = "1"
 		data["repliesToAllDisabled"] = "1"
 	}
