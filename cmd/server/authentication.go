@@ -158,9 +158,9 @@ func LoginHandler(c *gin.Context) {
 	u := clients[server+username]
 
 	if u != nil {
-		passwordCorrect := edupage.CheckPasswordHash(password, u.Credentials.PasswordHash)
+		passwordCorrect := edupage.CheckPasswordHash(password, u.Client.Credentials.PasswordHash)
 		if passwordCorrect {
-			user, err := u.GetUser(false)
+			user, err := u.Client.GetUser(false)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 					"error":   err.Error(),
@@ -225,18 +225,23 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	clients[server+username] = h
-	cr.AddFunc("@every 10m", func() {
+	clients[server+username] = &ClientData{
+		Client: h,
+	}
+	jobId, err := cr.AddFunc("@every 10m", func() {
 		fmt.Println("Pinging", username, server)
 		success, err := h.PingSession()
-		if err != nil {
+		if err != nil || !success {
 			fmt.Println("session ping failed")
-			clients[server+username] = nil
-		} else if !success {
-			fmt.Println("session ping failed")
+			cr.Remove(clients[server+username].CrJobId)
 			clients[server+username] = nil
 		}
 	})
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	clients[server+username].CrJobId = jobId
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
 		"success": true,
@@ -260,7 +265,7 @@ func clientFromContext(c *gin.Context) (*edupage.EdupageClient, error) {
 		return &edupage.EdupageClient{}, err
 	}
 
-	return client, nil
+	return client.Client, nil
 }
 
 // ValidateTokenHandler godoc
@@ -288,7 +293,7 @@ func ValidateTokenHandler(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
 		return
 	}
-	user, err := h.GetUser(false)
+	user, err := h.Client.GetUser(false)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error":   err.Error(),

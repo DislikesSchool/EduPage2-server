@@ -17,7 +17,12 @@ import (
 	nrgin "github.com/newrelic/go-agent/v3/integrations/nrgin"
 )
 
-var clients = make(map[string]*edupage.EdupageClient)
+type ClientData struct {
+	CrJobId cron.EntryID
+	Client  *edupage.EdupageClient
+}
+
+var clients = make(map[string]*ClientData)
 
 var cr *cron.Cron
 
