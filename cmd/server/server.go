@@ -40,7 +40,7 @@ var cr *cron.Cron
 func main() {
 	if err := sentry.Init(sentry.ClientOptions{
 		Dsn:              "https://9f278010f63fd37cc43bee40a6d69aa6@o4504950085976064.ingest.sentry.io/4505752992743424",
-		EnableTracing:    true,
+		EnableTracing:    false,
 		TracesSampleRate: 1.0,
 	}); err != nil {
 		fmt.Printf("Sentry initialization failed: %v", err)
