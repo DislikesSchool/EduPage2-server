@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/getsentry/sentry-go"
 	sentrygin "github.com/getsentry/sentry-go/gin"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/robfig/cron/v3"
@@ -68,6 +70,11 @@ func main() {
 	api := router.Group("/api")
 	api.Use(authMiddleware())
 	docs.SwaggerInfo.BasePath = "/"
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 	router.Use(sentrygin.New(sentrygin.Options{}))
 
 	router.POST("/login", LoginHandler)
