@@ -582,3 +582,48 @@ func TimelineItemHandler(c *gin.Context) {
 		Replies:         replies,
 	})
 }
+
+// ResultsHandler godoc
+// @Summary Get the user's grades
+// @Schemes
+// @Description Returns the user's grades.
+// @Tags grades
+// @Param Authorization header
+// @Param year query string false "Year"
+// @Param half query string false "Half"
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} []model.Result
+// @Failure 401 {object} apimodel.UnauthorizedResponse
+// @Failure 500 {object} apimodel.InternalErrorResponse
+// @Router /api/grades [get]
+func ResultsHandler(c *gin.Context) {
+	client := c.MustGet("client").(*edupage.EdupageClient)
+
+	year := c.Query("year")
+	half := c.Query("half")
+
+	if year == "" {
+		year = time.Now().Format("2006")
+	}
+	if half == "" {
+		month := time.Now().Month()
+		if month >= time.January && month <= time.January {
+			half = "1"
+		}
+		if month >= time.February && month <= time.August {
+			half = "2"
+		}
+		if month >= time.September && month <= time.December {
+			half = "1"
+		}
+	}
+
+	results, err := client.GetResults(year, half)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, results)
+}

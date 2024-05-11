@@ -85,6 +85,7 @@ func main() {
 	api.GET("/timelineitem/:id", TimelineItemHandler)
 	api.GET("/recipients", RecipientsHandler)
 	api.POST("/message", SendMessageHandler)
+	api.GET("/grades", ResultsHandler)
 
 	router.POST("/icanteen", ICanteenHandler)
 
