@@ -65,17 +65,19 @@ func main() {
 	cr = cron.New()
 
 	router := gin.Default()
-	router.Use(nrgin.Middleware(app))
-	api := router.Group("/api")
-	api.Use(authMiddleware())
-	docs.SwaggerInfo.BasePath = "/"
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
+		AllowAllOrigins:  false,
+		AllowOriginFunc:  func(origin string) bool { return true },
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
 		AllowHeaders:     []string{"*"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
+		MaxAge:           86400,
 	}))
+	router.Use(nrgin.Middleware(app))
+	api := router.Group("/api")
+	api.Use(authMiddleware())
+	docs.SwaggerInfo.BasePath = "/"
 	router.Use(sentrygin.New(sentrygin.Options{}))
 
 	router.POST("/login", LoginHandler)
