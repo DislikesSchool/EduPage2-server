@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
@@ -71,9 +70,11 @@ func main() {
 	api.Use(authMiddleware())
 	docs.SwaggerInfo.BasePath = "/"
 	router.Use(cors.New(cors.Config{
-		AllowAllOrigins:  true,
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "X-Auth-Token"},
+		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
 	}))
 	router.Use(sentrygin.New(sentrygin.Options{}))
 
