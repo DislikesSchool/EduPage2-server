@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
@@ -101,6 +102,21 @@ func main() {
 
 	router.GET("/test", func(c *gin.Context) {
 		c.Status(200)
+	})
+
+	router.StaticFile("/", "./cmd/server/web/index.html")
+	router.StaticFile("/main.dart.js", "./cmd/server/web/main.dart.js")
+	router.StaticFile("/flutter.js", "./cmd/server/web/flutter.js")
+	router.StaticFile("/flutter_service_worker.js", "./cmd/server/web/flutter_service_worker.js")
+	router.StaticFile("/manifest.json", "./cmd/server/web/manifest.json")
+	router.StaticFile("/version.json", "./cmd/server/web/version.json")
+	router.StaticFile("/favicon.png", "./cmd/server/web/favicon.png")
+	router.StaticFS("/assets", http.Dir("./cmd/server/web/assets"))
+	router.StaticFS("/canvaskit", http.Dir("./cmd/server/web/canvaskit"))
+	router.StaticFS("/icons", http.Dir("./cmd/server/web/icons"))
+
+	router.NoRoute(func(c *gin.Context) {
+		c.Redirect(302, "/")
 	})
 
 	cr.Start()
