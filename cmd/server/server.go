@@ -84,6 +84,8 @@ func main() {
 	router.POST("/login", LoginHandler)
 	router.GET("/validate-token", ValidateTokenHandler)
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	router.GET("/qrlogin", QRLoginHandler)
+	router.GET("/qrlogin/:code", FinishQRLoginHandler)
 
 	api.GET("/timeline", TimelineHandler)
 	api.GET("/timeline/recent", RecentTimelineHandler)

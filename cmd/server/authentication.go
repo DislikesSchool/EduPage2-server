@@ -3,9 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/edupage"
@@ -308,4 +311,108 @@ func ValidateTokenHandler(c *gin.Context) {
 		"success": true,
 		"expires": exp,
 	})
+}
+
+var (
+	sseclients = make(map[string]chan QRLoginData)
+	mu         sync.Mutex
+)
+
+type QRLoginData struct {
+	Code     string `json:"code"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Endpoint string `json:"endpoint"`
+	Server   string `json:"server"`
+}
+
+// QRLoginHandler godoc
+// @Summary Log in using a QR code
+// @Schemes
+// @Description Logs in using a QR code. This route uses Server-Sent Events (SSE).
+// @Tags auth
+// @Router /qrlogin [get]
+func QRLoginHandler(c *gin.Context) {
+	code := generateCode(8)
+	dataChannel := make(chan QRLoginData, 1)
+
+	mu.Lock()
+	sseclients[code] = dataChannel
+	mu.Unlock()
+
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	c.Writer.Header().Set("Transfer-Encoding", "chunked")
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+
+	sentCode := false
+	c.Stream(func(w io.Writer) bool {
+		if !sentCode {
+			c.SSEvent("code", code)
+			sentCode = true
+		}
+		select {
+		case data := <-dataChannel:
+			c.SSEvent("data", data)
+			return false
+		default:
+			return true
+		}
+	})
+
+	mu.Lock()
+	delete(sseclients, code)
+	mu.Unlock()
+
+	close(dataChannel)
+
+	c.Status(http.StatusOK)
+}
+
+// FinishQRLoginHandler godoc
+// @Summary Finish QR login
+// @Schemes
+// @Description Finishes QR login by sending the login data to the client that initiated the SSE channel.
+// @Tags auth
+// @Param code path string true "Code"
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Param endpoint formData string true "Endpoint"
+// @Param server formData string true "Server"
+// @Router /qrlogin/:code [post]
+func FinishQRLoginHandler(c *gin.Context) {
+	code := c.Param("code")
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+	endpoint := c.PostForm("endpoint")
+	server := c.PostForm("server")
+
+	mu.Lock()
+	dataChannel, ok := sseclients[code]
+	mu.Unlock()
+
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Invalid code"})
+		return
+	}
+
+	dataChannel <- QRLoginData{
+		Code:     code,
+		Username: username,
+		Password: password,
+		Endpoint: endpoint,
+		Server:   server,
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Login data sent"})
+}
+
+func generateCode(n int) string {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	result := make([]byte, n)
+	for i := range result {
+		result[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(result)
 }
