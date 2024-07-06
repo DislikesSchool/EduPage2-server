@@ -100,7 +100,7 @@ func TestEdupage(t *testing.T) {
 		//return
 	}
 
-	if len(results.Grades) == 0 {
+	if len(results.Events) == 0 {
 		t.Log("Recieved grades are empty")
 	}
 
@@ -202,7 +202,7 @@ func BenchmarkResults(t *testing.B) {
 		return
 	}
 
-	if len(results.Grades) == 0 {
+	if len(results.Events) == 0 {
 		t.Log("Recieved grades are empty")
 	}
 }
