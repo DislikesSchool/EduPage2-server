@@ -609,13 +609,13 @@ func ResultsHandler(c *gin.Context) {
 	if half == "" {
 		month := time.Now().Month()
 		if month >= time.January && month <= time.January {
-			half = "1"
+			half = "P1"
 		}
 		if month >= time.February && month <= time.August {
-			half = "2"
+			half = "P2"
 		}
 		if month >= time.September && month <= time.December {
-			half = "1"
+			half = "P1"
 		}
 	}
 
