@@ -604,11 +604,20 @@ func ResultsHandler(c *gin.Context) {
 	half := c.Query("half")
 
 	if year == "" {
-		year = time.Now().Format("2006")
+		month := time.Now().Month()
+		if month == time.January {
+			year = time.Now().AddDate(-1, 0, 0).Format("2006")
+		}
+		if month >= time.February && month <= time.August {
+			year = time.Now().Format("2006")
+		}
+		if month >= time.September && month <= time.December {
+			year = time.Now().Format("2006")
+		}
 	}
 	if half == "" {
 		month := time.Now().Month()
-		if month >= time.January && month <= time.January {
+		if month == time.January {
 			half = "P1"
 		}
 		if month >= time.February && month <= time.August {
