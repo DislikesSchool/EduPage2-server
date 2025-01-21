@@ -236,6 +236,10 @@ definitions:
       reakcia_na:
         type: string
       removed: {}
+      replies:
+        items:
+          $ref: '#/definitions/apimodel.TimelineItemWithOrigin'
+        type: array
       target_user:
         type: string
       text:
@@ -282,15 +286,13 @@ definitions:
         example: false
         type: boolean
     type: object
-  edupage.Attachment:
-    type: object
   edupage.MessageOptions:
     properties:
       allowReplies:
         type: boolean
       attachments:
         items:
-          $ref: '#/definitions/edupage.Attachment'
+          type: string
         type: array
       important:
         type: boolean
@@ -363,6 +365,64 @@ definitions:
       short:
         type: string
     type: object
+  model.Event:
+    properties:
+      TriedaID:
+        type: string
+      data:
+        type: string
+      datum:
+        type: string
+      mesiac:
+        type: string
+      moredata: {}
+      p_farba:
+        type: string
+      p_meno:
+        type: string
+      p_najskor_priemer:
+        type: string
+      p_pocet_znamok: {}
+      p_typ_udalosti: {}
+      p_vaha: {}
+      planid:
+        type: string
+      podpisane:
+        type: string
+      podpisane_rodic:
+        type: string
+      predmetid:
+        type: string
+      priemer:
+        type: string
+      provider:
+        type: string
+      stav:
+        type: string
+      studentid:
+        type: string
+      timestamp:
+        type: string
+      ucitelid:
+        type: string
+      udalostID:
+        type: string
+      znamkaid:
+        type: string
+    type: object
+  model.Note:
+    properties:
+      PredmetID:
+        type: string
+      VcelickaID:
+        type: string
+      p_datum:
+        type: string
+      p_text:
+        type: string
+      p_typ:
+        type: string
+    type: object
   model.Period:
     properties:
       endtime:
@@ -375,6 +435,17 @@ definitions:
         type: string
       starttime:
         type: string
+    type: object
+  model.Results:
+    properties:
+      events:
+        additionalProperties:
+          $ref: '#/definitions/model.Event'
+        type: object
+      notes:
+        additionalProperties:
+          $ref: '#/definitions/model.Note'
+        type: object
     type: object
   model.StringJsonObject:
     properties:
@@ -454,6 +525,45 @@ paths:
       summary: Get the classroom by ID
       tags:
       - DBI
+  /api/grades:
+    get:
+      description: Returns the user's grades.
+      parameters:
+      - description: JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Year
+        in: query
+        name: year
+        type: string
+      - description: Half
+        in: query
+        name: half
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Results'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/apimodel.UnauthorizedResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/apimodel.InternalErrorResponse'
+      security:
+      - Bearer: []
+      summary: Get the user's grades
+      tags:
+      - grades
   /api/message:
     post:
       description: Sends a message to a recipient.
@@ -871,6 +981,47 @@ paths:
           schema:
             $ref: '#/definitions/apimodel.LoginInternalErrorResponse'
       summary: Login to your Edupage account
+      tags:
+      - auth
+  /qrlogin:
+    get:
+      description: Logs in using a QR code. This route uses Server-Sent Events (SSE).
+      responses: {}
+      summary: Log in using a QR code
+      tags:
+      - auth
+  /qrlogin/:code:
+    post:
+      description: Finishes QR login by sending the login data to the client that
+        initiated the SSE channel.
+      parameters:
+      - description: Code
+        in: path
+        name: code
+        required: true
+        type: string
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Endpoint
+        in: formData
+        name: endpoint
+        required: true
+        type: string
+      - description: Server
+        in: formData
+        name: server
+        required: true
+        type: string
+      responses: {}
+      summary: Finish QR login
       tags:
       - auth
   /validate-token:

@@ -68,6 +68,67 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/grades": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns the user's grades.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "grades"
+                ],
+                "summary": "Get the user's grades",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JWT token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Year",
+                        "name": "year",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Half",
+                        "name": "half",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/model.Results"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.UnauthorizedResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/apimodel.InternalErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/message": {
             "post": {
                 "security": [
@@ -713,6 +774,63 @@ const docTemplate = `{
                 }
             }
         },
+        "/qrlogin": {
+            "get": {
+                "description": "Logs in using a QR code. This route uses Server-Sent Events (SSE).",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Log in using a QR code",
+                "responses": {}
+            }
+        },
+        "/qrlogin/:code": {
+            "post": {
+                "description": "Finishes QR login by sending the login data to the client that initiated the SSE channel.",
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Finish QR login",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Code",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Username",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Endpoint",
+                        "name": "endpoint",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Server",
+                        "name": "server",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/validate-token": {
             "get": {
                 "description": "Validates your token and returns a 200 OK if it's valid.",
@@ -1097,6 +1215,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "removed": {},
+                "replies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/apimodel.TimelineItemWithOrigin"
+                    }
+                },
                 "target_user": {
                     "type": "string"
                 },
@@ -1165,9 +1289,6 @@ const docTemplate = `{
                 }
             }
         },
-        "edupage.Attachment": {
-            "type": "object"
-        },
         "edupage.MessageOptions": {
             "type": "object",
             "properties": {
@@ -1177,7 +1298,7 @@ const docTemplate = `{
                 "attachments": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/edupage.Attachment"
+                        "type": "string"
                     }
                 },
                 "important": {
@@ -1290,6 +1411,92 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Event": {
+            "type": "object",
+            "properties": {
+                "TriedaID": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "datum": {
+                    "type": "string"
+                },
+                "mesiac": {
+                    "type": "string"
+                },
+                "moredata": {},
+                "p_farba": {
+                    "type": "string"
+                },
+                "p_meno": {
+                    "type": "string"
+                },
+                "p_najskor_priemer": {
+                    "type": "string"
+                },
+                "p_pocet_znamok": {},
+                "p_typ_udalosti": {},
+                "p_vaha": {},
+                "planid": {
+                    "type": "string"
+                },
+                "podpisane": {
+                    "type": "string"
+                },
+                "podpisane_rodic": {
+                    "type": "string"
+                },
+                "predmetid": {
+                    "type": "string"
+                },
+                "priemer": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "stav": {
+                    "type": "string"
+                },
+                "studentid": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "ucitelid": {
+                    "type": "string"
+                },
+                "udalostID": {
+                    "type": "string"
+                },
+                "znamkaid": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Note": {
+            "type": "object",
+            "properties": {
+                "PredmetID": {
+                    "type": "string"
+                },
+                "VcelickaID": {
+                    "type": "string"
+                },
+                "p_datum": {
+                    "type": "string"
+                },
+                "p_text": {
+                    "type": "string"
+                },
+                "p_typ": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Period": {
             "type": "object",
             "properties": {
@@ -1307,6 +1514,23 @@ const docTemplate = `{
                 },
                 "starttime": {
                     "type": "string"
+                }
+            }
+        },
+        "model.Results": {
+            "type": "object",
+            "properties": {
+                "events": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/model.Event"
+                    }
+                },
+                "notes": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/model.Note"
+                    }
                 }
             }
         },

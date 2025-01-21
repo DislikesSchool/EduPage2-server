@@ -588,12 +588,12 @@ func TimelineItemHandler(c *gin.Context) {
 // @Schemes
 // @Description Returns the user's grades.
 // @Tags grades
-// @Param Authorization header
+// @Param Authorization header string true "JWT token"
 // @Param year query string false "Year"
 // @Param half query string false "Half"
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} []model.Result
+// @Success 200 {object} []model.Results
 // @Failure 401 {object} apimodel.UnauthorizedResponse
 // @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/grades [get]
