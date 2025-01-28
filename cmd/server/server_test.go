@@ -116,3 +116,128 @@ func TestLogin(t *testing.T) {
 	assert.Equal(t, name, response.Name)
 	assert.NotEmpty(t, response.Token)
 }
+
+func getAuthToken(t *testing.T) string {
+	// Login to get auth token first
+	data := url.Values{}
+	data.Set("username", username)
+	data.Set("password", password)
+	req, _ := http.NewRequest("POST", "/login", strings.NewReader(data.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+	router := gin.Default()
+	router.POST("/login", LoginHandler)
+	router.ServeHTTP(w, req)
+
+	var response struct {
+		Token string `json:"token"`
+	}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+	return response.Token
+}
+
+func TestTimelineHandler(t *testing.T) {
+	if len(username) == 0 || len(password) == 0 {
+		t.Skip("Skipping test: credentials not provided")
+	}
+
+	gin.SetMode(gin.TestMode)
+	token := getAuthToken(t)
+
+	router := gin.Default()
+	api := router.Group("/api")
+	api.Use(authMiddleware())
+	api.GET("/timeline/recent", RecentTimelineHandler)
+
+	req, _ := http.NewRequest("GET", "/api/timeline/recent", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestTimetableHandler(t *testing.T) {
+	if len(username) == 0 || len(password) == 0 {
+		t.Skip("Skipping test: credentials not provided")
+	}
+
+	gin.SetMode(gin.TestMode)
+	token := getAuthToken(t)
+
+	router := gin.Default()
+	api := router.Group("/api")
+	api.Use(authMiddleware())
+	api.GET("/timetable/recent", RecentTimetableHangler)
+
+	req, _ := http.NewRequest("GET", "/api/timetable/recent", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestGradesHandler(t *testing.T) {
+	if len(username) == 0 || len(password) == 0 {
+		t.Skip("Skipping test: credentials not provided")
+	}
+
+	gin.SetMode(gin.TestMode)
+	token := getAuthToken(t)
+
+	router := gin.Default()
+	api := router.Group("/api")
+	api.Use(authMiddleware())
+	api.GET("/grades", ResultsHandler)
+
+	req, _ := http.NewRequest("GET", "/api/grades", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestPeriodsHandler(t *testing.T) {
+	if len(username) == 0 || len(password) == 0 {
+		t.Skip("Skipping test: credentials not provided")
+	}
+
+	gin.SetMode(gin.TestMode)
+	token := getAuthToken(t)
+
+	router := gin.Default()
+	api := router.Group("/api")
+	api.Use(authMiddleware())
+	api.GET("/periods", PeriodsHandler)
+
+	req, _ := http.NewRequest("GET", "/api/periods", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestRecipientsHandler(t *testing.T) {
+	if len(username) == 0 || len(password) == 0 {
+		t.Skip("Skipping test: credentials not provided")
+	}
+
+	gin.SetMode(gin.TestMode)
+	token := getAuthToken(t)
+
+	router := gin.Default()
+	api := router.Group("/api")
+	api.Use(authMiddleware())
+	api.GET("/recipients", RecipientsHandler)
+
+	req, _ := http.NewRequest("GET", "/api/recipients", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
