@@ -231,20 +231,24 @@ func LoginHandler(c *gin.Context) {
 	clients[server+username] = &ClientData{
 		Client: h,
 	}
-	jobId, err := cr.AddFunc("@every 10m", func() {
-		fmt.Println("Pinging", username, server)
-		success, err := h.PingSession()
-		if err != nil || !success {
-			fmt.Println("session ping failed")
-			cr.Remove(clients[server+username].CrJobId)
-			clients[server+username] = nil
+
+	// The cron is kinda broken when run from the go test command
+	if os.Getenv("CI") == "" {
+		jobId, err := cr.AddFunc("@every 10m", func() {
+			fmt.Println("Pinging", username, server)
+			success, err := h.PingSession()
+			if err != nil || !success {
+				fmt.Println("session ping failed")
+				cr.Remove(clients[server+username].CrJobId)
+				clients[server+username] = nil
+			}
+		})
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
-	})
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		clients[server+username].CrJobId = jobId
 	}
-	clients[server+username].CrJobId = jobId
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
 		"success": true,

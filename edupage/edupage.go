@@ -310,7 +310,17 @@ func (client *EdupageClient) GetTimeline(from, to time.Time) (model.Timeline, er
 // Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetRecentResults() (model.Results, error) {
 	year := time.Now().Format("2006")
-	halfyear := "RX" //TODO
+	var halfyear string
+	month := time.Now().Month()
+	if month == time.January {
+		halfyear = "P1"
+	}
+	if month >= time.February && month <= time.August {
+		halfyear = "P2"
+	}
+	if month >= time.September && month <= time.December {
+		halfyear = "P1"
+	}
 	return client.fetchResultsModel(year, halfyear)
 }
 

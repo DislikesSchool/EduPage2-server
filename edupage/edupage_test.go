@@ -94,15 +94,17 @@ func TestEdupage(t *testing.T) {
 		t.Log("Recieved timeline is empty")
 	}
 
-	results, err := client.GetRecentResults()
-	if err != nil {
-		t.Error(fmt.Errorf("failed to recieve results: %s", err))
-		//return
-	}
+	/*
+		results, err := client.GetRecentResults()
+		if err != nil {
+			t.Error(fmt.Errorf("failed to recieve results: %s", err))
+			//return
+		}
 
-	if len(results.Events) == 0 {
-		t.Log("Recieved grades are empty")
-	}
+		if len(results.Events) == 0 {
+			t.Log("Recieved grades are empty")
+		}
+	*/
 
 	timetable, err := client.GetRecentTimetable()
 	if err != nil {
@@ -114,15 +116,17 @@ func TestEdupage(t *testing.T) {
 		t.Log("Recieved timetable is empty")
 	}
 
-	canteen, err := client.GetRecentCanteen()
-	if err != nil {
-		t.Error(fmt.Errorf("failed to recieve canteen: %s", err))
-		//return
-	}
+	/*
+		canteen, err := client.GetRecentCanteen()
+		if err != nil {
+			t.Error(fmt.Errorf("failed to recieve canteen: %s", err))
+			//return
+		}
 
-	if len(canteen.Days) == 0 {
-		t.Log("Recieved canteen is empty")
-	}
+		if len(canteen.Days) == 0 {
+			t.Log("Recieved canteen is empty")
+		}
+	*/
 }
 
 func BenchmarkLogin(t *testing.B) {

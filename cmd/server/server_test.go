@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"flag"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -46,14 +47,11 @@ func TestLoginAuto(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	// Test case 1: successful login
-	loginData := LoginData{
-		Server:   "",
-		Username: username,
-		Password: password,
-	}
-	loginDataBytes, _ := json.Marshal(loginData)
-	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(loginDataBytes))
-	req.Header.Set("Content-Type", "application/json")
+	data := url.Values{}
+	data.Set("username", username)
+	data.Set("password", password)
+	req, _ := http.NewRequest("POST", "/login", strings.NewReader(data.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	w := httptest.NewRecorder()
 	router := gin.Default()
 	router.POST("/login", LoginHandler)
@@ -93,14 +91,12 @@ func TestLogin(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	// Test case 1: successful login
-	loginData := LoginData{
-		Server:   server,
-		Username: username,
-		Password: password,
-	}
-	loginDataBytes, _ := json.Marshal(loginData)
-	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(loginDataBytes))
-	req.Header.Set("Content-Type", "application/json")
+	data := url.Values{}
+	data.Set("server", server)
+	data.Set("username", username)
+	data.Set("password", password)
+	req, _ := http.NewRequest("POST", "/login", strings.NewReader(data.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	w := httptest.NewRecorder()
 	router := gin.Default()
 	router.POST("/login", LoginHandler)
