@@ -2,20 +2,19 @@ name: Test Go packages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-
   icanteen:
     name: Run package tests
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.21.x
+      - name: Set up Go 1.23.x
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.21
+          go-version: ^1.23
         id: go
 
       - name: Check out code into the Go module directory
@@ -23,9 +22,9 @@ jobs:
 
       - name: Test iCanteen package
         run: go test -v -coverpkg=./... ./... -server="${{ secrets.SERVER }}" -username="${{ secrets.USERNAME }}" -password="${{ secrets.PASSWORD }}" -ic_server="${{ secrets.IC_SERVER }}" -ic_username="${{ secrets.IC_USERNAME }}" -ic_password="${{ secrets.IC_PASSWORD }}" -race -coverprofile=coverage.out -covermode=atomic
-      
+
       - name: Upload coverage to Codecov
         if: ${{ success() || failure() }}
         uses: codecov/codecov-action@v3
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}      
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
