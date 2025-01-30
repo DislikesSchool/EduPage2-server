@@ -118,7 +118,7 @@ func main() {
 	router.StaticFS("/canvaskit", http.Dir("./cmd/server/web/canvaskit"))
 	router.StaticFS("/icons", http.Dir("./cmd/server/web/icons"))
 
-	router.StaticFile("/.well-known/assetlinks.json", "./cmd/server/web/.well-known/assetlinks.json")
+	router.StaticFile("/.well-known/assetlinks.json", "./cmd/server/.well-known/assetlinks.json")
 
 	router.NoRoute(func(c *gin.Context) {
 		c.Redirect(302, "/")
