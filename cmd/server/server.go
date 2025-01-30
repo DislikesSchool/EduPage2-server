@@ -109,6 +109,7 @@ func main() {
 	router.StaticFile("/", "./cmd/server/web/index.html")
 	router.StaticFile("/main.dart.js", "./cmd/server/web/main.dart.js")
 	router.StaticFile("/flutter.js", "./cmd/server/web/flutter.js")
+	router.StaticFile("/flutter_bootstrap.js", "./cmd/server/web/flutter.js")
 	router.StaticFile("/flutter_service_worker.js", "./cmd/server/web/flutter_service_worker.js")
 	router.StaticFile("/manifest.json", "./cmd/server/web/manifest.json")
 	router.StaticFile("/version.json", "./cmd/server/web/version.json")
@@ -116,6 +117,8 @@ func main() {
 	router.StaticFS("/assets", http.Dir("./cmd/server/web/assets"))
 	router.StaticFS("/canvaskit", http.Dir("./cmd/server/web/canvaskit"))
 	router.StaticFS("/icons", http.Dir("./cmd/server/web/icons"))
+
+	router.StaticFile("/.well-known/assetlinks.json", "./cmd/server/web/.well-known/assetlinks.json")
 
 	router.NoRoute(func(c *gin.Context) {
 		c.Redirect(302, "/")

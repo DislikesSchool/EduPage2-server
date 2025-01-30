@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.vypal.eduapge2",
+      "sha256_cert_fingerprints": [
+        "32:AC:F6:CD:51:59:FE:49:24:C8:1A:A7:B5:84:DB:30:09:57:E6:63:73:A5:98:7A:56:76:CE:9B:B1:4B:F6:CC"
+      ]
+    }
+  }
+]
