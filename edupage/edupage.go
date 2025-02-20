@@ -309,7 +309,7 @@ func (client *EdupageClient) GetTimeline(from, to time.Time) (model.Timeline, er
 // GetRecentResults retrieves the results from the current year from edupage.
 // Return ErrorUnauthorized if an authorization error occcurs.
 func (client *EdupageClient) GetRecentResults() (model.Results, error) {
-	year := time.Now().Format("2006")
+	year := time.Now()
 	var halfyear string
 	month := time.Now().Month()
 	if month == time.January {
@@ -317,11 +317,12 @@ func (client *EdupageClient) GetRecentResults() (model.Results, error) {
 	}
 	if month >= time.February && month <= time.August {
 		halfyear = "P2"
+		year = year.AddDate(-1, 0, 0)
 	}
 	if month >= time.September && month <= time.December {
 		halfyear = "P1"
 	}
-	return client.fetchResultsModel(year, halfyear)
+	return client.fetchResultsModel(year.Format("2006"), halfyear)
 }
 
 // GetResults retrieves the results in a specified interval from edupage.

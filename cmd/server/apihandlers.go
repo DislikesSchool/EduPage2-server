@@ -605,11 +605,8 @@ func ResultsHandler(c *gin.Context) {
 
 	if year == "" {
 		month := time.Now().Month()
-		if month == time.January {
+		if month >= time.January && month <= time.August {
 			year = time.Now().AddDate(-1, 0, 0).Format("2006")
-		}
-		if month >= time.February && month <= time.August {
-			year = time.Now().Format("2006")
 		}
 		if month >= time.September && month <= time.December {
 			year = time.Now().Format("2006")
