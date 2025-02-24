@@ -69,14 +69,17 @@ jobs:
           cp -r eduapp2/build/web/* cmd/server/web/
 
       - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
           if [ -z "$(git status --porcelain)" ]; then
             echo "No changes to commit."
           else
             git add cmd/server/web
-            git commit -m "Update web app to version ${{ steps.get_tag.outputs.normalized_version }}"
-            git push origin HEAD:${{ github.ref }}
+            git commit -m "Update web app to version 1.10.3"
+            # Update the remote URL with authentication:
+            git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+            git push origin HEAD:refs/heads/main
           fi
