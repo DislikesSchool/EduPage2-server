@@ -7,16 +7,11 @@ import (
 
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
-	"github.com/getsentry/sentry-go"
-	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/robfig/cron/v3"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-	nrgin "github.com/newrelic/go-agent/v3/integrations/nrgin"
 )
 
 type ClientData struct {
@@ -40,23 +35,6 @@ var cr *cron.Cron
 // @Name Authorization
 
 func main() {
-	if err := sentry.Init(sentry.ClientOptions{
-		Dsn:              "https://9f278010f63fd37cc43bee40a6d69aa6@o4504950085976064.ingest.sentry.io/4505752992743424",
-		EnableTracing:    false,
-		TracesSampleRate: 1.0,
-	}); err != nil {
-		fmt.Printf("Sentry initialization failed: %v", err)
-	}
-
-	app, err := newrelic.NewApplication(
-		newrelic.ConfigAppName("EduPage2-server"),
-		newrelic.ConfigLicense("eu01xx4155dca9b59d668e2cc9fc4e98FFFFNRAL"),
-		newrelic.ConfigAppLogForwardingEnabled(true),
-	)
-	if err != nil {
-		fmt.Println("NewRelic initialization failed:", err)
-	}
-
 	key := os.Getenv("JWT_SECRET_KEY")
 	if key == "" && gin.Mode() == gin.ReleaseMode {
 		fmt.Println("\033[0;31mERROR\033[0m: No JWT_SECRET_KEY environment variable found. Use the JWT_SECRET_KEY environment variable to set the secret key.")
@@ -75,11 +53,9 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           86400,
 	}))
-	router.Use(nrgin.Middleware(app))
 	api := router.Group("/api")
 	api.Use(authMiddleware())
 	docs.SwaggerInfo.BasePath = "/"
-	router.Use(sentrygin.New(sentrygin.Options{}))
 
 	router.POST("/login", LoginHandler)
 	router.GET("/validate-token", ValidateTokenHandler)
