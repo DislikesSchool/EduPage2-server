@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -201,6 +202,25 @@ func LoginHandler(c *gin.Context) {
 			"success": false,
 		})
 		return
+	}
+
+	schoolId := strings.Split(cred.Server, ".")[0]
+	if config.AppConfig.Schools.IsBlacklist {
+		if slices.Contains(config.AppConfig.Schools.Whitelist, schoolId) {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error":   "This school is blacklisted",
+				"success": false,
+			})
+			return
+		}
+	} else {
+		if !slices.Contains(config.AppConfig.Schools.Whitelist, schoolId) {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error":   "This school is not whitelisted",
+				"success": false,
+			})
+			return
+		}
 	}
 
 	var h *edupage.EdupageClient

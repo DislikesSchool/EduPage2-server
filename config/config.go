@@ -10,6 +10,10 @@ import (
 var AppConfig *Config
 
 type Config struct {
+	Schools struct {
+		Whitelist   []string `yaml:"whitelist"`
+		IsBlacklist bool     `yaml:"blacklist" mapstructure:"blacklist"`
+	} `yaml:"schools"`
 	Server struct {
 		Host string `yaml:"host"`
 		Port string `yaml:"port"`

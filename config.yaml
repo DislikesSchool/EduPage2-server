@@ -7,6 +7,14 @@ server:
   # The mode to run the server in (either "development" or "production")
   mode: "production"
 
+# School configuration
+schools:
+  # Whitelisted schools (users will only be allowed to login if they are a member of this school)
+  whitelist:
+    - "schoolname" # This is your school's unique name (https://schoolname.edupage.org)
+  # Whether to use the whitelist as a blacklist instead
+  blacklist: false # Set this to true with a empty whitelist to allow users from any school
+
 # JWT configuration
 jwt:
   # The secret key to use for signing JWT tokens (change this to a secure random value)
