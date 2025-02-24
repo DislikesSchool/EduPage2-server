@@ -1,5 +1,9 @@
 name: Update Web App
 
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
   workflow_dispatch:
 
