@@ -1,0 +1,13 @@
+# General server configuration
+server:
+  # The host address to bind to (do not change this unless you know what you are doing)
+  host: "0.0.0.0"
+  # The port to bind to
+  port: "8080"
+  # The mode to run the server in (either "development" or "production")
+  mode: "production"
+
+# JWT configuration
+jwt:
+  # The secret key to use for signing JWT tokens (change this to a secure random value)
+  secret: "YourDefaultSecretKey"

@@ -11,13 +11,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/DislikesSchool/EduPage2-server/config"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
 )
 
 func getSecretKey() []byte {
-	key := os.Getenv("JWT_SECRET_KEY")
+	key := config.AppConfig.JWT.Secret
 	if key == "" {
 		key = "development-secret-key"
 	}

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"os"
 
+	"github.com/DislikesSchool/EduPage2-server/config"
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/gin-contrib/cors"
@@ -35,13 +35,17 @@ var cr *cron.Cron
 // @Name Authorization
 
 func main() {
-	key := os.Getenv("JWT_SECRET_KEY")
+	key := config.AppConfig.JWT.Secret
 	if key == "" && gin.Mode() == gin.ReleaseMode {
 		fmt.Println("\033[0;31mERROR\033[0m: No JWT_SECRET_KEY environment variable found. Use the JWT_SECRET_KEY environment variable to set the secret key.")
 		panic("No JWT_SECRET_KEY environment variable found")
 	}
 
 	cr = cron.New()
+
+	if config.AppConfig.Server.Mode == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	router := gin.Default()
 	router.Use(cors.New(cors.Config{
@@ -101,5 +105,14 @@ func main() {
 	})
 
 	cr.Start()
-	router.Run()
+
+	port := config.AppConfig.Server.Port
+	if port == "" {
+		port = "8080"
+	}
+	host := config.AppConfig.Server.Host
+	if host == "" {
+		host = "0.0.0.0"
+	}
+	router.Run(host + ":" + port)
 }
