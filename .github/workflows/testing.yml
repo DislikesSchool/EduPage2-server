@@ -20,7 +20,12 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: Test iCanteen package
+      - name: Copy config.yaml file to cmd/server
+        run: |
+          sed -i 's/blacklist: false/blacklist: true/g' config.yaml
+          cp config.yaml cmd/server/config.yaml
+
+      - name: Test packages
         run: go test -v -coverpkg=./... ./... -server="${{ secrets.SERVER }}" -username="${{ secrets.USERNAME }}" -password="${{ secrets.PASSWORD }}" -name="${{ secrets.NAME }}" -ic_server="${{ secrets.IC_SERVER }}" -ic_username="${{ secrets.IC_USERNAME }}" -ic_password="${{ secrets.IC_PASSWORD }}" -race -coverprofile=coverage.out -covermode=atomic
 
       - name: Upload coverage to Codecov
