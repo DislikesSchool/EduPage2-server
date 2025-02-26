@@ -43,8 +43,6 @@ func main() {
 
 	cr = cron.New()
 
-	fmt.Println("blacklist:", config.AppConfig.Schools.IsBlacklist)
-
 	if config.AppConfig.Server.Mode == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
