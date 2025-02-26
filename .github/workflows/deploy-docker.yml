@@ -39,37 +39,6 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      - name: Get latest tag from EduPage2 repo
-        id: get_tag
-        run: |
-          tag_json=$(curl -s https://api.github.com/repos/DislikesSchool/EduPage2/tags)
-          latest_tag=$(echo "$tag_json" | jq -r '.[0].name')
-          echo "Latest tag: $latest_tag"
-          normalized_version=${latest_tag#v}
-          echo "Normalized version: $normalized_version"
-          echo "normalized_version=$normalized_version" >> $GITHUB_OUTPUT
-
-      - name: Get current web app version
-        id: get_current_version
-        run: |
-          if [ -f cmd/server/web/version.json ]; then
-            current_version=$(jq -r '.version' cmd/server/web/version.json)
-          else
-            current_version="none"
-          fi
-          echo "Current web app version: $current_version"
-          echo "current_version=$current_version" >> $GITHUB_OUTPUT
-
-      - name: Check if update is needed
-        id: check_update
-        run: |
-          if [ "${{ steps.get_tag.outputs.normalized_version }}" = "${{ steps.get_current_version.outputs.current_version }}" ]; then
-            echo "Web app version is up-to-date. Exiting..."
-            exit 0
-          else
-            echo "Updating to version ${{ steps.get_tag.outputs.normalized_version }}"
-          fi
-
       - name: Clone EduPage2 repo
         run: |
           git clone https://github.com/DislikesSchool/EduPage2.git eduapp2
