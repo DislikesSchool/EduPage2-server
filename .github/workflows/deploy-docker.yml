@@ -27,12 +27,6 @@ jobs:
       - name: Test packages
         run: go test -v -coverpkg=./... ./... -server="${{ secrets.SERVER }}" -username="${{ secrets.USERNAME }}" -password="${{ secrets.PASSWORD }}" -name="${{ secrets.NAME }}" -ic_server="${{ secrets.IC_SERVER }}" -ic_username="${{ secrets.IC_USERNAME }}" -ic_password="${{ secrets.IC_PASSWORD }}" -race -coverprofile=coverage.out -covermode=atomic
 
-      - name: Upload coverage to Codecov
-        if: ${{ success() || failure() }}
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
   update-web-app:
     name: Update web app
     runs-on: ubuntu-latest
