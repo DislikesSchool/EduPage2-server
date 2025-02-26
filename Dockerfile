@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# ----- Stage 1: Build the Go binary and gather assets -----
+# ----- Stage 1: Build the Go binary, generate API docs, and gather assets -----
 FROM golang:1.24 AS builder
 WORKDIR /src
 
@@ -9,6 +9,11 @@ RUN go mod download
 
 # Copy the entire repository so that we get all source files and assets.
 COPY . .
+
+# Install swaggo and generate API docs.
+# This runs from the repository root and uses your provided command.
+RUN go install github.com/swaggo/swag/cmd/swag@latest && \
+    swag init -g server.go -d "cmd/server,edupage,icanteen" --parseInternal
 
 # Build the Go binary from the ./cmd/server folder.
 WORKDIR /src/cmd/server
