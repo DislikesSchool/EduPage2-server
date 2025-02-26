@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # ----- Stage 1: Build the Go binary and gather assets -----
-FROM golang:1.19 AS builder
+FROM golang:1.24 AS builder
 WORKDIR /src
 
 # First copy go.mod/go.sum and download dependencies
@@ -12,7 +12,7 @@ COPY . .
 
 # Build the Go binary from the ./cmd/server folder.
 WORKDIR /src/cmd/server
-RUN go build -o /server .
+RUN CGO_ENABLED=0 go build -o /server .
 
 # ----- Stage 2: Final runtime image -----
 FROM alpine:latest
