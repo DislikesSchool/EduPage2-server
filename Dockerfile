@@ -35,6 +35,8 @@ COPY --from=builder /src/cmd/server/web /cmd/server/web
 # Copy the docs folder (from repository root) into the image.
 COPY --from=builder /src/docs /docs
 
+COPY --from=builder /src/config.yaml /config.yaml
+
 # Expose port 8080.
 EXPOSE 8080
 
