@@ -12,5 +12,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Clone EduPage2 repo
+        run: |
+          git clone https://github.com/DislikesSchool/EduPage2.git eduapp2
+
+      - name: Get latest tag from EduPage2 repo
+        id: get_tag
+        run: |
+          tag_json=$(curl -s https://api.github.com/repos/DislikesSchool/EduPage2/tags)
+          latest_tag=$(echo "$tag_json" | jq -r '.[0].name')
+          echo "Latest tag: $latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: Build EduPage2 web release
+        working-directory: ./eduapp2
+        run: |
+          flutter pub get
+          flutter gen-l10n
+          flutter build web --dart-define=BVS="Docker Test ${{ steps.get_tag.outputs.latest_tag }} Web"
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag vypal/edupage2-server:$(date +%s)
