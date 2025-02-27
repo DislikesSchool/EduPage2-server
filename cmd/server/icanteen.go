@@ -20,7 +20,7 @@ import (
 // @Param password formData string true "Password"
 // @Param server formData string true "Server"
 // @Produce json
-// @Success 200 {object} []*http.Cookie
+// @Success 200 {object} []http.Cookie
 // @Failure 400 {object} apimodel.ICanteenBadRequestResponse
 // @Failure 500 {object} apimodel.ICanteenInternalErrorResponse
 // @Router /icanteen/login [post]
@@ -103,9 +103,9 @@ func ICanteenMonthHandler(ctx *gin.Context) {
 }
 
 // ICanteenChangeOrderHandler godoc
-// @Summary Fetch lunches for month
+// @Summary Change lunch order
 // @Schemes
-// @Description Fetches the lunches for the month using the provided cookies
+// @Description Changes the lunch order using the provided cookies and changeURL
 // @Tags lunches
 // @Accept multipart/form-data
 // @Accept x-www-form-urlencoded
@@ -117,7 +117,7 @@ func ICanteenMonthHandler(ctx *gin.Context) {
 // @Success 200 {object} icanteen.ICanteenData
 // @Failure 400 {object} apimodel.ICanteenBadRequestResponse
 // @Failure 500 {object} apimodel.ICanteenInternalErrorResponse
-// @Router /icanteen/month [post]
+// @Router /icanteen/change [post]
 func ICanteenChangeOrderHandler(ctx *gin.Context) {
 	var cookies string
 	var server string

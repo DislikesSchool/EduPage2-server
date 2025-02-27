@@ -13,7 +13,7 @@ COPY . .
 # Install swaggo and generate API docs.
 # This runs from the repository root and uses your provided command.
 RUN go install github.com/swaggo/swag/cmd/swag@latest && \
-    swag init -g server.go -d "cmd/server,edupage,icanteen" --parseInternal
+    swag init -g server.go -d "cmd/server,edupage,icanteen" --pd --parseInternal
 
 # Build the Go binary from the ./cmd/server folder.
 WORKDIR /src/cmd/server
