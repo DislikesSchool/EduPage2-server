@@ -36,5 +36,6 @@ jobs:
           flutter pub get
           flutter gen-l10n
           flutter build web --dart-define=BVS="Docker Test ${{ steps.get_tag.outputs.latest_tag }} Web"
+          cp -r build/web ../cmd/server/web
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag vypal/edupage2-server:$(date +%s)
