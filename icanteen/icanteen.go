@@ -45,6 +45,66 @@ func NormalizeServerURL(server string) (string, error) {
 	return server, nil
 }
 
+func TryLogin(username, password, server string) error {
+	cookieJar, _ := cookiejar.New(nil)
+	client := &http.Client{Jar: cookieJar}
+
+	server, err := NormalizeServerURL(server)
+	if err != nil {
+		return err
+	}
+
+	loginURL := server + "/login"
+	parsedURL, err := url.Parse(loginURL)
+	if err != nil {
+		return err
+	}
+	resp, err := client.Get(loginURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return err
+	}
+	csrfToken := doc.Find("input[name='_csrf']").AttrOr("value", "")
+
+	loginData := url.Values{}
+	loginData.Set("j_username", username)
+	loginData.Set("j_password", password)
+	loginData.Set("terminal", "false")
+	loginData.Set("_csrf", csrfToken)
+	loginData.Set("targetUrl", "/faces/secured/main.jsp?terminal=false&status=true&printer=&keyboard=")
+
+	loginHeaders := map[string]string{
+		"Accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+		"Accept-Encoding": "text/html",
+		"Cache-Control":   "max-age=0",
+		"Connection":      "keep-alive",
+		"Content-Type":    "application/x-www-form-urlencoded",
+		"Host":            parsedURL.Host,
+		"Origin":          server,
+		"Referer":         server + "/login",
+	}
+	loginURL = server + "/j_spring_security_check"
+	req, err := http.NewRequest(http.MethodPost, loginURL, strings.NewReader(loginData.Encode()))
+	if err != nil {
+		return err
+	}
+	for key, value := range loginHeaders {
+		req.Header.Set(key, value)
+	}
+	resp, err = client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	return nil
+}
+
 func LoadLunches(username, password, server string) ([]ICanteenDay, error) {
 	cookieJar, _ := cookiejar.New(nil)
 	client := &http.Client{Jar: cookieJar}

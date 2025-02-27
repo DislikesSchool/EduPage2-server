@@ -459,6 +459,51 @@ func ICanteenHandler(ctx *gin.Context) {
 	ctx.JSON(200, lunches)
 }
 
+// ICanteenTestHandler godoc
+// @Summary Tests the connection to iCanteen
+// @Schemes
+// @Description Makes sure that the informaion provided by the user is correct.
+// @Tags lunches
+// @Accept multipart/form-data
+// @Accept x-www-form-urlencoded
+// @Consumes application/x-www-form-urlencoded
+// @Param username formData string true "Username"
+// @Param password formData string true "Password"
+// @Param server formData string true "Server"
+// @Produce json
+// @Success 200 {string} string "ok"
+// @Failure 400 {object} apimodel.ICanteenBadRequestResponse
+// @Failure 500 {object} apimodel.ICanteenInternalErrorResponse
+// @Router /icanteen-test [post]
+func ICanteenTestHandler(ctx *gin.Context) {
+	var username string
+	var password string
+	var server string
+
+	if username = ctx.PostForm("username"); username == "" {
+		ctx.AbortWithStatusJSON(400, gin.H{"error": "username is missing"})
+		return
+	}
+
+	if password = ctx.PostForm("password"); password == "" {
+		ctx.AbortWithStatusJSON(400, gin.H{"error": "password is missing"})
+		return
+	}
+
+	if server = ctx.PostForm("server"); server == "" {
+		ctx.AbortWithStatusJSON(400, gin.H{"error": "server is missing"})
+		return
+	}
+
+	err := icanteen.TryLogin(username, password, server)
+	if err != nil {
+		ctx.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.String(200, "ok")
+}
+
 // PeriodsHandler godoc
 // @Summary Get the school's periods
 // @Schemes

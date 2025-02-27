@@ -24,7 +24,7 @@ var clients = make(map[string]*ClientData)
 var cr *cron.Cron
 
 // @title EduPage2 API
-// @version 1.0
+// @version 1.0.1
 // @description This is the backend for the EduPage2 app.
 // @BasePath /
 
@@ -81,6 +81,7 @@ func main() {
 	api.GET("/grades", ResultsHandler)
 
 	router.POST("/icanteen", ICanteenHandler)
+	router.POST("/icanteen-test", ICanteenTestHandler)
 
 	router.GET("/test", func(c *gin.Context) {
 		c.Status(200)
