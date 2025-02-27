@@ -46,4 +46,12 @@ func init() {
 	if jwtEnv := os.Getenv("JWT_SECRET_KEY"); jwtEnv != "" {
 		AppConfig.JWT.Secret = jwtEnv
 	}
+
+	if hostEnv := os.Getenv("HOST"); hostEnv != "" {
+		AppConfig.Server.Host = hostEnv
+	}
+
+	if portEnv := os.Getenv("PORT"); portEnv != "" {
+		AppConfig.Server.Port = portEnv
+	}
 }
