@@ -302,6 +302,11 @@ func TryLogin(username, password, server string) error {
 func LoadLunches(username, password, server string) ([]ICanteenDay, error) {
 	_, url, client, err := login(username, password, server)
 
+	server, err = NormalizeServerURL(server)
+	if err != nil {
+		return nil, err
+	}
+
 	monthURL := server + "/faces/secured/month.jsp"
 	req, err := http.NewRequest(http.MethodGet, monthURL, nil)
 	if err != nil {
