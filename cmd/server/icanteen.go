@@ -257,4 +257,3 @@ func ICanteenTestHandler(ctx *gin.Context) {
 
 	ctx.String(200, "ok")
 }
-

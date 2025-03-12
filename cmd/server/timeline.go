@@ -26,6 +26,35 @@ import (
 func RecentTimelineHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
 
+	var cacheKey string
+	if shouldCache {
+		cacheKey, err := CacheKeyFromEPClient(client, "timeline")
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		cached, err := IsCached(cacheKey)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if cached {
+			var timeline apimodel.Timeline
+			read, err := ReadCache(cacheKey, &timeline)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			if read {
+				c.JSON(http.StatusOK, timeline)
+				return
+			}
+		}
+	}
+
 	timeline, err := client.GetRecentTimeline()
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -33,6 +62,10 @@ func RecentTimelineHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, timeline)
+
+	if shouldCache {
+		_ = CacheData(cacheKey, timeline, TTLFromType("timeline"))
+	}
 }
 
 // TimelineHandler godoc
@@ -215,4 +248,3 @@ func TimelineItemHandler(c *gin.Context) {
 		Replies:         replies,
 	})
 }
-

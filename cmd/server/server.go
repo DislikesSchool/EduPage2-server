@@ -1,9 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-	"context"
 
 	"github.com/DislikesSchool/EduPage2-server/config"
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
@@ -28,6 +28,8 @@ var ctx = context.Background()
 var cr *cron.Cron
 
 var rdb redis.Client
+
+var shouldCache = config.AppConfig.Redis.Enabled
 
 // @title EduPage2 API
 // @version 1.1.0
