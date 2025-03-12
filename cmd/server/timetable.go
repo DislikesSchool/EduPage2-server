@@ -26,8 +26,9 @@ func RecentTimetableHangler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
 
 	var cacheKey string
+	var err error
 	if shouldCache {
-		cacheKey, err := CacheKeyFromEPClient(client, "timetable")
+		cacheKey, err = CacheKeyFromEPClient(client, "timetable")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

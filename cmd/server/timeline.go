@@ -27,8 +27,9 @@ func RecentTimelineHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
 
 	var cacheKey string
+	var err error
 	if shouldCache {
-		cacheKey, err := CacheKeyFromEPClient(client, "timeline")
+		cacheKey, err = CacheKeyFromEPClient(client, "timeline")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -41,7 +42,7 @@ func RecentTimelineHandler(c *gin.Context) {
 		}
 
 		if cached {
-			var timeline apimodel.Timeline
+			var timeline model.Timeline
 			read, err := ReadCache(cacheKey, &timeline)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

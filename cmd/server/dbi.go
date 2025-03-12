@@ -25,8 +25,9 @@ func RecipientsHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
 
 	var cacheKey string
+	var err error
 	if shouldCache {
-		cacheKey, err := CacheKeyFromEPClient(client, "recipients")
+		cacheKey, err = CacheKeyFromEPClient(client, "recipients")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -45,7 +46,7 @@ func RecipientsHandler(c *gin.Context) {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			
+
 			if read {
 				c.JSON(http.StatusOK, recipients)
 				return
@@ -109,8 +110,9 @@ func SubjectHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	var cacheKey string
+	var err error
 	if shouldCache {
-		cacheKey, err := CacheKeyFromEPClient(client, "subject:"+id)
+		cacheKey, err = CacheKeyFromEPClient(client, "subject:"+id)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -129,7 +131,7 @@ func SubjectHandler(c *gin.Context) {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			
+
 			if read {
 				c.JSON(http.StatusOK, subject)
 				return
@@ -169,8 +171,9 @@ func TeacherHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	var cacheKey string
+	var err error
 	if shouldCache {
-		cacheKey, err := CacheKeyFromEPClient(client, "teacher:"+id)
+		cacheKey, err = CacheKeyFromEPClient(client, "teacher:"+id)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -189,7 +192,7 @@ func TeacherHandler(c *gin.Context) {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			
+
 			if read {
 				c.JSON(http.StatusOK, subject)
 				return
@@ -229,8 +232,9 @@ func ClassroomHandler(c *gin.Context) {
 	id := c.Param("id")
 
 	var cacheKey string
+	var err error
 	if shouldCache {
-		cacheKey, err := CacheKeyFromEPClient(client, "classroom:"+id)
+		cacheKey, err = CacheKeyFromEPClient(client, "classroom:"+id)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -249,7 +253,7 @@ func ClassroomHandler(c *gin.Context) {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			
+
 			if read {
 				c.JSON(http.StatusOK, subject)
 				return

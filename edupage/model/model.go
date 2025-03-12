@@ -19,6 +19,12 @@ type StringJsonObject struct {
 }
 
 func (n *StringJsonObject) UnmarshalJSON(b []byte) error {
+	// Handle the case where the value was marshaled by the marshal method
+	err := json.Unmarshal(b, &n.Value)
+	if err == nil {
+		return nil
+	}
+
 	r := string(b)
 	if r == "[]" {
 		n.Value = make(map[string]interface{})

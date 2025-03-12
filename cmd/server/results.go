@@ -27,8 +27,9 @@ func ResultsHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
 
 	var cacheKey string
+	var err error
 	if shouldCache {
-		cacheKey, err := CacheKeyFromEPClient(client, "results")
+		cacheKey, err = CacheKeyFromEPClient(client, "results")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -41,7 +42,7 @@ func ResultsHandler(c *gin.Context) {
 		}
 
 		if cached {
-			var results []model.Results
+			var results model.Results
 			read, err := ReadCache(cacheKey, &results)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
