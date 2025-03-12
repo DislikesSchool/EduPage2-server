@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/edupage"
+	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,6 +25,35 @@ import (
 // @Router /api/grades [get]
 func ResultsHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
+
+	var cacheKey string
+	if shouldCache {
+		cacheKey, err := CacheKeyFromEPClient(client, "results")
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		cached, err := IsCached(cacheKey)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if cached {
+			var results []model.Results
+			read, err := ReadCache(cacheKey, &results)
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			if read {
+				c.JSON(http.StatusOK, results)
+				return
+			}
+		}
+	}
 
 	year := c.Query("year")
 	half := c.Query("half")
@@ -57,4 +87,8 @@ func ResultsHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, results)
+
+	if shouldCache {
+		_ = CacheData(cacheKey, results, TTLFromType("results"))
+	}
 }
