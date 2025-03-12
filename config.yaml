@@ -15,6 +15,17 @@ schools:
   # Whether to use the whitelist as a blacklist instead
   blacklist: false # Set this to true with a empty whitelist to allow users from any school
 
+# Redis caching configuration
+redis:
+  # Whether to enable Redis caching
+  enabled: false
+  # The Redis server address
+  address: "localhost:6379"
+  # The Redis server password
+  password: ""
+  # The Redis database to use
+  database: 0
+
 # JWT configuration
 jwt:
   # The secret key to use for signing JWT tokens (change this to a secure random value)

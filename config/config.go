@@ -19,6 +19,12 @@ type Config struct {
 		Port string `yaml:"port"`
 		Mode string `yaml:"mode"`
 	} `yaml:"server"`
+	Redis struct {
+		Enabled  bool   `yaml:"enabled"`
+		Address  string `yaml:"address"`
+		Password string `yaml:"password"`
+		DB       int    `yaml:"db"`
+	} `yaml:"redis"`
 	JWT struct {
 		Secret string `yaml:"secret"`
 	} `yaml:"jwt"`
