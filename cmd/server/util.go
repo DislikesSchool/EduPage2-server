@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -34,7 +33,7 @@ func CacheKeyFromEPClient(client *edupage.EdupageClient, key string) (string, er
 	return fmt.Sprintf("edupage:%s_%s:%s", client.Credentials.Server, user.UserRow.UserID, key), nil
 }
 
-func CacheData(ctx context.Context, key string, data interface{}, ttl time.Duration) error {
+func CacheData(key string, data interface{}, ttl time.Duration) error {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return fmt.Errorf("error marshalling data to JSON: %w", err)
@@ -46,7 +45,7 @@ func CacheData(ctx context.Context, key string, data interface{}, ttl time.Durat
 	return nil
 }
 
-func IsCached(ctx context.Context, key string) (bool, error) {
+func IsCached(key string) (bool, error) {
 	exists, err := rdb.Exists(ctx, key).Result()
 	if err != nil {
 		return false, fmt.Errorf("error checking cache existence: %w", err)
@@ -54,7 +53,7 @@ func IsCached(ctx context.Context, key string) (bool, error) {
 	return exists == 1, nil
 }
 
-func ReadCache(ctx context.Context, key string, target interface{}) (bool, error) {
+func ReadCache(key string, target interface{}) (bool, error) {
 	jsonData, err := rdb.Get(ctx, key).Result()
 	if err == redis.Nil {
 		return false, nil
