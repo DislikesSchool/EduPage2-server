@@ -9,6 +9,7 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -22,6 +23,8 @@ type ClientData struct {
 var clients = make(map[string]*ClientData)
 
 var cr *cron.Cron
+
+var rdb redis.Client
 
 // @title EduPage2 API
 // @version 1.1.0
@@ -42,6 +45,14 @@ func main() {
 	}
 
 	cr = cron.New()
+
+	if config.AppConfig.Redis.Enabled {
+		rdb = *redis.NewClient(&redis.Options{
+			Addr:     config.AppConfig.Redis.Address,
+			Password: config.AppConfig.Redis.Password,
+			DB:       config.AppConfig.Redis.DB,
+		})
+	}
 
 	if config.AppConfig.Server.Mode == "production" {
 		gin.SetMode(gin.ReleaseMode)
