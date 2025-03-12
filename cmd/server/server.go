@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"context"
 
 	"github.com/DislikesSchool/EduPage2-server/config"
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
@@ -21,6 +22,8 @@ type ClientData struct {
 }
 
 var clients = make(map[string]*ClientData)
+
+var ctx = context.Background()
 
 var cr *cron.Cron
 
