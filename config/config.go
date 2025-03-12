@@ -24,6 +24,12 @@ type Config struct {
 		Address  string `yaml:"address"`
 		Password string `yaml:"password"`
 		DB       int    `yaml:"db"`
+		TTL struct {
+			Timeline int `yaml:"timeline"`
+			Timetable int `yaml:"timetable"`
+			Results int `yaml:"results"`
+			DBI int `yaml:"dbi"`
+		} `yaml:"ttl"`
 	} `yaml:"redis"`
 	JWT struct {
 		Secret string `yaml:"secret"`
