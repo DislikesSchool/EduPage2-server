@@ -54,6 +54,7 @@ func main() {
 	if config.AppConfig.Redis.Enabled {
 		rdb = *redis.NewClient(&redis.Options{
 			Addr:     config.AppConfig.Redis.Address,
+			Username: config.AppConfig.Redis.Username,
 			Password: config.AppConfig.Redis.Password,
 			DB:       config.AppConfig.Redis.DB,
 		})

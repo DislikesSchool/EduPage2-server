@@ -21,6 +21,8 @@ redis:
   enabled: false
   # The Redis server address
   address: "localhost:6379"
+  # The Redis server username
+  username: ""
   # The Redis server password
   password: ""
   # The Redis database to use

@@ -22,6 +22,7 @@ type Config struct {
 	Redis struct {
 		Enabled  bool   `yaml:"enabled"`
 		Address  string `yaml:"address"`
+		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 		DB       int    `yaml:"db"`
 		TTL      struct {
