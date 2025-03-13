@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/config"
@@ -30,7 +31,7 @@ func CacheKeyFromEPClient(client *edupage.EdupageClient, key string) (string, er
 	if err != nil {
 		return "", fmt.Errorf("error getting user: %w", err)
 	}
-	return fmt.Sprintf("edupage:%s_%s:%s", client.Credentials.Server, user.UserRow.UserID, key), nil
+	return fmt.Sprintf("%s:%s:%s", strings.Split(client.Credentials.Server, ".")[0], user.UserRow.UserID, key), nil
 }
 
 func CacheData(key string, data interface{}, ttl time.Duration) error {

@@ -51,6 +51,16 @@ func RecentTimelineHandler(c *gin.Context) {
 
 			if read {
 				c.JSON(http.StatusOK, timeline)
+
+				go func() {
+					timeline, err := client.GetRecentTimeline()
+					if err != nil {
+						return
+					}
+
+					_ = CacheData(cacheKey, timeline, TTLFromType("timeline"))
+				}()
+
 				return
 			}
 		}

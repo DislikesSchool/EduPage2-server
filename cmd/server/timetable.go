@@ -50,6 +50,63 @@ func RecentTimetableHangler(c *gin.Context) {
 
 			if read {
 				c.JSON(http.StatusOK, timetable)
+
+				go func() {
+					timetable, err := client.GetRecentTimetable()
+					if err != nil {
+						return
+					}
+
+					user, err := client.GetUser(false)
+					if err != nil {
+						return
+					}
+
+					completeTimetable := apimodel.CompleteTimetable{
+						Days: make(map[string][]apimodel.CompleteTimetableItem, len(timetable.Days)),
+					}
+
+					for date, items := range timetable.Days {
+						for _, item := range items {
+							completeItem := apimodel.CompleteTimetableItem{
+								Type:       item.Type,
+								Date:       item.Date,
+								Period:     item.Period,
+								StartTime:  item.StartTime,
+								EndTime:    item.EndTime,
+								Subject:    user.DBI.Subjects[item.SubjectID],
+								Classes:    make([]model.Class, len(item.ClassIDs)),
+								GroupNames: item.GroupNames,
+								IGroupID:   item.IGroupID,
+								Teachers:   make([]model.Teacher, len(item.TeacherIDs)),
+								Classrooms: make([]model.Classroom, len(item.ClassroomIDs)),
+								StudentIDs: item.StudentIDs,
+								Colors:     item.Colors,
+							}
+
+							for i, classID := range item.ClassIDs {
+								completeItem.Classes[i] = user.DBI.Classes[classID]
+							}
+
+							for i, teacherID := range item.TeacherIDs {
+								completeItem.Teachers[i] = user.DBI.Teachers[teacherID]
+							}
+
+							for i, classroomID := range item.ClassroomIDs {
+								completeItem.Classrooms[i] = user.DBI.Classrooms[classroomID]
+							}
+
+							if original, ok := completeTimetable.Days[date]; ok {
+								completeTimetable.Days[date] = append(original, completeItem)
+							} else {
+								completeTimetable.Days[date] = []apimodel.CompleteTimetableItem{completeItem}
+							}
+						}
+					}
+
+					_ = CacheData(cacheKey, completeTimetable, TTLFromType("timetable"))
+				}()
+
 				return
 			}
 		}
