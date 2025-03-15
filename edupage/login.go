@@ -43,6 +43,9 @@ type Credentials struct {
 // Login creates EdupageClient you can use to interact the edupage api with.
 // Returns EdupageClient or error.
 func Login(username, password, server string) (Credentials, error) {
+	server = strings.TrimPrefix(server, "http://")
+	server = strings.TrimPrefix(server, "https://")
+	server = strings.TrimSuffix(server, ".edupage.org")
 	Server = server + "." + edupageDomain
 
 	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
