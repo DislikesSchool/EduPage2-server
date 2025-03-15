@@ -256,7 +256,7 @@ func LoginHandler(c *gin.Context) {
 	// The cron is kinda broken when run from the go test command
 	if os.Getenv("CI") == "" {
 		jobId, err := cr.AddFunc("@every 10m", func() {
-			fmt.Println("Pinging", username, server)
+			fmt.Println("Pinging", username, strings.Split(cred.Server, ".")[0])
 			success, err := h.PingSession()
 			if err != nil || !success {
 				fmt.Println("session ping failed")
