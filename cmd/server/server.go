@@ -64,7 +64,11 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	router := gin.Default()
+	router := gin.New()
+	router.Use(
+		gin.LoggerWithConfig(gin.LoggerConfig{SkipPaths: []string{"/test"}}),
+		gin.Recovery(),
+	)
 	router.Use(cors.New(cors.Config{
 		AllowAllOrigins:  false,
 		AllowOriginFunc:  func(origin string) bool { return true },
