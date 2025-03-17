@@ -129,7 +129,7 @@ func main() {
 	router.StaticFile("/.well-known/assetlinks.json", "./cmd/server/.well-known/assetlinks.json")
 
 	router.NoRoute(func(c *gin.Context) {
-		c.Redirect(302, "/")
+		c.File("./cmd/server/web/index.html")
 	})
 
 	cr.Start()
