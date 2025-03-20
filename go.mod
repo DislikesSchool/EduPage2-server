@@ -6,6 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.9.1
+	github.com/redis/go-redis/v9 v9.7.1
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/spf13/viper v1.19.0
 	github.com/swaggo/files v1.0.1
@@ -37,7 +38,6 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/redis/go-redis/v9 v9.7.1 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
