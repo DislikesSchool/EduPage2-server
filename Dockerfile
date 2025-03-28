@@ -32,6 +32,8 @@ COPY --from=builder /server /server
 # They will be available at /cmd/server/web.
 COPY --from=builder /src/cmd/server/web /cmd/server/web
 
+COPY --from=builder /src/cmd/server/.well-known /cmd/server/.well-known
+
 # Copy the docs folder (from repository root) into the image.
 COPY --from=builder /src/docs /docs
 
