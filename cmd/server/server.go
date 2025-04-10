@@ -14,6 +14,11 @@ import (
 	"github.com/robfig/cron/v3"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
+	"gorm.io/driver/sqlserver"
+	"gorm.io/gorm"
 )
 
 type ClientData struct {
@@ -28,8 +33,10 @@ var ctx = context.Background()
 var cr *cron.Cron
 
 var rdb redis.Client
+var db *gorm.DB
 
 var shouldCache = config.AppConfig.Redis.Enabled
+var shouldStore = config.AppConfig.Database.Enabled
 
 // @title EduPage2 API
 // @version 1.1.0
@@ -51,13 +58,35 @@ func main() {
 
 	cr = cron.New()
 
-	if config.AppConfig.Redis.Enabled {
+	if shouldCache {
 		rdb = *redis.NewClient(&redis.Options{
 			Addr:     config.AppConfig.Redis.Address,
 			Username: config.AppConfig.Redis.Username,
 			Password: config.AppConfig.Redis.Password,
 			DB:       config.AppConfig.Redis.DB,
 		})
+	}
+
+	if shouldStore {
+		dsn := config.AppConfig.Database.DSN
+		var err error
+		var dialector gorm.Dialector
+		switch config.AppConfig.Database.Driver {
+		case "sqlite":
+			dialector = sqlite.Open(dsn)
+		case "mysql":
+			dialector = mysql.Open(dsn)
+		case "postgres":
+			dialector = postgres.Open(dsn)
+		case "sqlserver":
+			dialector = sqlserver.Open(dsn)
+		default:
+			panic("Unknown database driver")
+		}
+		db, err = gorm.Open(dialector, &gorm.Config{})
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	if config.AppConfig.Server.Mode == "production" {
