@@ -32,6 +32,11 @@ type Config struct {
 			DBI       int `yaml:"dbi"`
 		} `yaml:"ttl"`
 	} `yaml:"redis"`
+	Database struct {
+		Enabled bool   `yaml:"enabled"`
+		Driver  string `yaml:"driver"`
+		DSN     string `yaml:"dsn"`
+	} `yaml:"database"`
 	JWT struct {
 		Secret string `yaml:"secret"`
 	} `yaml:"jwt"`
