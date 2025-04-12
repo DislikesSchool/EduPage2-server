@@ -37,6 +37,10 @@ type Config struct {
 		Driver  string `yaml:"driver"`
 		DSN     string `yaml:"dsn"`
 	} `yaml:"database"`
+	Encryption struct {
+		Enabled bool   `yaml:"enabled"`
+		Key     string `yaml:"key"`
+	} `yaml:"encryption"`
 	JWT struct {
 		Secret string `yaml:"secret"`
 	} `yaml:"jwt"`
@@ -71,5 +75,10 @@ func init() {
 
 	if portEnv := os.Getenv("PORT"); portEnv != "" {
 		AppConfig.Server.Port = portEnv
+	}
+
+	if encKey := os.Getenv("ENCRYPTION_KEY"); encKey != "" {
+		AppConfig.Encryption.Key = encKey
+		AppConfig.Encryption.Enabled = true
 	}
 }

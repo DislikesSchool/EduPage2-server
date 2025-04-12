@@ -11,8 +11,9 @@ import (
 )
 
 type ClientData struct {
-	CrJobId cron.EntryID
-	Client  *edupage.EdupageClient
+	CrJobId     cron.EntryID
+	Client      *edupage.EdupageClient
+	DataStorage *DataStorageConfig
 }
 
 var Clients = make(map[string]*ClientData)

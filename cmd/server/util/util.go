@@ -11,6 +11,13 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+type DataStorageConfig struct {
+	Enabled     bool `json:"enabled"`
+	Credentials bool `json:"credentials"`
+	Messages    bool `json:"messages"`
+	Timeline    bool `json:"timeline"`
+}
+
 func TTLFromType(ttlType string) time.Duration {
 	switch ttlType {
 	case "timeline":

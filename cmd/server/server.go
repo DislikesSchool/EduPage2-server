@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/crypto"
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/dbmodel"
 	"github.com/DislikesSchool/EduPage2-server/cmd/server/routes"
 	"github.com/DislikesSchool/EduPage2-server/cmd/server/util"
 	"github.com/DislikesSchool/EduPage2-server/config"
@@ -22,7 +24,7 @@ import (
 )
 
 // @title EduPage2 API
-// @version 1.1.0
+// @version 1.2.0
 // @description This is the backend for the EduPage2 app.
 // @BasePath /
 
@@ -50,6 +52,20 @@ func main() {
 		})
 	}
 
+	if config.AppConfig.Encryption.Enabled {
+		if config.AppConfig.Encryption.Key == "" {
+			fmt.Println("\033[0;31mERROR\033[0m: No encryption key found. Use a command like openssl rand -base64 32 to generate a key.")
+			panic("No encryption key found")
+		} else if config.AppConfig.Encryption.Key == "YourDefaultEncryptionKey" {
+			fmt.Println("\033[0;31mERROR\033[0m: Using default encryption key. Please change it for security reasons.")
+			panic("Using default encryption key")
+		}
+		if err := crypto.InitCrypto(config.AppConfig.Encryption.Key); err != nil {
+			fmt.Printf("\033[0;31mERROR\033[0m: %v\n", err)
+			panic("Failed to initialize encryption")
+		}
+	}
+
 	if util.ShouldStore {
 		dsn := config.AppConfig.Database.DSN
 		var err error
@@ -70,6 +86,8 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
+		util.Db.AutoMigrate(&dbmodel.User{})
 	}
 
 	if config.AppConfig.Server.Mode == "production" {
@@ -112,6 +130,9 @@ func main() {
 	api.GET("/recipients", routes.RecipientsHandler)
 	api.POST("/message", routes.SendMessageHandler)
 	api.GET("/grades", routes.ResultsHandler)
+
+	api.GET("/version", routes.ServerVersion)
+	api.GET("/capabilities", routes.ServerCapabilities)
 
 	ic := router.Group("/icanteen")
 	ic.POST("/login", routes.ICanteenLoginHandler)

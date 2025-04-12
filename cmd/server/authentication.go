@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -12,11 +13,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/crypto"
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/dbmodel"
 	"github.com/DislikesSchool/EduPage2-server/cmd/server/util"
 	"github.com/DislikesSchool/EduPage2-server/config"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"gorm.io/gorm"
 )
 
 func getSecretKey() []byte {
@@ -77,12 +81,13 @@ func authMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		client, err := clientFromContext(c)
+		client, dataStorage, err := clientFromContext(c)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 			return
 		}
 		c.Set("client", client)
+		c.Set("dataStorage", dataStorage)
 
 		c.Next()
 	}
@@ -129,6 +134,7 @@ type LoginData struct {
 // @Param username formData string true "Username"
 // @Param password formData string true "Password"
 // @Param server formData string false "Server"
+// @Param storage query string false "Data Storage config. If omitted, no data will be stored."
 // @Produce json
 // @Success 200 {object} apimodel.LoginSuccessResponse
 // @Failure 400 {object} apimodel.LoginBadRequestResponse
@@ -250,8 +256,78 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
+	dataStorage := &util.DataStorageConfig{
+		Enabled:     false,
+		Credentials: false,
+		Messages:    false,
+		Timeline:    false,
+	}
+
+	if util.ShouldStore {
+		// Try to get the 'storage' query param (stringified json), parse it and set it to dataStorage. If not present, leave it as is.
+		if storageParam := c.Query("storage"); storageParam != "" {
+			if err := json.Unmarshal([]byte(storageParam), dataStorage); err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid storage configuration"})
+				return
+			}
+		}
+
+		if dataStorage.Enabled && dataStorage.Credentials {
+			userModel := &dbmodel.User{}
+			result := util.Db.First(userModel, "username = ?", username)
+
+			var passwordToStore string
+			if config.AppConfig.Encryption.Enabled {
+				encryptedPwd, err := crypto.Encrypt(password)
+				if err != nil {
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to encrypt password: " + err.Error()})
+					return
+				}
+				passwordToStore = encryptedPwd
+			} else {
+				passwordToStore = password
+			}
+
+			if result.Error == nil {
+				if userModel.Password != passwordToStore {
+					userModel.Password = passwordToStore
+				}
+				if userModel.Server != server {
+					userModel.Server = server
+				}
+
+				userModel.LastOnline = time.Now()
+				userModel.StoreMessages = dataStorage.Messages
+				userModel.StoreTimeline = dataStorage.Timeline
+
+				if err := util.Db.Save(userModel).Error; err != nil {
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user data: " + err.Error()})
+					return
+				}
+			} else if result.Error == gorm.ErrRecordNotFound {
+				newUser := &dbmodel.User{
+					Username:      username,
+					Password:      passwordToStore,
+					Server:        server,
+					LastOnline:    time.Now(),
+					StoreMessages: dataStorage.Messages,
+					StoreTimeline: dataStorage.Timeline,
+				}
+
+				if err := util.Db.Create(newUser).Error; err != nil {
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user: " + err.Error()})
+					return
+				}
+			} else {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+				return
+			}
+		}
+	}
+
 	util.Clients[server+username] = &util.ClientData{
-		Client: h,
+		Client:      h,
+		DataStorage: dataStorage,
 	}
 
 	// The cron is kinda broken when run from the go test command
@@ -279,11 +355,11 @@ func LoginHandler(c *gin.Context) {
 	})
 }
 
-func clientFromContext(c *gin.Context) (*edupage.EdupageClient, error) {
+func clientFromContext(c *gin.Context) (*edupage.EdupageClient, *util.DataStorageConfig, error) {
 	claims, err := getClaims(c)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return &edupage.EdupageClient{}, err
+		return &edupage.EdupageClient{}, &util.DataStorageConfig{}, err
 	}
 	server := claims["server"].(string)
 	username := claims["username"].(string)
@@ -291,10 +367,10 @@ func clientFromContext(c *gin.Context) (*edupage.EdupageClient, error) {
 	client, ok := util.Clients[server+username]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
-		return &edupage.EdupageClient{}, err
+		return &edupage.EdupageClient{}, &util.DataStorageConfig{}, err
 	}
 
-	return client.Client, nil
+	return client.Client, client.DataStorage, nil
 }
 
 // ValidateTokenHandler godoc

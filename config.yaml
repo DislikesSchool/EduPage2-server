@@ -42,6 +42,12 @@ database:
   # DSN (find the correct format for your driver here: https://gorm.io/docs/connecting_to_the_database.html)
   dsn: data.db
 
+encryption:
+  # Whether to enable encryption
+  enabled: false
+  # The encryption key (16, 24, or 32 bytes, generated using a secure random value, use a command like openssl rand -base64 32)
+  key: "YourDefaultEncryptionKey"
+
 # JWT configuration
 jwt:
   # The secret key to use for signing JWT tokens (change this to a secure random value)
