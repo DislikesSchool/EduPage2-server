@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -148,7 +149,7 @@ func TestTimelineHandler(t *testing.T) {
 	router := gin.Default()
 	api := router.Group("/api")
 	api.Use(authMiddleware())
-	api.GET("/timeline/recent", RecentTimelineHandler)
+	api.GET("/timeline/recent", routes.RecentTimelineHandler)
 
 	req, _ := http.NewRequest("GET", "/api/timeline/recent", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -169,7 +170,7 @@ func TestTimetableHandler(t *testing.T) {
 	router := gin.Default()
 	api := router.Group("/api")
 	api.Use(authMiddleware())
-	api.GET("/timetable/recent", RecentTimetableHangler)
+	api.GET("/timetable/recent", routes.RecentTimetableHandler)
 
 	req, _ := http.NewRequest("GET", "/api/timetable/recent", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -190,7 +191,7 @@ func TestGradesHandler(t *testing.T) {
 	router := gin.Default()
 	api := router.Group("/api")
 	api.Use(authMiddleware())
-	api.GET("/grades", ResultsHandler)
+	api.GET("/grades", routes.ResultsHandler)
 
 	req, _ := http.NewRequest("GET", "/api/grades", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -211,7 +212,7 @@ func TestPeriodsHandler(t *testing.T) {
 	router := gin.Default()
 	api := router.Group("/api")
 	api.Use(authMiddleware())
-	api.GET("/periods", PeriodsHandler)
+	api.GET("/periods", routes.PeriodsHandler)
 
 	req, _ := http.NewRequest("GET", "/api/periods", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -232,7 +233,7 @@ func TestRecipientsHandler(t *testing.T) {
 	router := gin.Default()
 	api := router.Group("/api")
 	api.Use(authMiddleware())
-	api.GET("/recipients", RecipientsHandler)
+	api.GET("/recipients", routes.RecipientsHandler)
 
 	req, _ := http.NewRequest("GET", "/api/recipients", nil)
 	req.Header.Set("Authorization", "Bearer "+token)

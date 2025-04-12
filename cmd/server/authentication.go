@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/util"
 	"github.com/DislikesSchool/EduPage2-server/config"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/gin-gonic/gin"
@@ -160,7 +161,7 @@ func LoginHandler(c *gin.Context) {
 		server = "login1"
 	}
 
-	u := clients[server+username]
+	u := util.Clients[server+username]
 
 	if u != nil {
 		passwordCorrect := edupage.CheckPasswordHash(password, u.Client.Credentials.PasswordHash)
@@ -249,26 +250,26 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-	clients[server+username] = &ClientData{
+	util.Clients[server+username] = &util.ClientData{
 		Client: h,
 	}
 
 	// The cron is kinda broken when run from the go test command
 	if os.Getenv("CI") == "" {
-		jobId, err := cr.AddFunc("@every 10m", func() {
+		jobId, err := util.Cr.AddFunc("@every 10m", func() {
 			fmt.Println("Pinging", username, strings.Split(cred.Server, ".")[0])
 			success, err := h.PingSession()
 			if err != nil || !success {
 				fmt.Println("session ping failed")
-				cr.Remove(clients[server+username].CrJobId)
-				clients[server+username] = nil
+				util.Cr.Remove(util.Clients[server+username].CrJobId)
+				util.Clients[server+username] = nil
 			}
 		})
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		clients[server+username].CrJobId = jobId
+		util.Clients[server+username].CrJobId = jobId
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"error":   "",
@@ -287,7 +288,7 @@ func clientFromContext(c *gin.Context) (*edupage.EdupageClient, error) {
 	server := claims["server"].(string)
 	username := claims["username"].(string)
 
-	client, ok := clients[server+username]
+	client, ok := util.Clients[server+username]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
 		return &edupage.EdupageClient{}, err
@@ -316,7 +317,7 @@ func ValidateTokenHandler(c *gin.Context) {
 	username := claims["username"].(string)
 	exp := claims["exp"].(float64)
 
-	h, ok := clients[server+username]
+	h, ok := util.Clients[server+username]
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "client not found"})
 		return

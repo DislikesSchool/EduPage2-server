@@ -1,9 +1,10 @@
-package main
+package routes
 
 import (
 	"net/http"
 
 	"github.com/DislikesSchool/EduPage2-server/cmd/server/apimodel"
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/util"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 	"github.com/gin-gonic/gin"
@@ -26,14 +27,14 @@ func RecipientsHandler(c *gin.Context) {
 
 	var cacheKey string
 	var err error
-	if shouldCache {
-		cacheKey, err = CacheKeyFromEPClient(client, "recipients")
+	if util.ShouldCache {
+		cacheKey, err = util.CacheKeyFromEPClient(client, "recipients")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		cached, err := IsCached(cacheKey)
+		cached, err := util.IsCached(cacheKey)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -41,7 +42,7 @@ func RecipientsHandler(c *gin.Context) {
 
 		if cached {
 			var recipients []apimodel.Recipient
-			read, err := ReadCache(cacheKey, &recipients)
+			read, err := util.ReadCache(cacheKey, &recipients)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -86,8 +87,8 @@ func RecipientsHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, recipients)
 
-	if shouldCache {
-		_ = CacheData(cacheKey, recipients, TTLFromType("dbi"))
+	if util.ShouldCache {
+		_ = util.CacheData(cacheKey, recipients, util.TTLFromType("dbi"))
 	}
 }
 
@@ -111,14 +112,14 @@ func SubjectHandler(c *gin.Context) {
 
 	var cacheKey string
 	var err error
-	if shouldCache {
-		cacheKey, err = CacheKeyFromEPClient(client, "subject:"+id)
+	if util.ShouldCache {
+		cacheKey, err = util.CacheKeyFromEPClient(client, "subject:"+id)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		cached, err := IsCached(cacheKey)
+		cached, err := util.IsCached(cacheKey)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -126,7 +127,7 @@ func SubjectHandler(c *gin.Context) {
 
 		if cached {
 			var subject model.Subject
-			read, err := ReadCache(cacheKey, &subject)
+			read, err := util.ReadCache(cacheKey, &subject)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -147,8 +148,8 @@ func SubjectHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, subject)
 
-	if shouldCache {
-		_ = CacheData(cacheKey, subject, TTLFromType("dbi"))
+	if util.ShouldCache {
+		_ = util.CacheData(cacheKey, subject, util.TTLFromType("dbi"))
 	}
 }
 
@@ -172,14 +173,14 @@ func TeacherHandler(c *gin.Context) {
 
 	var cacheKey string
 	var err error
-	if shouldCache {
-		cacheKey, err = CacheKeyFromEPClient(client, "teacher:"+id)
+	if util.ShouldCache {
+		cacheKey, err = util.CacheKeyFromEPClient(client, "teacher:"+id)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		cached, err := IsCached(cacheKey)
+		cached, err := util.IsCached(cacheKey)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -187,7 +188,7 @@ func TeacherHandler(c *gin.Context) {
 
 		if cached {
 			var subject model.Subject
-			read, err := ReadCache(cacheKey, &subject)
+			read, err := util.ReadCache(cacheKey, &subject)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -208,8 +209,8 @@ func TeacherHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, subject)
 
-	if shouldCache {
-		_ = CacheData(cacheKey, subject, TTLFromType("dbi"))
+	if util.ShouldCache {
+		_ = util.CacheData(cacheKey, subject, util.TTLFromType("dbi"))
 	}
 }
 
@@ -233,14 +234,14 @@ func ClassroomHandler(c *gin.Context) {
 
 	var cacheKey string
 	var err error
-	if shouldCache {
-		cacheKey, err = CacheKeyFromEPClient(client, "classroom:"+id)
+	if util.ShouldCache {
+		cacheKey, err = util.CacheKeyFromEPClient(client, "classroom:"+id)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		cached, err := IsCached(cacheKey)
+		cached, err := util.IsCached(cacheKey)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -248,7 +249,7 @@ func ClassroomHandler(c *gin.Context) {
 
 		if cached {
 			var subject model.Subject
-			read, err := ReadCache(cacheKey, &subject)
+			read, err := util.ReadCache(cacheKey, &subject)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -269,8 +270,8 @@ func ClassroomHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, subject)
 
-	if shouldCache {
-		_ = CacheData(cacheKey, subject, TTLFromType("dbi"))
+	if util.ShouldCache {
+		_ = util.CacheData(cacheKey, subject, util.TTLFromType("dbi"))
 	}
 }
 

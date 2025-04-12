@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/cmd/server/apimodel"
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/util"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 	"github.com/gin-gonic/gin"
@@ -28,14 +29,14 @@ func RecentTimelineHandler(c *gin.Context) {
 
 	var cacheKey string
 	var err error
-	if shouldCache {
-		cacheKey, err = CacheKeyFromEPClient(client, "timeline")
+	if util.ShouldCache {
+		cacheKey, err = util.CacheKeyFromEPClient(client, "timeline")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		cached, err := IsCached(cacheKey)
+		cached, err := util.IsCached(cacheKey)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -43,7 +44,7 @@ func RecentTimelineHandler(c *gin.Context) {
 
 		if cached {
 			var timeline model.Timeline
-			read, err := ReadCache(cacheKey, &timeline)
+			read, err := util.ReadCache(cacheKey, &timeline)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -58,7 +59,7 @@ func RecentTimelineHandler(c *gin.Context) {
 						return
 					}
 
-					_ = CacheData(cacheKey, timeline, TTLFromType("timeline"))
+					_ = util.CacheData(cacheKey, timeline, util.TTLFromType("timeline"))
 				}()
 
 				return
@@ -74,8 +75,8 @@ func RecentTimelineHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, timeline)
 
-	if shouldCache {
-		_ = CacheData(cacheKey, timeline, TTLFromType("timeline"))
+	if util.ShouldCache {
+		_ = util.CacheData(cacheKey, timeline, util.TTLFromType("timeline"))
 	}
 }
 

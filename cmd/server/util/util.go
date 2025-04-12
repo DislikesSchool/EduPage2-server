@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"encoding/json"
@@ -39,7 +39,7 @@ func CacheData(key string, data interface{}, ttl time.Duration) error {
 	if err != nil {
 		return fmt.Errorf("error marshalling data to JSON: %w", err)
 	}
-	err = rdb.Set(ctx, key, jsonData, ttl).Err()
+	err = Rdb.Set(Ctx, key, jsonData, ttl).Err()
 	if err != nil {
 		return fmt.Errorf("error setting data in Redis: %w", err)
 	}
@@ -47,7 +47,7 @@ func CacheData(key string, data interface{}, ttl time.Duration) error {
 }
 
 func IsCached(key string) (bool, error) {
-	exists, err := rdb.Exists(ctx, key).Result()
+	exists, err := Rdb.Exists(Ctx, key).Result()
 	if err != nil {
 		return false, fmt.Errorf("error checking cache existence: %w", err)
 	}
@@ -55,7 +55,7 @@ func IsCached(key string) (bool, error) {
 }
 
 func ReadCache(key string, target interface{}) (bool, error) {
-	jsonData, err := rdb.Get(ctx, key).Result()
+	jsonData, err := Rdb.Get(Ctx, key).Result()
 	if err == redis.Nil {
 		return false, nil
 	} else if err != nil {

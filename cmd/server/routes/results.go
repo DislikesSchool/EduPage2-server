@@ -1,9 +1,10 @@
-package main
+package routes
 
 import (
 	"net/http"
 	"time"
 
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/util"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 	"github.com/gin-gonic/gin"
@@ -28,14 +29,14 @@ func ResultsHandler(c *gin.Context) {
 
 	var cacheKey string
 	var err error
-	if shouldCache {
-		cacheKey, err = CacheKeyFromEPClient(client, "results")
+	if util.ShouldCache {
+		cacheKey, err = util.CacheKeyFromEPClient(client, "results")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		cached, err := IsCached(cacheKey)
+		cached, err := util.IsCached(cacheKey)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -43,7 +44,7 @@ func ResultsHandler(c *gin.Context) {
 
 		if cached {
 			var results model.Results
-			read, err := ReadCache(cacheKey, &results)
+			read, err := util.ReadCache(cacheKey, &results)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -84,7 +85,7 @@ func ResultsHandler(c *gin.Context) {
 						return
 					}
 
-					_ = CacheData(cacheKey, results, TTLFromType("results"))
+					_ = util.CacheData(cacheKey, results, util.TTLFromType("results"))
 				}()
 
 				return
@@ -125,7 +126,7 @@ func ResultsHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, results)
 
-	if shouldCache {
-		_ = CacheData(cacheKey, results, TTLFromType("results"))
+	if util.ShouldCache {
+		_ = util.CacheData(cacheKey, results, util.TTLFromType("results"))
 	}
 }

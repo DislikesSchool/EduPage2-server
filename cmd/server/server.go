@@ -1,13 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/routes"
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/util"
 	"github.com/DislikesSchool/EduPage2-server/config"
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
-	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -20,23 +20,6 @@ import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 )
-
-type ClientData struct {
-	CrJobId cron.EntryID
-	Client  *edupage.EdupageClient
-}
-
-var clients = make(map[string]*ClientData)
-
-var ctx = context.Background()
-
-var cr *cron.Cron
-
-var rdb redis.Client
-var db *gorm.DB
-
-var shouldCache = config.AppConfig.Redis.Enabled
-var shouldStore = config.AppConfig.Database.Enabled
 
 // @title EduPage2 API
 // @version 1.1.0
@@ -56,10 +39,10 @@ func main() {
 		panic("No JWT_SECRET_KEY environment variable found")
 	}
 
-	cr = cron.New()
+	util.Cr = cron.New()
 
-	if shouldCache {
-		rdb = *redis.NewClient(&redis.Options{
+	if util.ShouldCache {
+		util.Rdb = *redis.NewClient(&redis.Options{
 			Addr:     config.AppConfig.Redis.Address,
 			Username: config.AppConfig.Redis.Username,
 			Password: config.AppConfig.Redis.Password,
@@ -67,7 +50,7 @@ func main() {
 		})
 	}
 
-	if shouldStore {
+	if util.ShouldStore {
 		dsn := config.AppConfig.Database.DSN
 		var err error
 		var dialector gorm.Dialector
@@ -83,7 +66,7 @@ func main() {
 		default:
 			panic("Unknown database driver")
 		}
-		db, err = gorm.Open(dialector, &gorm.Config{})
+		util.Db, err = gorm.Open(dialector, &gorm.Config{})
 		if err != nil {
 			panic(err)
 		}
@@ -117,27 +100,27 @@ func main() {
 	router.GET("/qrlogin", QRLoginHandler)
 	router.POST("/qrlogin/:code", FinishQRLoginHandler)
 
-	api.GET("/timeline", TimelineHandler)
-	api.GET("/timeline/recent", RecentTimelineHandler)
-	api.GET("/timetable", TimetableHandler)
-	api.GET("/timetable/recent", RecentTimetableHangler)
-	api.GET("/subject/:id", SubjectHandler)
-	api.GET("/teacher/:id", TeacherHandler)
-	api.GET("/classroom/:id", ClassroomHandler)
-	api.GET("/periods", PeriodsHandler)
-	api.GET("/timelineitem/:id", TimelineItemHandler)
-	api.GET("/recipients", RecipientsHandler)
-	api.POST("/message", SendMessageHandler)
-	api.GET("/grades", ResultsHandler)
+	api.GET("/timeline", routes.TimelineHandler)
+	api.GET("/timeline/recent", routes.RecentTimelineHandler)
+	api.GET("/timetable", routes.TimetableHandler)
+	api.GET("/timetable/recent", routes.RecentTimetableHandler)
+	api.GET("/subject/:id", routes.SubjectHandler)
+	api.GET("/teacher/:id", routes.TeacherHandler)
+	api.GET("/classroom/:id", routes.ClassroomHandler)
+	api.GET("/periods", routes.PeriodsHandler)
+	api.GET("/timelineitem/:id", routes.TimelineItemHandler)
+	api.GET("/recipients", routes.RecipientsHandler)
+	api.POST("/message", routes.SendMessageHandler)
+	api.GET("/grades", routes.ResultsHandler)
 
 	ic := router.Group("/icanteen")
-	ic.POST("/login", ICanteenLoginHandler)
-	ic.POST("/month", ICanteenMonthHandler)
-	ic.POST("/change", ICanteenChangeOrderHandler)
+	ic.POST("/login", routes.ICanteenLoginHandler)
+	ic.POST("/month", routes.ICanteenMonthHandler)
+	ic.POST("/change", routes.ICanteenChangeOrderHandler)
 
 	// For compatibility with 1.0.x
-	router.POST("/icanteen", ICanteenHandler)
-	router.POST("/icanteen-test", ICanteenTestHandler)
+	router.POST("/icanteen", routes.ICanteenHandler)
+	router.POST("/icanteen-test", routes.ICanteenTestHandler)
 
 	router.GET("/test", func(c *gin.Context) {
 		c.Status(200)
@@ -161,7 +144,7 @@ func main() {
 		c.File("./cmd/server/web/index.html")
 	})
 
-	cr.Start()
+	util.Cr.Start()
 
 	port := config.AppConfig.Server.Port
 	if port == "" {

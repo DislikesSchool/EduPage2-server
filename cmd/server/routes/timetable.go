@@ -1,10 +1,11 @@
-package main
+package routes
 
 import (
 	"net/http"
 	"time"
 
 	"github.com/DislikesSchool/EduPage2-server/cmd/server/apimodel"
+	"github.com/DislikesSchool/EduPage2-server/cmd/server/util"
 	"github.com/DislikesSchool/EduPage2-server/edupage"
 	"github.com/DislikesSchool/EduPage2-server/edupage/model"
 	"github.com/gin-gonic/gin"
@@ -22,19 +23,19 @@ import (
 // @Failure 401 {object} apimodel.UnauthorizedResponse
 // @Failure 500 {object} apimodel.InternalErrorResponse
 // @Router /api/timetable/recent [get]
-func RecentTimetableHangler(c *gin.Context) {
+func RecentTimetableHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
 
 	var cacheKey string
 	var err error
-	if shouldCache {
-		cacheKey, err = CacheKeyFromEPClient(client, "timetable")
+	if util.ShouldCache {
+		cacheKey, err = util.CacheKeyFromEPClient(client, "timetable")
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		cached, err := IsCached(cacheKey)
+		cached, err := util.IsCached(cacheKey)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -42,7 +43,7 @@ func RecentTimetableHangler(c *gin.Context) {
 
 		if cached {
 			var timetable apimodel.CompleteTimetable
-			read, err := ReadCache(cacheKey, &timetable)
+			read, err := util.ReadCache(cacheKey, &timetable)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -104,7 +105,7 @@ func RecentTimetableHangler(c *gin.Context) {
 						}
 					}
 
-					_ = CacheData(cacheKey, completeTimetable, TTLFromType("timetable"))
+					_ = util.CacheData(cacheKey, completeTimetable, util.TTLFromType("timetable"))
 				}()
 
 				return
@@ -168,8 +169,8 @@ func RecentTimetableHangler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, completeTimetable)
 
-	if shouldCache {
-		_ = CacheData(cacheKey, completeTimetable, TTLFromType("timetable"))
+	if util.ShouldCache {
+		_ = util.CacheData(cacheKey, completeTimetable, util.TTLFromType("timetable"))
 	}
 }
 
