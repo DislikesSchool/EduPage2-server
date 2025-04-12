@@ -13,7 +13,7 @@ import (
 // @Tags server,info
 // @Produce json
 // @Success 200 {object} object "Server version information"
-// @Router /api/version [get]
+// @Router /server/version [get]
 func ServerVersion(c *gin.Context) {
 	c.Status(http.StatusOK)
 	c.File("./cmd/server/web/version.json")
@@ -25,7 +25,7 @@ func ServerVersion(c *gin.Context) {
 // @Tags server,info
 // @Produce json
 // @Success 200 {object} object "Server capabilities with cache and storage status"
-// @Router /api/capabilities [get]
+// @Router /server/capabilities [get]
 func ServerCapabilities(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"cache":      config.AppConfig.Redis.Enabled,

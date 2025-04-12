@@ -134,8 +134,9 @@ func main() {
 	api.POST("/message", routes.SendMessageHandler)
 	api.GET("/grades", routes.ResultsHandler)
 
-	api.GET("/version", routes.ServerVersion)
-	api.GET("/capabilities", routes.ServerCapabilities)
+	srv := router.Group("/server")
+	srv.GET("/version", routes.ServerVersion)
+	srv.GET("/capabilities", routes.ServerCapabilities)
 
 	ic := router.Group("/icanteen")
 	ic.POST("/login", routes.ICanteenLoginHandler)
