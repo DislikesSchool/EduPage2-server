@@ -143,6 +143,13 @@ func main() {
 	ic.POST("/month", routes.ICanteenMonthHandler)
 	ic.POST("/change", routes.ICanteenChangeOrderHandler)
 
+	security := router.Group("/security")
+	security.Use(authMiddleware()) // Ensure routes are protected
+	security.GET("/status", GetSecurityStatusHandler)
+	security.POST("/preferences", UpdateDataStoragePrefsHandler)
+	security.DELETE("/delete-data", DeleteUserDataHandler)
+	security.GET("/export-data", RequestDataExportHandler)
+
 	// For compatibility with 1.0.x
 	router.POST("/icanteen", routes.ICanteenHandler)
 	router.POST("/icanteen-test", routes.ICanteenTestHandler)
