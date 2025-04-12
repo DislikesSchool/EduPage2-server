@@ -94,6 +94,9 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	util.InitLogging()
+	defer util.CloseLogger()
+
 	router := gin.New()
 	router.Use(
 		gin.LoggerWithConfig(gin.LoggerConfig{SkipPaths: []string{"/test"}}),
@@ -166,6 +169,11 @@ func main() {
 	})
 
 	util.Cr.Start()
+
+	if util.ShouldStore {
+		util.InfoLogger.Println("Starting to load stored users...")
+		util.LoadStoredUsers()
+	}
 
 	port := config.AppConfig.Server.Port
 	if port == "" {

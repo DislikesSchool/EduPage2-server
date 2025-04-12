@@ -170,6 +170,37 @@ func LoginHandler(c *gin.Context) {
 	u := util.Clients[server+username]
 
 	if u != nil {
+		dataStorage := u.DataStorage
+
+		if util.ShouldStore {
+			// Try to get the 'storage' query param (stringified json), parse it and set it to dataStorage. If not present, leave it as is.
+			if storageParam := c.Query("storage"); storageParam != "" {
+				if err := json.Unmarshal([]byte(storageParam), dataStorage); err != nil {
+					c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid storage configuration"})
+					return
+				}
+			}
+
+			if dataStorage.Enabled && dataStorage.Credentials {
+				userModel := &dbmodel.User{}
+				result := util.Db.First(userModel, "username = ?", username)
+
+				if result.Error == nil {
+					userModel.LastOnline = time.Now()
+					userModel.StoreMessages = dataStorage.Messages
+					userModel.StoreTimeline = dataStorage.Timeline
+
+					if err := util.Db.Save(userModel).Error; err != nil {
+						c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user data: " + err.Error()})
+						return
+					}
+				} else {
+					c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
+					return
+				}
+			}
+		}
+
 		passwordCorrect := edupage.CheckPasswordHash(password, u.Client.Credentials.PasswordHash)
 		if passwordCorrect {
 			user, err := u.Client.GetUser(false)
