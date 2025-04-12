@@ -33,3 +33,5 @@ go.work
 # Ignore build files
 cmd/server/web
 docs/
+
+logs/
