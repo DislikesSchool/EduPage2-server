@@ -140,12 +140,6 @@ func loadAndAuthenticateUser(user *dbmodel.User) error {
 		Clients[clientKey].CrJobId = jobId
 	}
 
-	// Update last online time
-	user.LastOnline = time.Now()
-	if err := Db.Save(user).Error; err != nil {
-		return fmt.Errorf("failed to update user last online time: %w", err)
-	}
-
 	return nil
 }
 
