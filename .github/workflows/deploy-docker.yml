@@ -21,7 +21,7 @@ jobs:
 
       - name: Copy config.yaml file to cmd/server
         run: |
-          sed -i 's/blacklist: false/blacklist: true/g' config.yaml
+          sed -i 's/blacklist: false/blacklist: true/g' config.example.yaml
           cp config.example.yaml cmd/server/config.yaml
 
       - name: Install swaggo/swag
