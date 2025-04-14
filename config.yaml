@@ -48,6 +48,20 @@ encryption:
   # The encryption key (16, 24, or 32 bytes, generated using a secure random value, use a command like openssl rand -base64 32)
   key: "YourDefaultEncryptionKey"
 
+meilisearch:
+  # Whether to enable MeiliSearch integration
+  enabled: false
+  # The MeiliSearch server address
+  host: "http://localhost:7700"
+  # The MeiliSearch server API key
+  api_key: ""
+  # Config for message search
+  messages:
+    # The MeiliSearch index name
+    index_name: "edupage2_messages"
+    # The MeiliSearch primary key
+    primary_key: "id"
+
 # JWT configuration
 jwt:
   # The secret key to use for signing JWT tokens (change this to a secure random value)

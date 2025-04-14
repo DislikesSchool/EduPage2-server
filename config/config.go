@@ -41,6 +41,15 @@ type Config struct {
 		Enabled bool   `yaml:"enabled"`
 		Key     string `yaml:"key"`
 	} `yaml:"encryption"`
+	Meilisearch struct {
+		Enabled  bool   `yaml:"enabled"`
+		Host     string `yaml:"host"`
+		APIKey   string `yaml:"api_key"`
+		Messages struct {
+			IndexName  string `yaml:"index_name"`
+			PrimaryKey string `yaml:"primary_key"`
+		} `yaml:"messages"`
+	} `yaml:"meilisearch"`
 	JWT struct {
 		Secret string `yaml:"secret"`
 	} `yaml:"jwt"`

@@ -12,6 +12,7 @@ import (
 	docs "github.com/DislikesSchool/EduPage2-server/docs"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/meilisearch/meilisearch-go"
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
 	swaggerfiles "github.com/swaggo/files"
@@ -88,6 +89,16 @@ func main() {
 		}
 
 		util.Db.AutoMigrate(&dbmodel.User{})
+	}
+
+	if util.ShouldSearch {
+		util.Meili = meilisearch.New(config.AppConfig.Meilisearch.Host, meilisearch.WithAPIKey(config.AppConfig.Meilisearch.APIKey))
+		util.MeiliIndex = util.Meili.Index(config.AppConfig.Meilisearch.Messages.IndexName)
+
+		_, err := util.MeiliIndex.UpdateFilterableAttributes(&[]string{"ownerid"})
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	if config.AppConfig.Server.Mode == "production" {

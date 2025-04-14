@@ -28,8 +28,9 @@ func ServerVersion(c *gin.Context) {
 // @Router /server/capabilities [get]
 func ServerCapabilities(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"cache":      config.AppConfig.Redis.Enabled,
-		"storage":    config.AppConfig.Database.Enabled,
-		"encryption": config.AppConfig.Encryption.Enabled,
+		"cache":       config.AppConfig.Redis.Enabled,
+		"storage":     config.AppConfig.Database.Enabled,
+		"encryption":  config.AppConfig.Encryption.Enabled,
+		"meilisearch": config.AppConfig.Meilisearch.Enabled,
 	})
 }
