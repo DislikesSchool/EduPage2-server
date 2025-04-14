@@ -9,6 +9,9 @@ There are 3 ways to install and run the server:
 2. [Docker](#docker)
 3. [Docker-compose](#docker-compose)
 
+> [!IMPORTANT]
+> For bare-metal and Docker installs, you will also need to clone the [EduPage2](https://github.com/DislikesSchool/EduPage2) flutter project, build it for the web, and place the build files in `cmd/server/web`
+
 ### Bare-metal
 1. Install [Golang](https://go.dev/doc/install)
 2. Clone the repository
@@ -39,7 +42,7 @@ docker build -t edupage2-server .
 ```
 3. Run the Docker container
 ```bash
-docker run --mount type=bind,src=./config.yaml,dst=/config.yaml,ro -p 8080:8080 edupage2-server
+docker run --mount type=bind,src=./config.yaml,dst=/config.yaml,ro --mount type=bind,src=./logs,dst=/logs -p 8080:8080 edupage2-server
 ```
 
 ### Docker-compose
@@ -53,7 +56,11 @@ docker compose up -d
 ```
 
 ## Configuration
-The server can be configured using the `config.yaml` file. The default configuration is as follows:
+The server can be configured using the `config.yaml` file. Copy the `config.example.yaml` file and edit it to your liking.
+```bash
+cp config.example.yaml config.yaml
+```
+The default configuration is as follows:
 ```yaml
 # General server configuration
 server:
