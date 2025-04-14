@@ -145,6 +145,10 @@ func main() {
 	api.POST("/message", routes.SendMessageHandler)
 	api.GET("/grades", routes.ResultsHandler)
 
+	api.GET("/search/messages", routes.SearchMessagesHandler)
+	api.GET("/search/conversation/:userId", routes.ConversationSearchHandler)
+	api.GET("/search/advanced", routes.MessageFulltextSearchHandler)
+
 	srv := router.Group("/server")
 	srv.GET("/version", routes.ServerVersion)
 	srv.GET("/capabilities", routes.ServerCapabilities)

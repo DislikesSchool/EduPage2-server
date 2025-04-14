@@ -35,6 +35,7 @@ func CheckPasswordHash(password, hash string) bool {
 }
 
 type Credentials struct {
+	Username     string
 	Server       string
 	PasswordHash string
 	httpClient   *http.Client
@@ -83,6 +84,7 @@ func Login(username, password, server string) (Credentials, error) {
 				return Login(username, password, sub)
 			} else {
 				var credentials Credentials
+				credentials.Username = username
 				credentials.Server = Server
 				credentials.PasswordHash, err = HashPassword(password)
 				if err != nil {
