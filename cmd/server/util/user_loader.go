@@ -153,6 +153,10 @@ func loadAndAuthenticateUserWithRetry(user *dbmodel.User, maxRetries int) error 
 	var err error
 	backoff := 2 * time.Second
 
+	if user.Password == "" || user.Username == "" {
+		return fmt.Errorf("user %s has no password or username", user.Username)
+	}
+
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		err = loadAndAuthenticateUser(user)
 		if err == nil {

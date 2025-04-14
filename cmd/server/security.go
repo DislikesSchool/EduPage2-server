@@ -7,6 +7,7 @@ import (
 	"github.com/DislikesSchool/EduPage2-server/cmd/server/dbmodel"
 	"github.com/DislikesSchool/EduPage2-server/cmd/server/util"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // GetSecurityStatusHandler godoc
@@ -155,6 +156,20 @@ func UpdateDataStoragePrefsHandler(c *gin.Context) {
 		} else if !prefs.Enabled || !prefs.Credentials {
 			// User does not exist in DB and doesn't want to be stored - nothing to do
 			changes["databaseAction"] = "none"
+		} else if result.Error == gorm.ErrRecordNotFound {
+			userModel := &dbmodel.User{
+				Username:      username,
+				LastOnline:    time.Now(),
+				StoreMessages: prefs.Messages,
+				StoreTimeline: prefs.Timeline,
+			}
+
+			if err := util.Db.Create(userModel).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user: " + err.Error()})
+				return
+			}
+
+			changes["databaseAction"] = "created"
 		} else {
 			// Would have created the user but encountered an error
 			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
