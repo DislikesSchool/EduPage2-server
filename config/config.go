@@ -44,10 +44,10 @@ type Config struct {
 	Meilisearch struct {
 		Enabled  bool   `yaml:"enabled"`
 		Host     string `yaml:"host"`
-		APIKey   string `yaml:"api_key"`
+		APIKey   string `mapstructure:"api_key" yaml:"api_key"`
 		Messages struct {
-			IndexName  string `yaml:"index_name"`
-			PrimaryKey string `yaml:"primary_key"`
+			IndexName  string `mapstructure:"index_name" yaml:"index_name"`
+			PrimaryKey string `mapstructure:"primary_key" yaml:"primary_key"`
 		} `yaml:"messages"`
 	} `yaml:"meilisearch"`
 	JWT struct {
