@@ -120,7 +120,7 @@ func UpdateDataStoragePrefsHandler(c *gin.Context) {
 			// Handle credential storage change - delete entire record if credentials storage is disabled
 			if !prefs.Credentials || !prefs.Enabled {
 				// Delete the entire user record
-				if err := util.Db.Unscoped().Delete(userModel).Error; err != nil {
+				if err := util.Db.Delete(userModel).Error; err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user record: " + err.Error()})
 					return
 				}
@@ -241,7 +241,7 @@ func DeleteUserDataHandler(c *gin.Context) {
 
 	// Remove data from database if storage is enabled
 	if util.ShouldStore {
-		dbResult := util.Db.Where("username = ?", username).Unscoped().Delete(&dbmodel.User{})
+		dbResult := util.Db.Where("username = ?", username).Delete(&dbmodel.User{})
 		if dbResult.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user from database: " + dbResult.Error.Error()})
 			return
