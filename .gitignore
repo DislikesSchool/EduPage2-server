@@ -29,9 +29,12 @@ go.work
 !Spacefile
 !Procfile
 !Dockerfile
+!LICENSE
 
 # Ignore build files
 cmd/server/web
 docs/
 
 logs/
+
+config.yaml
