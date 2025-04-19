@@ -88,4 +88,4 @@ jwt:
 If you want to host a public instance, remove all schools from the whitelist and set `blacklist` to `true`.
 
 ## API
-The server provides a RESTful API for the frontend to interact with. The API documentation can be found [here](https://ep2.ypal.me/docs/index.html), or at the same endpoint on your own instance.
+The server provides a RESTful API for the frontend to interact with. The API documentation can be found [here](https://ep2.vypal.me/docs/index.html), or at the same endpoint on your own instance.
