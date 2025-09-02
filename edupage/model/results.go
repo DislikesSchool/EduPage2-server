@@ -68,9 +68,9 @@ func (dst *Results) Merge(src *Results) {
 
 func ParseResults(jsondata []byte) (Results, error) {
 	type RawGradesData struct {
-		Grades []Grade                     `json:"vsetkyZnamky"`
-		Events map[string]map[string]Event `json:"vsetkyUdalosti"`
-		Notes  []Note                      `json:"vsetkyVcelicky"`
+		Grades []Grade            `json:"vsetkyZnamky"`
+		Events map[string][]Event `json:"vsetkyUdalosti"`
+		Notes  []Note             `json:"vsetkyVcelicky"`
 	}
 
 	type RawGrades struct {
@@ -93,8 +93,8 @@ func ParseResults(jsondata []byte) (Results, error) {
 
 	results.Events = make(map[string]Event, len(rgrades.Data.Events["edupage"]))
 
-	for k, v := range rgrades.Data.Events["edupage"] {
-		results.Events[k] = v
+	for _, v := range rgrades.Data.Events["edupage"] {
+		results.Events[v.EventID] = v
 	}
 
 	for _, v := range rgrades.Data.Grades {
