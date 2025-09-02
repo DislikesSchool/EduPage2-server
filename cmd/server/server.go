@@ -99,6 +99,11 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
+		_, err = util.MeiliIndex.UpdateSearchableAttributes(&[]string{"timestamp"})
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	if config.AppConfig.Server.Mode == "production" {
@@ -195,7 +200,7 @@ func main() {
 
 	if util.ShouldStore {
 		util.InfoLogger.Println("Starting to load stored users...")
-		util.LoadStoredUsers()
+		go util.LoadStoredUsers()
 	}
 
 	port := config.AppConfig.Server.Port

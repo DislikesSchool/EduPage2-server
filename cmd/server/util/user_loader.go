@@ -111,7 +111,7 @@ func loadAndAuthenticateUser(user *dbmodel.User) error {
 	}
 
 	// Try to authenticate with Edupage
-	cred, err := edupage.Login(user.Username, password, user.Server)
+	cred, err := edupage.Login(user.Username, password, user.Server, "")
 	if err != nil {
 		return fmt.Errorf("failed to authenticate: %w", err)
 	}

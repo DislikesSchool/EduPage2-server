@@ -37,13 +37,14 @@ func CheckPasswordHash(password, hash string) bool {
 type Credentials struct {
 	Username     string
 	Server       string
+	LoginServer  string
 	PasswordHash string
 	httpClient   *http.Client
 }
 
 // Login creates EdupageClient you can use to interact the edupage api with.
 // Returns EdupageClient or error.
-func Login(username, password, server string) (Credentials, error) {
+func Login(username, password, server, loginserver string) (Credentials, error) {
 	server = strings.TrimPrefix(server, "http://")
 	server = strings.TrimPrefix(server, "https://")
 	server = strings.TrimSuffix(server, ".edupage.org")
@@ -81,11 +82,12 @@ func Login(username, password, server string) (Credentials, error) {
 				sp := strings.Split(parsed.Hostname(), ".")
 				sub := sp[0]
 
-				return Login(username, password, sub)
+				return Login(username, password, sub, server)
 			} else {
 				var credentials Credentials
 				credentials.Username = username
 				credentials.Server = Server
+				credentials.LoginServer = loginserver
 				credentials.PasswordHash, err = HashPassword(password)
 				if err != nil {
 					return Credentials{}, err

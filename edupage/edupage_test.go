@@ -52,7 +52,7 @@ func TestLoginAuto(t *testing.T) {
 		t.Error(errors.New("password parameter missing, (-password=?)"))
 	}
 
-	credentials, err := Login(username, password, "login1")
+	credentials, err := Login(username, password, "login1", "login1")
 	if err != nil {
 		t.Error(err)
 		return
@@ -72,7 +72,7 @@ func TestEdupage(t *testing.T) {
 		return
 	}
 
-	credentials, err := Login(username, password, server)
+	credentials, err := Login(username, password, server, server)
 	if err != nil {
 		t.Error(err)
 		return
@@ -137,7 +137,7 @@ func BenchmarkLogin(t *testing.B) {
 	}
 	t.ResetTimer()
 
-	_, err = Login(username, password, server)
+	_, err = Login(username, password, server, server)
 
 	if err != nil {
 		t.Error(err)
@@ -152,7 +152,7 @@ func BenchmarkTimeline(t *testing.B) {
 		return
 	}
 
-	credentials, err := Login(username, password, server)
+	credentials, err := Login(username, password, server, server)
 
 	if err != nil {
 		t.Error(err)
@@ -185,7 +185,7 @@ func BenchmarkResults(t *testing.B) {
 		return
 	}
 
-	credentials, err := Login(username, password, server)
+	credentials, err := Login(username, password, server, server)
 
 	if err != nil {
 		t.Error(err)
@@ -218,7 +218,7 @@ func BenchmarkTimetable(t *testing.B) {
 		return
 	}
 
-	credentials, err := Login(username, password, server)
+	credentials, err := Login(username, password, server, server)
 
 	if err != nil {
 		t.Error(err)

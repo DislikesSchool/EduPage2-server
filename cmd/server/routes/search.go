@@ -61,7 +61,7 @@ func SearchMessagesHandler(c *gin.Context) {
 	client := c.MustGet("client").(*edupage.EdupageClient)
 
 	// Create owner ID that will be used for filtering (username@server format)
-	ownerID := fmt.Sprintf("%s@%s", client.Credentials.Username, client.Credentials.Server)
+	ownerID := fmt.Sprintf("%s@%s", client.Credentials.Username, client.Credentials.LoginServer)
 
 	// Parse request
 	var req SearchMessagesRequest

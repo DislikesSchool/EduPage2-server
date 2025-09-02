@@ -278,7 +278,7 @@ func LoginHandler(c *gin.Context) {
 		}
 	}
 
-	cred, err = edupage.Login(username, password, server)
+	cred, err = edupage.Login(username, password, server, "")
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
