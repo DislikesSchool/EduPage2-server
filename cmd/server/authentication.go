@@ -186,10 +186,7 @@ func LoginHandler(c *gin.Context) {
 			if util.ShouldStore {
 				// Try to get the 'storage' query param (stringified json), parse it and set it to dataStorage. If not present, leave it as is.
 				if storageParam := c.Query("storage"); storageParam != "" {
-					if err := json.Unmarshal([]byte(storageParam), dataStorage); err != nil {
-						c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid storage configuration"})
-						return
-					}
+					_ = json.Unmarshal([]byte(storageParam), dataStorage)
 				}
 
 				if dataStorage.Enabled && dataStorage.Credentials {
@@ -343,10 +340,7 @@ func LoginHandler(c *gin.Context) {
 	if util.ShouldStore {
 		// Try to get the 'storage' query param (stringified json), parse it and set it to dataStorage. If not present, leave it as is.
 		if storageParam := c.Query("storage"); storageParam != "" {
-			if err := json.Unmarshal([]byte(storageParam), dataStorage); err != nil {
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid storage configuration"})
-				return
-			}
+			_ = json.Unmarshal([]byte(storageParam), dataStorage)
 		}
 
 		if dataStorage.Enabled && dataStorage.Credentials {
