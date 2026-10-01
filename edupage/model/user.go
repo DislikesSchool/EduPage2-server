@@ -2,8 +2,51 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
+	"strings"
 )
+
+// FlexString tolerates EduPage's loose typing: a field that is usually a
+// string may arrive as number, bool, array, object or null.
+// Scalars are stringified, arrays/objects keep their raw JSON, null -> "".
+type FlexString string
+
+func (s *FlexString) UnmarshalJSON(data []byte) error {
+	t := strings.TrimSpace(string(data))
+	if t == "" || t == "null" {
+		*s = ""
+		return nil
+	}
+	if t[0] == '"' {
+		var str string
+		if err := json.Unmarshal(data, &str); err != nil {
+			return err
+		}
+		*s = FlexString(str)
+		return nil
+	}
+	var v interface{}
+	if err := json.Unmarshal(data, &v); err != nil {
+		return err
+	}
+	switch v.(type) {
+	case float64, bool:
+		*s = FlexString(fmt.Sprintf("%v", v))
+	default:
+		// array or object: keep raw JSON so no data is lost
+		*s = FlexString(t)
+	}
+	return nil
+}
+
+func (s FlexString) MarshalJSON() ([]byte, error) {
+	return json.Marshal(string(s))
+}
+
+func (s FlexString) String() string {
+	return string(s)
+}
 
 type User struct {
 	Edubar           map[string]interface{} `json:"_edubar"`
@@ -146,7 +189,7 @@ type Students struct {
 	NumberInClass string `json:"numberinclass"`
 	IsOut         bool   `json:"isout"`
 	Number        string `json:"number"`
-	DataCopy      string `json:"kopiadata"`
+	DataCopy      FlexString `json:"kopiadata"`
 }
 
 type Parents struct {
