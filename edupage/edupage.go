@@ -2,7 +2,6 @@ package edupage
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -66,7 +65,15 @@ func (client *EdupageClient) PingSession() (bool, error) {
 
 	u := fmt.Sprintf("https://%s/login/eauth?portalping", client.Credentials.Server)
 
-	response, err := client.Credentials.httpClient.Post(u, "application/x-www-form-urlencoded", bytes.NewBuffer([]byte("gpids=")))
+	req, err := http.NewRequest("POST", u, bytes.NewBuffer([]byte("gpids=")))
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("User-Agent", EduPageUserAgent)
+	req.Header.Set("Referer", fmt.Sprintf("https://%s/", client.Credentials.Server))
+
+	response, err := client.Credentials.httpClient.Do(req)
 	if err != nil {
 		return false, ErrorUnauthorized
 	}
@@ -219,7 +226,8 @@ func (client *EdupageClient) SendMessage(recipient string, options MessageOption
 	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
 	req.Header.Set("X-Requested-With", "XMLHttpRequest")
-	req.Header.Set("Referer", fmt.Sprintf("https://%s.edupage.org/", client.Credentials.Server))
+	req.Header.Set("User-Agent", EduPageUserAgent)
+	req.Header.Set("Referer", fmt.Sprintf("https://%s/", client.Credentials.Server))
 
 	resp, err := client.Credentials.httpClient.Do(req)
 	if err != nil {
@@ -449,31 +457,22 @@ func (client *EdupageClient) FetchHomeworkAttachments(i model.Homework) (map[str
 		"superid": i.ESuperID,
 	}
 
-	payload := CreatePayload(data)
-
-	resp, err := client.Credentials.httpClient.PostForm(
+	_, response, err := doAuthedPostForm(client.Credentials.httpClient,
 		"https://"+path.Join(client.Credentials.Server, "elearning", "?cmd=MaterialPlayer&akcia=getETestData"),
-		payload,
-	)
+		data,
+		fmt.Sprintf("https://%s/elearning/", client.Credentials.Server))
 	if err != nil {
 		return nil, fmt.Errorf("homework request failed: %w", err)
 	}
 
-	response, err := io.ReadAll(resp.Body)
-
 	if len(response) < 5 {
-		return nil, fmt.Errorf("homework request failed, bad response: %w", err)
+		return nil, fmt.Errorf("homework request failed, bad response")
 	}
 
-	response = response[4:]
-
-	decoded := make([]byte, base64.StdEncoding.DecodedLen(len(response)))
-	_, err = base64.StdEncoding.Decode(decoded, response)
+	decoded, err := DecodeLegacyBody(response)
 	if err != nil {
 		return nil, fmt.Errorf("homework request failed, bad response: %w", err)
 	}
-
-	decoded = bytes.Trim(decoded, "\x00")
 	var object map[string]interface{}
 	err = json.Unmarshal(decoded, &object)
 	if err != nil {
@@ -595,10 +594,19 @@ func (e *EdupageClient) ChangeOrderStatus(day Day, order bool) error {
 		"jedlaStravnika": string(jedlaStravnika),
 	})
 
-	response, err := e.Credentials.httpClient.PostForm(fmt.Sprintf("https://%s/menu/", e.Credentials.Server), payload)
+	req, err := http.NewRequest("POST", fmt.Sprintf("https://%s/menu/", e.Credentials.Server), strings.NewReader(payload.Encode()))
 	if err != nil {
 		return err
 	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+	req.Header.Set("User-Agent", EduPageUserAgent)
+	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	req.Header.Set("Referer", fmt.Sprintf("https://%s/menu/", e.Credentials.Server))
+	response, err := e.Credentials.httpClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
 		return errors.New("invalid response code")
@@ -609,17 +617,13 @@ func (e *EdupageClient) ChangeOrderStatus(day Day, order bool) error {
 		return fmt.Errorf("failed to read response body: %s", err)
 	}
 
-	decoded_body := make([]byte, base64.StdEncoding.DecodedLen(len(body)-4))
-
-	_, err = base64.StdEncoding.Decode(decoded_body, body[4:])
+	decodedBody, err := DecodeLegacyBody(body)
 	if err != nil {
 		return fmt.Errorf("failed to decode response body: %s", err)
 	}
 
-	decoded_body = bytes.Trim(decoded_body, "\x00")
-
 	var parsed map[string]interface{}
-	err = json.Unmarshal(decoded_body, &parsed)
+	err = json.Unmarshal(decodedBody, &parsed)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal response body: %s", err)
 	}
