@@ -16,6 +16,15 @@ jobs:
         run: |
           git clone https://github.com/DislikesSchool/EduPage2.git eduapp2
 
+      - name: Fix broken Tamil ICU plurals in EduPage2
+        run: |
+          # Upstream app_ta.arb translated the ICU keyword "other" to Tamil
+          # ("மற்ற"), which makes flutter gen-l10n fail with
+          # "ICU Lexing Error: Unexpected character".
+          # Repair it (harmless no-op if fixed upstream).
+          sed -i 's/மற்ற{{count}/other{{count}/g' eduapp2/lib/l10n/app_ta.arb
+          grep -c "other{{count}" eduapp2/lib/l10n/app_ta.arb
+
       - name: Get latest tag from EduPage2 repo
         id: get_tag
         run: |
