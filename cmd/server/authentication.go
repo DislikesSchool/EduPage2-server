@@ -277,6 +277,14 @@ func LoginHandler(c *gin.Context) {
 
 	cred, err = edupage.Login(username, password, server, "")
 
+	if errors.Is(err, edupage.ErrInvalidServer) {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   err.Error(),
+			"success": false,
+		})
+		return
+	}
+
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error":   err.Error(),

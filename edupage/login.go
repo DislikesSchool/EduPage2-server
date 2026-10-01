@@ -24,6 +24,7 @@ var (
 	ErrTwoFactor       = errors.New("two-factor authentication required - approve in EduPage app or use email code")
 	ErrLoginToken      = errors.New("EduPage did not provide a login token")
 	ErrInvalidResponse = errors.New("invalid response from EduPage")
+	ErrInvalidServer   = errors.New("invalid server: must be an edupage.org subdomain")
 )
 
 var (
@@ -50,8 +51,18 @@ type Credentials struct {
 	httpClient   *http.Client
 }
 
+// validSubdomain matches a single DNS label (no dots, ports, userinfo, etc.)
+// so that "https://<sub>.edupage.org" can only ever resolve to edupage.org.
+var validSubdomain = regexp.MustCompile(`^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$`)
+
+// isEdupageHost reports whether host is edupage.org or one of its subdomains.
+func isEdupageHost(host string) bool {
+	host = strings.ToLower(strings.TrimSuffix(host, "."))
+	return host == edupageDomain || strings.HasSuffix(host, "."+edupageDomain)
+}
+
 func normalizeSubdomain(server string) string {
-	server = strings.TrimSpace(server)
+	server = strings.ToLower(strings.TrimSpace(server))
 	server = strings.TrimPrefix(server, "http://")
 	server = strings.TrimPrefix(server, "https://")
 	// strip path
@@ -82,6 +93,9 @@ func newEduClient(jar http.CookieJar) *http.Client {
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= 10 {
 				return errors.New("too many redirects")
+			}
+			if req.URL.Scheme != "https" || !isEdupageHost(req.URL.Hostname()) {
+				return fmt.Errorf("refusing redirect to non-edupage host %q", req.URL.Hostname())
 			}
 			// Preserve headers on redirect
 			if len(via) > 0 {
@@ -154,10 +168,16 @@ func httpPostFormRaw(client *http.Client, rawurl, body string, referer string) (
 // Returns Credentials or error (ErrBadCredentials / ErrCaptcha / ErrTwoFactor).
 func Login(username, password, server, loginserver string) (Credentials, error) {
 	sub := normalizeSubdomain(server)
+	if !validSubdomain.MatchString(sub) {
+		return Credentials{}, ErrInvalidServer
+	}
 	if loginserver == "" {
 		loginserver = sub
 	} else {
 		loginserver = normalizeSubdomain(loginserver)
+		if !validSubdomain.MatchString(loginserver) {
+			return Credentials{}, ErrInvalidServer
+		}
 	}
 	fqdn := sub + "." + edupageDomain
 	// Keep global for backwards compat (used by old callers).
@@ -291,6 +311,9 @@ func loginWithRPC(client *http.Client, username, password, subdomain string) (bo
 		fullRedirect = baseURL + redirectURL
 	} else if !strings.HasPrefix(redirectURL, "http") {
 		fullRedirect = baseURL + "/" + strings.TrimPrefix(redirectURL, "/")
+	}
+	if ru, err := url.Parse(fullRedirect); err != nil || ru.Scheme != "https" || !isEdupageHost(ru.Hostname()) {
+		return false, "", ErrInvalidResponse
 	}
 	resp2, body2, err := httpGet(client, fullRedirect)
 	if err != nil {
